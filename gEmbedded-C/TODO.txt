@@ -1,0 +1,2 @@
+1. Test externel device context lock for io config operations
+2. Lock chain
