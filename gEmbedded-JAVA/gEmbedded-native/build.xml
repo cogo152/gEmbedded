@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<project name="ant-test" basedir="">
+
+    <target name="make-executable">
+        <executable-maker/>
+    </target>
+
+    <target name="create-headers">
+        <header-creator/>
+    </target>
+
+    <target name="compile-native">
+        <native-compiler/>
+    </target>
+
+    <target name="copy-native">
+        <native-copier/>
+    </target>
+
+    <macrodef name="executable-maker">
+        <attribute name="args" default=""/>
+        <sequential>
+            <echo message="Making all .sh files to executable"/>
+            <exec dir="" failonerror="true" executable="/bin/bash"> <arg line="executable.sh @{args}"/></exec>
+            <echo message="All .sh files are made executable"/>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="header-creator">
+        <attribute name="args" default=""/>
+        <sequential>
+            <echo message="Creating header files"/>
+            <exec dir="" failonerror="true" executable="/bin/bash"> <arg line="header.sh @{args}"/></exec>
+            <echo message="Headers files are created"/>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="native-compiler">
+        <attribute name="args" default=""/>
+        <sequential>
+            <echo message="Compiling native library"/>
+            <exec dir="" failonerror="true" executable="/bin/bash"> <arg line="compile.sh @{args}"/></exec>
+            <echo message="Native libraries are compiled"/>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="native-copier">
+        <attribute name="args" default=""/>
+        <sequential>
+            <echo message="Copying native libraries "/>
+            <exec dir="" failonerror="true" executable="/bin/bash"> <arg line="copy.sh @{args}"/></exec>
+            <echo message="Native libraries are copied"/>
+        </sequential>
+    </macrodef>
+
+</project>

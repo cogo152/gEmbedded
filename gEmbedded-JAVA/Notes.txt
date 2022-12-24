@@ -1,0 +1,2 @@
+1. GPIO Event Worker Threads are as a daemon, so think about recourses like files and gpio pins.
+2. When not root already shutdown exception
