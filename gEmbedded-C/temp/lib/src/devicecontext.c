@@ -8,8 +8,8 @@
 #include "devicecontextlock.h"
 #include "deviceregisters.h"
 #include "mapper.h"
+#include "session.h"
 
-// recursive ???
 static pthread_mutex_t contextLock = PTHREAD_MUTEX_INITIALIZER;
 static volatile uint8_t deviceContextInitialized = FALSE;
 static const char *const deviceName = DEVICE_NAME;
@@ -136,7 +136,6 @@ const char *getDeviceName(void) {
 
 }
 
-// api call
 uint8_t isDeviceInitialized(void) {
 
     pthread_mutex_lock(&contextLock);
@@ -147,28 +146,6 @@ uint8_t isDeviceInitialized(void) {
 
     return initialized;
 
-}
-
-DEVICE_CONTEXT_STATUS lockDeviceContext(void) {
-    const int mutexStatus = pthread_mutex_lock(&contextLock);
-    if (mutexStatus == 0) {
-        return DEVICE_CONTEXT_SUCCESS;
-    } else {
-        return DEVICE_CONTEXT_LOCK_ERROR;
-    }
-}
-
-DEVICE_CONTEXT_STATUS unlockDeviceContext(void) {
-    const int mutexStatus = pthread_mutex_unlock(&contextLock);
-    if (mutexStatus == 0) {
-        return DEVICE_CONTEXT_SUCCESS;
-    } else {
-        return DEVICE_CONTEXT_UNLOCK_ERROR;
-    }
-}
-
-uint8_t getDeviceStatus(void) {
-    return deviceContextInitialized;
 }
 
 DEVICE_CONTEXT_STATUS requestPinConfigRegs(struct PinConfigRegs **const pPinConfigRegs) {
@@ -241,4 +218,15 @@ DEVICE_CONTEXT_STATUS requestI2CRegs(struct I2CRegs **const pI2CRegs) {
 
     return DEVICE_CONTEXT_SUCCESS;
 
+}
+
+SESSION_STATUS initSession(struct session *session){
+
+    return SESSION_SUCCESS;
+
+}
+
+SESSION_STATUS destroySession(struct session *session){
+
+    return SESSION_SUCCESS;
 }

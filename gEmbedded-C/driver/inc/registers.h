@@ -1,26 +1,9 @@
 //
-// Created by sondahi on 07.12.22.
+// Created by sondahi on 29.12.22.
 //
 
-#ifndef GEMBEDDED_C_DEVICEREGISTERS_H
-#define GEMBEDDED_C_DEVICEREGISTERS_H
-
-#include "common.h"
-#include "devicecontextstatus.h"
-
-#define DEVICE_NAME             ("RaspberryPi-4B")
-#define CORE_CLOCK_SPEED        (1500000000U)
-
-#define MEMORY_FILE_NAME        ("/dev/mem")
-#define PERIPHERAL_BASE_ADDRESS (0xFE000000)
-#define BLOCK_SIZE              (0X1000)
-
-#define GPIO_BASE_ADDRESS       (PERIPHERAL_BASE_ADDRESS+0x00200000)
-#define CLOCK_BASE_ADDRESS      (PERIPHERAL_BASE_ADDRESS+0x00101000)
-#define CLOCK_GP0_OFFSET        (0X70/4)
-#define CLOCK_PWM_OFFSET        (0xa0/4)
-#define PWM_BASE_ADDRESS        (PERIPHERAL_BASE_ADDRESS+0x0020c000)
-#define I2C_BASE_ADDRESS        (PERIPHERAL_BASE_ADDRESS+0x00804000)
+#ifndef GEMBEDDED_C_REGISTERS_H
+#define GEMBEDDED_C_REGISTERS_H
 
 struct PinConfigRegs {
     volatile uintptr_t FSEL[6];
@@ -51,11 +34,6 @@ struct PinIORegs {
     volatile uintptr_t EDS[2];
 };
 
-typedef enum {
-    CLOCK_GP_0 = 0,
-    CLOCK_PWM = 1
-} CLOCK_ID;
-
 struct ClockRegs {
     volatile uintptr_t CTL;
     volatile uintptr_t DIV;
@@ -85,15 +63,4 @@ struct I2CRegs {
     volatile uintptr_t CLKT;
 };
 
-// InDeviceContextLock
-DEVICE_CONTEXT_STATUS requestPinConfigRegs(struct PinConfigRegs **);
-// InDeviceContextLock
-DEVICE_CONTEXT_STATUS requestPinIORegs(struct PinIORegs **);
-// InDeviceContextLock
-DEVICE_CONTEXT_STATUS requestClockRegs(CLOCK_ID, struct ClockRegs **);
-// InDeviceContextLock
-DEVICE_CONTEXT_STATUS requestPWMRegs(struct PWMRegs **);
-// InDeviceContextLock
-DEVICE_CONTEXT_STATUS requestI2CRegs(struct I2CRegs **);
-
-#endif //GEMBEDDED_C_DEVICEREGISTERS_H
+#endif //GEMBEDDED_C_REGISTERS_H

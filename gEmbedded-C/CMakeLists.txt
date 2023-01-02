@@ -1,36 +1,66 @@
 cmake_minimum_required(VERSION 3.22.1)
 
-if(NOT "${CMAKE_GENERATOR}" STREQUAL "Ninja")
-    message(STATUS "cmake genarator is set to Ninja")
-    set(CMAKE_GENERATOR "Ninja" CACHE INTERNAL "cmake generator" FORCE)
-endif()
-
-if(NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "cmake build type is set to Release" FORCE)
-endif()
+set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/toolchain.cmake")
 
 project(gEmbedded-C)
 
-set(COMPILER_FLAGS              "-mcpu=native -march=native -mtune=native -mfloat-abi=hard -mfpu=auto")
-set(VERBOSE                     "-Wall -v -Wl,--verbose")
-set(CMAKE_C_FLAGS               "${COMPILER_FLAGS}" CACHE INTERNAL "c flags")
-set(CMAKE_CXX_FLAGS             "${CMAKE_C_FLAGS}" CACHE INTERNAL "cpp flags")
-set(LIBRARY_OPTIONS             "-O3")
-set(LIBRARY_TEST_OPTIONS        "-O0 -ggdb")
-set(CMAKE_C_FLAGS_RELEASE       "${LIBRARY_OPTIONS}" CACHE INTERNAL "c release options")
-set(CMAKE_CXX_FLAGS_RELEASE     "${LIBRARY_TEST_OPTIONS}" CACHE INTERNAL "cpp release-test options")
+set(COMPILER_FLAGS "-Wall -mcpu=cortex-a72 -mtune=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8")
+set(VERBOSE "-v -Wl,--verbose")
 
-include_directories(api)
+set(CMAKE_C_FLAGS           "${COMPILER_FLAGS}" CACHE STRING    "c flags"           FORCE)
+set(CMAKE_CXX_FLAGS         "${COMPILER_FLAGS}" CACHE STRING    "cpp flags"         FORCE)
+set(CMAKE_C_FLAGS_RELEASE   "-O3 -DNDEBUG"      CACHE STRING    "c flags release"   FORCE)
+set(CMAKE_CXX_FLAGS_RELEASE "-O0 -ggdb -DDEBUG" CACHE STRING    "cpp flags release" FORCE)
 
-set(
-        LIB
-        ${CMAKE_PROJECT_NAME}
+enable_language(C)
+enable_language(CXX)
+enable_testing()
+
+set(CMAKE_C_STANDARD 23)
+set(CMAKE_CXX_STANDARD 23)
+
+include(FetchContent)
+FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/71140c3ca7a87bb1b5b9c9f1500fea8858cce344.zip
+)
+FetchContent_MakeAvailable(googletest)
+include(GoogleTest)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/api)
+
+set(LIB ${CMAKE_PROJECT_NAME})
+set(LIB_TEST "${LIB}_test")
+
+add_library(
+        ${LIB}
+        STATIC
 )
 
-set(
-        LIB_TEST
-        "${LIB}_test"
+add_executable(
+        ${LIB_TEST}
 )
 
-add_subdirectory(lib)
-add_subdirectory(test)
+target_link_libraries(
+        ${LIB_TEST}
+        PRIVATE
+        ${LIB}
+        GTest::gtest_main
+)
+
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+#gtest_discover_tests(${LIB_TEST})
+
+add_custom_command(
+        TARGET ${LIB}
+        POST_BUILD
+        COMMAND ${CMAKE_OBJDUMP} -S --disassemble lib${LIB}.a > library.list
+)
+
+add_custom_command(
+        TARGET ${LIB_TEST}
+        POST_BUILD
+        COMMAND ${CMAKE_OBJDUMP} -S --disassemble ${LIB_TEST} > library_test.list
+)
+
+add_subdirectory(driver)

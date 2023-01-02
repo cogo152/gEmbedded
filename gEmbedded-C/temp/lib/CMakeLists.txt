@@ -16,6 +16,7 @@ set(
         src/pinfunction.c
         src/pullupdown.c
         src/inputpin.c
+        src/session.c
 )
 
 target_include_directories(

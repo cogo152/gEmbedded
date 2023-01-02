@@ -10,8 +10,8 @@ add_executable(
 
 set(
         TEST_SRC
-        mappertest.cpp
-        devicecontexttest.cpp
+        #mappertest.cpp
+        #devicecontexttest.cpp
         #pinvalidatortest.cpp
         #pinregistratortest.cpp
         #pinfunctiontest.cpp

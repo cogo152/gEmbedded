@@ -17,11 +17,11 @@ DEVICE_CONTEXT_STATUS setupDeviceContext(void);
 // Thread safe
 DEVICE_CONTEXT_STATUS shutdownDeviceContext(void);
 
-// Not thread safe
-const char *getDeviceName(void);
-
 // Thread safe
 uint8_t isDeviceInitialized(void);
+
+// Not thread safe
+const char *getDeviceName(void);
 
 #ifdef __cplusplus
 }
