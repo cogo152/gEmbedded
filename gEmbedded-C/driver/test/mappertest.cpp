@@ -6,11 +6,12 @@
 
 extern "C" {
 #include "mapper.h"
+#include "registers.h"
 }
 
-#define FILE_NAME           ("/dev/gpiomem")
-#define LENGTH              (0xF4)
-#define OFFSET              (0)
+#define FILE_NAME           (MEMORY_FILE_NAME)
+#define LENGTH              (BLOCK_SIZE)
+#define OFFSET              (GPIO_BASE_ADDRESS)
 
 #define INVALID_FILE_NAME   ("/dev/invalidFile")
 #define INVALID_LENGTH      (0)

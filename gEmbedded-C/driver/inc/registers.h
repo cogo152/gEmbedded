@@ -5,6 +5,22 @@
 #ifndef GEMBEDDED_C_REGISTERS_H
 #define GEMBEDDED_C_REGISTERS_H
 
+#include "common.h"
+
+#define DEVICE_NAME             ("RaspberryPi-4B")
+#define CORE_CLOCK_SPEED        (1500000000U)
+
+#define MEMORY_FILE_NAME        ("/dev/mem")
+#define PERIPHERAL_BASE_ADDRESS (0xFE000000)
+#define BLOCK_SIZE              (0X1000)
+
+#define GPIO_BASE_ADDRESS       (PERIPHERAL_BASE_ADDRESS+0x00200000)
+#define CLOCK_BASE_ADDRESS      (PERIPHERAL_BASE_ADDRESS+0x00101000)
+#define CLOCK_GP0_OFFSET        (0X70/4)
+#define CLOCK_PWM_OFFSET        (0xa0/4)
+#define PWM_BASE_ADDRESS        (PERIPHERAL_BASE_ADDRESS+0x0020c000)
+#define I2C_BASE_ADDRESS        (PERIPHERAL_BASE_ADDRESS+0x00804000)
+
 struct PinConfigRegs {
     volatile uintptr_t FSEL[6];
     uintptr_t NotUsed1[13];

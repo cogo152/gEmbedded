@@ -9,7 +9,7 @@ add_library(
 
 set(
         LIB_SRC
-        src/mapper.c
+        ../../driver/src/mapper.c
         src/devicecontext.c
         src/pinvalidator.c
         src/pinregistrator.c

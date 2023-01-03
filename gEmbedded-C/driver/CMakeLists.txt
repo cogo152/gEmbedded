@@ -3,15 +3,9 @@ set(
         ${CMAKE_CURRENT_SOURCE_DIR}/inc
 )
 
-set(
-        LIB_SRC
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/x.c
-)
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src LIB_SRC)
 
-set(
-        LIB_TEST_SRC
-        ${CMAKE_CURRENT_SOURCE_DIR}/test/xtest.cpp
-)
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/test LIB_TEST_SRC)
 
 target_include_directories(
         ${LIB}
