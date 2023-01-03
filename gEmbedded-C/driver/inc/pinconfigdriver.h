@@ -74,12 +74,29 @@ typedef enum {
     PULL_UP_DOWN_PULL_DOWN = 0b10
 } PULL_UP_DOWN;
 
-PIN_CONFIG_STATUS setupPinConfigDriver(void );
-PIN_CONFIG_STATUS shutdownPinConfigDriver(void );
+typedef enum {
+    PIN_EVENT_NO_EVENT = 0,
+    PIN_EVENT_RISING = 1,
+    PIN_EVENT_FALLING = 2,
+    PIN_EVENT_BOTH = 3
+} PIN_EVENT;
+
+PIN_CONFIG_STATUS setupPinConfigDriver(void);
+
+PIN_CONFIG_STATUS shutdownPinConfigDriver(void);
+
 PIN_CONFIG_STATUS validatePin(PIN_TYPE pinType, PIN pinToValidate);
+
 PIN_CONFIG_STATUS configurePinFunction(PIN validatedPin, PIN_FUNCTION pinFunctionToConfigure);
+
 PIN_CONFIG_STATUS readPinFunction(PIN validatedPin, PIN_FUNCTION *pinFunctionToRead);
-PIN_CONFIG_STATUS configurePullUpDown(PIN validatedPin, PULL_UP_DOWN pullUpDownToConfigure);
-PIN_CONFIG_STATUS readPullUpDown(PIN validatedPin, PULL_UP_DOWN *pullUpDownToRead);
+
+PIN_CONFIG_STATUS configurePinPullUpDown(PIN validatedPin, PULL_UP_DOWN pullUpDownToConfigure);
+
+PIN_CONFIG_STATUS readPinPullUpDown(PIN validatedPin, PULL_UP_DOWN *pullUpDownToRead);
+
+PIN_CONFIG_STATUS configurePinEvent(PIN validatedPin, PIN_EVENT pinEventToConfigure, int *fileDescriptor);
+
+PIN_CONFIG_STATUS readPinEvent(PIN validatedPin, PIN_EVENT *pinEventToRead);
 
 #endif //GEMBEDDED_C_PINCONFIGDRIVER_H

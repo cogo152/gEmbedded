@@ -2,6 +2,9 @@
 // Created by sondahi on 02.01.23.
 //
 
+#include <linux/gpio.h>
+#include <sys/ioctl.h>
+
 #include "pinconfigdriver.h"
 #include "registers.h"
 #include "mapper.h"
@@ -187,14 +190,12 @@ PIN_CONFIG_STATUS configurePinFunction(PIN validatedPin, PIN_FUNCTION pinFunctio
             const uint8_t registerSelector = validatedPin / 10;
             pinConfigRegs->FSEL[registerSelector] &= ~(7 << ((validatedPin % 10) * 3));
             pinConfigRegs->FSEL[registerSelector] |= (pinFunctionToConfigure << ((validatedPin % 10) * 3));
-            break;
+            return PIN_CONFIG_SUCCESS;
         }
         default: {
             return PIN_CONFIG_ERROR;
         }
     }
-
-    return PIN_CONFIG_SUCCESS;
 
 }
 
@@ -205,8 +206,8 @@ PIN_CONFIG_STATUS readPinFunction(PIN validatedPin, PIN_FUNCTION *pinFunctionToR
     }
 
     const uint8_t registerSelector = validatedPin / 10;
-    uint32_t registerLine = pinConfigRegs->FSEL[registerSelector];
-    uint32_t mask = (7 << ((validatedPin % 10) * 3));
+    const uint32_t registerLine = pinConfigRegs->FSEL[registerSelector];
+    const uint32_t mask = (7 << ((validatedPin % 10) * 3));
     uint32_t pinFunction = registerLine & mask;
     pinFunction >>= ((validatedPin % 10) * 3);
     *pinFunctionToRead = pinFunction;
@@ -215,13 +216,131 @@ PIN_CONFIG_STATUS readPinFunction(PIN validatedPin, PIN_FUNCTION *pinFunctionToR
 
 }
 
-/*
 
-PIN_CONFIG_STATUS configurePullUpDown(PIN validatedPin, PULL_UP_DOWN pullUpDownToConfigure, struct PinConfigRegs *pinConfigRegs){
+PIN_CONFIG_STATUS configurePinPullUpDown(PIN validatedPin, PULL_UP_DOWN pullUpDownToConfigure) {
+
+    if (pinConfigInitialized == FALSE) {
+        return PIN_CONFIG_ERROR;
+    }
+
+    switch (pullUpDownToConfigure) {
+        case PULL_UP_DOWN_NO_RESISTOR:
+        case PULL_UP_DOWN_PULL_UP:
+        case PULL_UP_DOWN_PULL_DOWN: {
+            const uint8_t registerSelector = validatedPin / 16;
+            pinConfigRegs->PUP_PDN[registerSelector] &= ~(3 << ((validatedPin % 16) * 2));
+            pinConfigRegs->PUP_PDN[registerSelector] |= (pullUpDownToConfigure << ((validatedPin % 16) * 2));
+            return PIN_CONFIG_SUCCESS;
+        }
+        default: {
+            return PIN_CONFIG_ERROR;
+        }
+    }
 
 }
 
-PIN_CONFIG_STATUS readPullUpDown(PIN validatedPin, PULL_UP_DOWN *pullUpDownToRead, struct PinConfigRegs *pinConfigRegs){
+PIN_CONFIG_STATUS readPinPullUpDown(PIN validatedPin, PULL_UP_DOWN *pullUpDownToRead) {
+
+    if (pinConfigInitialized == FALSE) {
+        return PIN_CONFIG_ERROR;
+    }
+
+    const uint8_t registerSelector = validatedPin / 16;
+    const uint32_t registerLine = pinConfigRegs->PUP_PDN[registerSelector];
+    const uint32_t mask = (3 << ((validatedPin % 16) * 2));
+    uint32_t pullUpDown = registerLine & mask;
+    pullUpDown >>= ((validatedPin % 16) * 2);
+    *pullUpDownToRead = pullUpDown;
+
+    return PIN_CONFIG_SUCCESS;
 
 }
- */
+
+PIN_CONFIG_STATUS configurePinEvent(PIN validatedPin, PIN_EVENT pinEventToConfigure, int *fileDescriptor) {
+
+    if (pinConfigInitialized == FALSE) {
+        return PIN_CONFIG_ERROR;
+    }
+
+    int fd = open("/dev/gpiochip0", O_WRONLY);
+    if (fileDescriptor < 0) {
+        close(fd);
+        return PIN_CONFIG_ERROR;
+    }
+
+    struct gpioevent_request rq;
+
+    rq.lineoffset = (__u32) validatedPin;
+    rq.handleflags = GPIOHANDLE_REQUEST_INPUT;
+
+    switch (pinEventToConfigure) {
+        case PIN_EVENT_NO_EVENT: {
+            const uint8_t registerSelector = validatedPin / 31;
+            pinConfigRegs->REN[registerSelector] &= ~(1 << ((validatedPin % 32) * 1));
+            pinConfigRegs->FEN[registerSelector] &= ~(1 << ((validatedPin % 32) * 1));
+            *fileDescriptor = 0;
+            close(fd);
+            return PIN_CONFIG_SUCCESS;
+        }
+        case PIN_EVENT_RISING: {
+            rq.eventflags = GPIOEVENT_REQUEST_RISING_EDGE;
+            break;
+        }
+        case PIN_EVENT_FALLING: {
+            rq.eventflags = GPIOEVENT_REQUEST_FALLING_EDGE;
+            break;
+        }
+        case PIN_EVENT_BOTH: {
+            rq.eventflags = GPIOEVENT_REQUEST_BOTH_EDGES;
+            break;
+        }
+        default: {
+            close(fd);
+            return PIN_CONFIG_ERROR;
+        }
+    }
+
+    int result = ioctl(fd, GPIO_GET_LINEEVENT_IOCTL, &rq);
+    if (result < 0) {
+        close(fd);
+        return PIN_CONFIG_ERROR;
+    }
+
+    close(fd);
+
+    *fileDescriptor = rq.fd;
+
+    return PIN_CONFIG_SUCCESS;
+}
+
+PIN_CONFIG_STATUS readPinEvent(PIN validatedPin, PIN_EVENT *pinEventToRead) {
+
+    if (pinConfigInitialized == FALSE) {
+        return PIN_CONFIG_ERROR;
+    }
+
+    const uint8_t registerSelector = validatedPin / 31;
+    const uint32_t mask = (1 << ((validatedPin % 32) * 1));
+
+    const uint32_t registerLineREN = pinConfigRegs->REN[registerSelector];
+    const uint32_t registerLineFEN = pinConfigRegs->FEN[registerSelector];
+
+    uint32_t pinEventREN = registerLineREN & mask;
+    pinEventREN >>= ((validatedPin % 32) * 1);
+
+    uint32_t pinEventFEN = registerLineFEN & mask;
+    pinEventFEN >>= ((validatedPin % 32) * 1);
+
+    if ((pinEventREN & pinEventFEN) == TRUE) {
+        *pinEventToRead = PIN_EVENT_BOTH;
+    } else if (pinEventREN == TRUE) {
+        *pinEventToRead = PIN_EVENT_RISING;
+    } else if (pinEventFEN == TRUE) {
+        *pinEventToRead = PIN_EVENT_FALLING;
+    } else {
+        *pinEventToRead = PIN_EVENT_NO_EVENT;
+    }
+
+    return PIN_CONFIG_SUCCESS;
+
+}
