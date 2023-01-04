@@ -20,40 +20,32 @@ static volatile uintptr_t *EDS = NULL;
 
 PIN_IO_STATUS setupPinIODriver(void) {
 
-    if (pinIOInitialized == TRUE) {
+    const MAPPER_STATUS mapStatus = mapBaseRegister(MEMORY_FILE_NAME, BLOCK_SIZE, GPIO_BASE_ADDRESS, &gpioBase);
+    if (mapStatus != MAPPER_SUCCESS) {
         return PIN_IO_ERROR;
     } else {
-        const MAPPER_STATUS mapStatus = mapBaseRegister(MEMORY_FILE_NAME, BLOCK_SIZE, GPIO_BASE_ADDRESS, &gpioBase);
-        if (mapStatus != MAPPER_SUCCESS) {
-            return PIN_IO_ERROR;
-        } else {
-            SET = ((uintptr_t *) gpioBase + SET_OFFSET);
-            CLR = ((uintptr_t *) gpioBase + CLR_OFFSET);
-            LEV = ((uintptr_t *) gpioBase + LEV_OFFSET);
-            EDS = ((uintptr_t *) gpioBase + EDS_OFFSET);
-            pinIOInitialized = TRUE;
-            return PIN_IO_SUCCESS;
-        }
+        SET = ((uintptr_t *) gpioBase + SET_OFFSET);
+        CLR = ((uintptr_t *) gpioBase + CLR_OFFSET);
+        LEV = ((uintptr_t *) gpioBase + LEV_OFFSET);
+        EDS = ((uintptr_t *) gpioBase + EDS_OFFSET);
+        pinIOInitialized = TRUE;
+        return PIN_IO_SUCCESS;
     }
 
 }
 
 PIN_IO_STATUS shutdownPinIODriver(void) {
 
-    if (pinIOInitialized == FALSE) {
+    const MAPPER_STATUS unmapStatus = unmapBaseRegister(&gpioBase, BLOCK_SIZE);
+    if (unmapStatus != MAPPER_SUCCESS) {
         return PIN_IO_ERROR;
     } else {
-        const MAPPER_STATUS unmapStatus = unmapBaseRegister(&gpioBase, BLOCK_SIZE);
-        if (unmapStatus != MAPPER_SUCCESS) {
-            return PIN_IO_ERROR;
-        } else {
-            SET = NULL;
-            CLR = NULL;
-            LEV = NULL;
-            EDS = NULL;
-            pinIOInitialized = FALSE;
-            return PIN_IO_SUCCESS;
-        }
+        SET = NULL;
+        CLR = NULL;
+        LEV = NULL;
+        EDS = NULL;
+        pinIOInitialized = FALSE;
+        return PIN_IO_SUCCESS;
     }
 
 }

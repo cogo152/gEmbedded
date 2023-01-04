@@ -16,9 +16,6 @@ TEST(PinIODriver, testSetupPinIODriver) {
     status = setupPinIODriver();
     ASSERT_EQ(PIN_IO_SUCCESS, status);
 
-    status = setupPinIODriver();
-    ASSERT_EQ(PIN_IO_ERROR, status);
-
 }
 
 TEST(PinIODriver, testShutdownPinIODriver) {
@@ -27,9 +24,6 @@ TEST(PinIODriver, testShutdownPinIODriver) {
 
     status = shutdownPinIODriver();
     ASSERT_EQ(PIN_IO_SUCCESS, status);
-
-    status = shutdownPinIODriver();
-    ASSERT_EQ(PIN_IO_ERROR, status);
 
 }
 

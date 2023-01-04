@@ -24,48 +24,40 @@ static volatile uintptr_t *PUP_PDN = NULL;
 
 PIN_CONFIG_STATUS setupPinConfigDriver(void) {
 
-    if (pinConfigInitialized == TRUE) {
+    const MAPPER_STATUS mapStatus = mapBaseRegister(MEMORY_FILE_NAME, BLOCK_SIZE, GPIO_BASE_ADDRESS, &gpioBase);
+    if (mapStatus != MAPPER_SUCCESS) {
         return PIN_CONFIG_ERROR;
     } else {
-        const MAPPER_STATUS mapStatus = mapBaseRegister(MEMORY_FILE_NAME, BLOCK_SIZE, GPIO_BASE_ADDRESS, &gpioBase);
-        if (mapStatus != MAPPER_SUCCESS) {
-            return PIN_CONFIG_ERROR;
-        } else {
-            FSEL = ((uintptr_t *) gpioBase + FSEL_OFFSET);
-            REN = ((uintptr_t *) gpioBase + REN_OFFSET);
-            FEN = ((uintptr_t *) gpioBase + FEN_OFFSET);
-            HEN = ((uintptr_t *) gpioBase + HEN_OFFSET);
-            LEN = ((uintptr_t *) gpioBase + LEN_OFFSET);
-            AREN = ((uintptr_t *) gpioBase + AREN_OFFSET);
-            AFEN = ((uintptr_t *) gpioBase + AFEN_OFFSET);
-            PUP_PDN = ((uintptr_t *) gpioBase + PUP_PDN_OFFSET);
-            pinConfigInitialized = TRUE;
-            return PIN_CONFIG_SUCCESS;
-        }
+        FSEL = ((uintptr_t *) gpioBase + FSEL_OFFSET);
+        REN = ((uintptr_t *) gpioBase + REN_OFFSET);
+        FEN = ((uintptr_t *) gpioBase + FEN_OFFSET);
+        HEN = ((uintptr_t *) gpioBase + HEN_OFFSET);
+        LEN = ((uintptr_t *) gpioBase + LEN_OFFSET);
+        AREN = ((uintptr_t *) gpioBase + AREN_OFFSET);
+        AFEN = ((uintptr_t *) gpioBase + AFEN_OFFSET);
+        PUP_PDN = ((uintptr_t *) gpioBase + PUP_PDN_OFFSET);
+        pinConfigInitialized = TRUE;
+        return PIN_CONFIG_SUCCESS;
     }
 
 }
 
 PIN_CONFIG_STATUS shutdownPinConfigDriver(void) {
 
-    if (pinConfigInitialized == FALSE) {
+    const MAPPER_STATUS unmapStatus = unmapBaseRegister(&gpioBase, BLOCK_SIZE);
+    if (unmapStatus != MAPPER_SUCCESS) {
         return PIN_CONFIG_ERROR;
     } else {
-        const MAPPER_STATUS unmapStatus = unmapBaseRegister(&gpioBase, BLOCK_SIZE);
-        if (unmapStatus != MAPPER_SUCCESS) {
-            return PIN_CONFIG_ERROR;
-        } else {
-            FSEL = NULL;
-            REN = NULL;
-            FEN = NULL;
-            HEN = NULL;
-            LEN = NULL;
-            AREN = NULL;
-            AFEN = NULL;
-            PUP_PDN = NULL;
-            pinConfigInitialized = FALSE;
-            return PIN_CONFIG_SUCCESS;
-        }
+        FSEL = NULL;
+        REN = NULL;
+        FEN = NULL;
+        HEN = NULL;
+        LEN = NULL;
+        AREN = NULL;
+        AFEN = NULL;
+        PUP_PDN = NULL;
+        pinConfigInitialized = FALSE;
+        return PIN_CONFIG_SUCCESS;
     }
 
 }

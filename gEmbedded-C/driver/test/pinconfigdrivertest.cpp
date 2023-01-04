@@ -15,9 +15,6 @@ TEST(PinConfigDriver, testSetupPinConfigDriver) {
     status = setupPinConfigDriver();
     ASSERT_EQ(PIN_CONFIG_SUCCESS, status);
 
-    status = setupPinConfigDriver();
-    ASSERT_EQ(PIN_CONFIG_ERROR, status);
-
 }
 
 TEST(PinConfigDriver, testShutdownPinConfigDriver) {
@@ -26,9 +23,6 @@ TEST(PinConfigDriver, testShutdownPinConfigDriver) {
 
     status = shutdownPinConfigDriver();
     ASSERT_EQ(PIN_CONFIG_SUCCESS, status);
-
-    status = shutdownPinConfigDriver();
-    ASSERT_EQ(PIN_CONFIG_ERROR, status);
 
 }
 

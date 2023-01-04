@@ -11,46 +11,71 @@
 static pthread_mutex_t deviceControllerLock = PTHREAD_MUTEX_INITIALIZER;
 static volatile uint8_t deviceContextInitialized = FALSE;
 
-// Thread safe
-DEVICE_CONTROLLER_STATUS setupDeviceContext(void) {
-
-    volatile DEVICE_CONTROLLER_STATUS deviceControllerStatus = DEVICE_CONTROLLER_SUCCESS;
-
-    volatile int mutexResult = pthread_mutex_lock(&deviceControllerLock);
-
-    if (mutexResult != 0) {
-        deviceControllerStatus = DEVICE_CONTROLLER_LOCK_ERROR;
-        goto Return_Context_Status;
-    }
-
-    if (deviceContextInitialized == TRUE) {
-        deviceControllerStatus = DEVICE_CONTROLLER_INITIALIZED_ERROR;
-        goto Return_Context_Status;
-    }
+static DEVICE_CONTROLLER_STATUS setupDrivers(void) {
 
     const volatile PIN_CONFIG_STATUS pinConfigStatus = setupPinConfigDriver();
     if (pinConfigStatus != PIN_CONFIG_SUCCESS) {
-        deviceControllerStatus = DEVICE_CONTROLLER_PIN_CONFIG_ERROR;
-        goto Return_Context_Status;
+        return DEVICE_CONTROLLER_PIN_CONFIG_ERROR;
     }
 
     const volatile PIN_IO_STATUS pinIOStatus = setupPinIODriver();
     if (pinIOStatus != PIN_IO_SUCCESS) {
-        deviceControllerStatus = DEVICE_CONTROLLER_PIN_IO_ERROR;
-        goto Return_Context_Status;
+        return DEVICE_CONTROLLER_PIN_IO_ERROR;
+    }
+
+    return DEVICE_CONTROLLER_SUCCESS;
+
+}
+
+static DEVICE_CONTROLLER_STATUS shutdownDrivers(void) {
+
+    const volatile PIN_CONFIG_STATUS pinConfigStatus = shutdownPinConfigDriver();
+    if (pinConfigStatus != PIN_CONFIG_SUCCESS) {
+        return DEVICE_CONTROLLER_PIN_CONFIG_ERROR;
+    }
+
+    const volatile PIN_IO_STATUS pinIOStatus = shutdownPinIODriver();
+    if (pinIOStatus != PIN_IO_SUCCESS) {
+        return DEVICE_CONTROLLER_PIN_IO_ERROR;
+    }
+
+    return DEVICE_CONTROLLER_SUCCESS;
+
+}
+
+// Thread safe
+DEVICE_CONTROLLER_STATUS setupDeviceContext(void) {
+
+    volatile int mutexResult = pthread_mutex_lock(&deviceControllerLock);
+
+    volatile DEVICE_CONTROLLER_STATUS status;
+
+    if (mutexResult != 0) {
+        status = DEVICE_CONTROLLER_LOCK_ERROR;
+        goto Return_Device_Controller_Status;
+    }
+
+    if (deviceContextInitialized == TRUE) {
+        status = DEVICE_CONTROLLER_INITIALIZED_ERROR;
+        goto Return_Device_Controller_Status;
+    }
+
+    status = setupDrivers();
+    if (status != DEVICE_CONTROLLER_SUCCESS) {
+        goto Return_Device_Controller_Status;
     }
 
     deviceContextInitialized = TRUE;
 
-    Return_Context_Status :
+    Return_Device_Controller_Status :
     {
         if (mutexResult == 0) {
             mutexResult = pthread_mutex_unlock(&deviceControllerLock);
             if (mutexResult != 0) {
-                deviceControllerStatus = DEVICE_CONTROLLER_UNLOCK_ERROR;
+                status = DEVICE_CONTROLLER_UNLOCK_ERROR;
             }
         }
-        return deviceControllerStatus;
+        return status;
     }
 
 }
@@ -58,43 +83,35 @@ DEVICE_CONTROLLER_STATUS setupDeviceContext(void) {
 // Thread safe
 DEVICE_CONTROLLER_STATUS shutdownDeviceContext(void) {
 
-    volatile DEVICE_CONTROLLER_STATUS deviceControllerStatus = DEVICE_CONTROLLER_SUCCESS;
-
     volatile int mutexResult = pthread_mutex_lock(&deviceControllerLock);
 
+    volatile DEVICE_CONTROLLER_STATUS status;
+
     if (mutexResult != 0) {
-        deviceControllerStatus = DEVICE_CONTROLLER_LOCK_ERROR;
-        goto Return_Context_Status;
+        status = DEVICE_CONTROLLER_LOCK_ERROR;
+        goto Return_Device_Controller_Status;
     }
 
     if (deviceContextInitialized == FALSE) {
-        deviceControllerStatus = DEVICE_CONTROLLER_NOT_INITIALIZED_ERROR;
-        goto Return_Context_Status;
+        status = DEVICE_CONTROLLER_NOT_INITIALIZED_ERROR;
+        goto Return_Device_Controller_Status;
     }
 
-    const volatile PIN_CONFIG_STATUS pinConfigStatus = shutdownPinConfigDriver();
-    if (pinConfigStatus != PIN_CONFIG_SUCCESS) {
-        deviceControllerStatus = DEVICE_CONTROLLER_PIN_CONFIG_ERROR;
-        goto Return_Context_Status;
-    }
-
-    const volatile PIN_IO_STATUS pinIOStatus = shutdownPinIODriver();
-    if (pinIOStatus != PIN_IO_SUCCESS) {
-        deviceControllerStatus = DEVICE_CONTROLLER_PIN_IO_ERROR;
-        goto Return_Context_Status;
+    status = shutdownDrivers();
+    if (status != DEVICE_CONTROLLER_SUCCESS) {
+        goto Return_Device_Controller_Status;
     }
 
     deviceContextInitialized = FALSE;
 
-    Return_Context_Status :
+    Return_Device_Controller_Status :
     {
         if (mutexResult == 0) {
             mutexResult = pthread_mutex_unlock(&deviceControllerLock);
             if (mutexResult != 0) {
-                deviceControllerStatus = DEVICE_CONTROLLER_UNLOCK_ERROR;
+                status = DEVICE_CONTROLLER_UNLOCK_ERROR;
             }
         }
-        return deviceControllerStatus;
+        return status;
     }
-
 }
