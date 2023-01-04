@@ -8,11 +8,6 @@
 #include "common.h"
 #include "pin.h"
 
-#define SET_OFFSET  (0x1c/4)
-#define CLR_OFFSET  (0x28/4)
-#define LEV_OFFSET  (0x34/4)
-#define EDS_OFFSET  (0x40/4)
-
 typedef enum {
     PIN_IO_SUCCESS = 0,
     PIN_IO_ERROR = 1,

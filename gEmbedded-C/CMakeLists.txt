@@ -64,3 +64,4 @@ add_custom_command(
 )
 
 add_subdirectory(driver)
+add_subdirectory(controller)
