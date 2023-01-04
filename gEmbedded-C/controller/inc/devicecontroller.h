@@ -23,10 +23,4 @@ DEVICE_CONTROLLER_STATUS setupDeviceContext(void);
 // Thread safe
 DEVICE_CONTROLLER_STATUS shutdownDeviceContext(void);
 
-// Not thread safe
-const char *getDeviceName(void);
-
-// Thread safe
-uint8_t isDeviceInitialized(void);
-
 #endif //GEMBEDDED_C_DEVICECONTROLLER_H

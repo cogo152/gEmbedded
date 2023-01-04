@@ -9,6 +9,7 @@
 #include "piniodriver.h"
 
 static pthread_mutex_t deviceControllerLock = PTHREAD_MUTEX_INITIALIZER;
+
 static volatile uint8_t deviceContextInitialized = FALSE;
 
 static DEVICE_CONTROLLER_STATUS setupDrivers(void) {
@@ -72,6 +73,7 @@ DEVICE_CONTROLLER_STATUS setupDeviceContext(void) {
         if (mutexResult == 0) {
             mutexResult = pthread_mutex_unlock(&deviceControllerLock);
             if (mutexResult != 0) {
+                // force shutdown ? or retry
                 status = DEVICE_CONTROLLER_UNLOCK_ERROR;
             }
         }
@@ -114,4 +116,5 @@ DEVICE_CONTROLLER_STATUS shutdownDeviceContext(void) {
         }
         return status;
     }
+
 }

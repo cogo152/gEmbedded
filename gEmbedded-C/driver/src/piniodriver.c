@@ -9,8 +9,6 @@
 #include "registers.h"
 #include "mapper.h"
 
-static volatile uint8_t pinIOInitialized = FALSE;
-
 static void *gpioBase = NULL;
 
 static volatile uintptr_t *SET = NULL;
@@ -28,7 +26,6 @@ PIN_IO_STATUS setupPinIODriver(void) {
         CLR = ((uintptr_t *) gpioBase + CLR_OFFSET);
         LEV = ((uintptr_t *) gpioBase + LEV_OFFSET);
         EDS = ((uintptr_t *) gpioBase + EDS_OFFSET);
-        pinIOInitialized = TRUE;
         return PIN_IO_SUCCESS;
     }
 
@@ -44,7 +41,6 @@ PIN_IO_STATUS shutdownPinIODriver(void) {
         CLR = NULL;
         LEV = NULL;
         EDS = NULL;
-        pinIOInitialized = FALSE;
         return PIN_IO_SUCCESS;
     }
 

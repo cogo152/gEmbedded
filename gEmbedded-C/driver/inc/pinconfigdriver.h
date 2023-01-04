@@ -29,6 +29,7 @@ PIN_CONFIG_STATUS configurePinEventLFS(PIN validatedPin, PIN_EVENT validatedPinE
 
 PIN_EVENT readPinEvent(PIN validatedPin);
 
+// think release in controller after shutdown
 void releasePinEvent(int fileDescriptor);
 
 #endif //GEMBEDDED_C_PINCONFIGDRIVER_H

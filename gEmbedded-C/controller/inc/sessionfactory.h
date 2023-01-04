@@ -1,0 +1,8 @@
+//
+// Created by sondahi on 04.01.23.
+//
+
+#ifndef GEMBEDDED_C_SESSIONFACTORY_H
+#define GEMBEDDED_C_SESSIONFACTORY_H
+
+#endif //GEMBEDDED_C_SESSIONFACTORY_H

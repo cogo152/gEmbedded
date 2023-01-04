@@ -17,12 +17,7 @@
 
 typedef enum {
     MAPPER_SUCCESS = 0,
-    MAPPER_FILE_NAME_ERROR = 1,
-    MAPPER_LENGTH_ERROR = 2,
-    MAPPER_POINTER_ERROR = 3,
-    MAPPER_FILE_OPEN_ERROR = 4,
-    MAPPER_MAP_ERROR = 5,
-    MAPPER_UNMAP_ERROR = 6
+    MAPPER_ERROR = 1
 } MAPPER_STATUS;
 
 MAPPER_STATUS mapBaseRegister(const char *fileName, size_t length, off_t offset, void **pointer);

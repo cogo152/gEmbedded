@@ -9,8 +9,6 @@
 #include "registers.h"
 #include "mapper.h"
 
-static volatile uint8_t pinConfigInitialized = FALSE;
-
 static void *gpioBase = NULL;
 
 static volatile uintptr_t *FSEL = NULL;
@@ -36,7 +34,6 @@ PIN_CONFIG_STATUS setupPinConfigDriver(void) {
         AREN = ((uintptr_t *) gpioBase + AREN_OFFSET);
         AFEN = ((uintptr_t *) gpioBase + AFEN_OFFSET);
         PUP_PDN = ((uintptr_t *) gpioBase + PUP_PDN_OFFSET);
-        pinConfigInitialized = TRUE;
         return PIN_CONFIG_SUCCESS;
     }
 
@@ -56,7 +53,6 @@ PIN_CONFIG_STATUS shutdownPinConfigDriver(void) {
         AREN = NULL;
         AFEN = NULL;
         PUP_PDN = NULL;
-        pinConfigInitialized = FALSE;
         return PIN_CONFIG_SUCCESS;
     }
 
