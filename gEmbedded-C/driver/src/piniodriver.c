@@ -78,7 +78,7 @@ void clearPin(uint32_t bitField){
 
 uint8_t readPinLevel(uint32_t bitField){
 
-    uint32_t registerLine = *LEV;
+    volatile uint32_t registerLine = *LEV;
     registerLine &= bitField;
     if (registerLine > 0) {
         return TRUE;
