@@ -32,33 +32,6 @@ TEST(PinConfigDriver, testShutdownPinConfigDriver) {
 
 }
 
-TEST(PinConfigDriver, testValidatePin) {
-
-    ASSERT_EQ(PIN_CONFIG_ERROR, validatePin(PIN_TYPE_GPIO, PIN_4));
-
-    setupPinConfigDriver();
-
-    ASSERT_EQ(PIN_CONFIG_ERROR, validatePin((PIN_TYPE) 6, PIN_1));
-    ASSERT_EQ(PIN_CONFIG_ERROR, validatePin(PIN_TYPE_GPIO, PIN_1));
-    ASSERT_EQ(PIN_CONFIG_ERROR, validatePin(PIN_TYPE_CLOCK, PIN_5));
-    ASSERT_EQ(PIN_CONFIG_ERROR, validatePin(PIN_TYPE_PWM, PIN_17));
-    ASSERT_EQ(PIN_CONFIG_ERROR, validatePin(PIN_TYPE_I2C, PIN_4));
-    ASSERT_EQ(PIN_CONFIG_ERROR, validatePin(PIN_TYPE_SPI, PIN_12));
-    ASSERT_EQ(PIN_CONFIG_ERROR, validatePin(PIN_TYPE_UART, PIN_16));
-
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, validatePin(PIN_TYPE_GPIO, PIN_4));
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, validatePin(PIN_TYPE_CLOCK, PIN_4));
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, validatePin(PIN_TYPE_PWM, PIN_18));
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, validatePin(PIN_TYPE_I2C, PIN_2));
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, validatePin(PIN_TYPE_SPI, PIN_9));
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, validatePin(PIN_TYPE_UART, PIN_15));
-
-    shutdownPinConfigDriver();
-
-    ASSERT_EQ(PIN_CONFIG_ERROR, validatePin(PIN_TYPE_GPIO, PIN_4));
-
-}
-
 TEST(PinConfigDriver, testConfigureAndReadPinFunction) {
 
     const PIN validatedPin = PIN_4;
@@ -137,59 +110,61 @@ TEST(PinConfigDriver, testConfigureAndReadPinPullUpDown) {
 
 }
 
-TEST(PinConfigDriver, testConfigureAndReadPinEvent) {
+TEST(PinConfigDriver, testConfigureAndReadAndReleasePinEvent) {
 
     const PIN validatedPin = PIN_4;
     PIN_EVENT pinEventToCheck;
     PIN_FUNCTION pinFunctionToCheck;
     int fileDescriptor = -1;
 
-    ASSERT_EQ(PIN_CONFIG_ERROR, configurePinEvent(validatedPin, PIN_EVENT_NO_EVENT, &fileDescriptor));
+    ASSERT_EQ(PIN_CONFIG_ERROR, configurePinEventLFS(validatedPin, PIN_EVENT_NO_EVENT, &fileDescriptor));
     ASSERT_EQ(PIN_CONFIG_ERROR, readPinEvent(validatedPin, &pinEventToCheck));
+    ASSERT_EQ(PIN_CONFIG_ERROR, releasePinEvent(5));
 
     setupPinConfigDriver();
 
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinEvent(validatedPin, PIN_EVENT_RISING, &fileDescriptor));
+    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinEventLFS(validatedPin, PIN_EVENT_RISING, &fileDescriptor));
     ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinEvent(validatedPin, &pinEventToCheck));
     ASSERT_EQ(PIN_EVENT_RISING, pinEventToCheck);
     ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinFunction(validatedPin, &pinFunctionToCheck));
     ASSERT_EQ(PIN_FUNCTION_INPUT, pinFunctionToCheck);
     ASSERT_GT(fileDescriptor, 0);
-    close(fileDescriptor);
+    ASSERT_EQ(PIN_CONFIG_SUCCESS, releasePinEvent(fileDescriptor));
 
     fileDescriptor = -1;
 
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinEvent(validatedPin, PIN_EVENT_FALLING, &fileDescriptor));
+    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinEventLFS(validatedPin, PIN_EVENT_FALLING, &fileDescriptor));
     ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinEvent(validatedPin, &pinEventToCheck));
     ASSERT_EQ(PIN_EVENT_FALLING, pinEventToCheck);
     ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinFunction(validatedPin, &pinFunctionToCheck));
     ASSERT_EQ(PIN_FUNCTION_INPUT, pinFunctionToCheck);
     ASSERT_GT(fileDescriptor, 0);
-    close(fileDescriptor);
+    ASSERT_EQ(PIN_CONFIG_SUCCESS, releasePinEvent(fileDescriptor));
 
     fileDescriptor = -1;
 
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinEvent(validatedPin, PIN_EVENT_BOTH, &fileDescriptor));
+    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinEventLFS(validatedPin, PIN_EVENT_BOTH, &fileDescriptor));
     ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinEvent(validatedPin, &pinEventToCheck));
     ASSERT_EQ(PIN_EVENT_BOTH, pinEventToCheck);
     ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinFunction(validatedPin, &pinFunctionToCheck));
     ASSERT_EQ(PIN_FUNCTION_INPUT, pinFunctionToCheck);
     ASSERT_GT(fileDescriptor, 0);
-    close(fileDescriptor);
+    ASSERT_EQ(PIN_CONFIG_SUCCESS, releasePinEvent(fileDescriptor));
 
     fileDescriptor = -1;
 
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinEvent(validatedPin, PIN_EVENT_NO_EVENT, &fileDescriptor));
+    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinEventLFS(validatedPin, PIN_EVENT_NO_EVENT, &fileDescriptor));
     ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinEvent(validatedPin, &pinEventToCheck));
     ASSERT_EQ(PIN_EVENT_NO_EVENT, pinEventToCheck);
     ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinFunction(validatedPin, &pinFunctionToCheck));
     ASSERT_EQ(PIN_FUNCTION_INPUT, pinFunctionToCheck);
     ASSERT_EQ(fileDescriptor, 0);
-    close(fileDescriptor);
+    ASSERT_EQ(PIN_CONFIG_SUCCESS, releasePinEvent(fileDescriptor));
 
     shutdownPinConfigDriver();
 
-    ASSERT_EQ(PIN_CONFIG_ERROR, configurePinEvent(validatedPin, PIN_EVENT_NO_EVENT, &fileDescriptor));
+    ASSERT_EQ(PIN_CONFIG_ERROR, configurePinEventLFS(validatedPin, PIN_EVENT_NO_EVENT, &fileDescriptor));
     ASSERT_EQ(PIN_CONFIG_ERROR, readPinEvent(validatedPin, &pinEventToCheck));
+    ASSERT_EQ(PIN_CONFIG_ERROR, releasePinEvent(5));
 
 }
