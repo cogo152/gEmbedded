@@ -122,14 +122,3 @@ PIN_VALIDATION_STATUS validatePin(const PIN_TYPE pinType, const PIN pin) {
     }
 
 }
-
-PIN_VALIDATION_STATUS registerPin(PIN pin) {
-
-    if(registeredPins[pin] == TRUE){
-        return PIN_VALIDATION_ERROR;
-    } else {
-        registeredPins[pin] = TRUE;
-        return PIN_VALIDATION_SUCCESS;
-    }
-
-}

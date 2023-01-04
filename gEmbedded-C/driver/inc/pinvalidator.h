@@ -14,6 +14,5 @@ typedef enum {
 } PIN_VALIDATION_STATUS;
 
 PIN_VALIDATION_STATUS validatePin(PIN_TYPE pinType, PIN pinToValidate);
-PIN_VALIDATION_STATUS registerPin(PIN pin);
 
 #endif //GEMBEDDED_C_PINVALIDATOR_H
