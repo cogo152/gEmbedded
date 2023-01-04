@@ -69,10 +69,10 @@ typedef enum {
 } PULL_UP_DOWN;
 
 typedef enum {
-    PIN_EVENT_NO_EVENT = 0,
-    PIN_EVENT_RISING = 1,
-    PIN_EVENT_FALLING = 2,
-    PIN_EVENT_BOTH = 3
+    PIN_EVENT_NO_EVENT = 0b00,
+    PIN_EVENT_RISING = 0b01,
+    PIN_EVENT_FALLING = 0b10,
+    PIN_EVENT_BOTH = 0b11
 } PIN_EVENT;
 
 #endif //GEMBEDDED_C_PIN_H
