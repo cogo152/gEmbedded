@@ -35,136 +35,139 @@ TEST(PinConfigDriver, testShutdownPinConfigDriver) {
 TEST(PinConfigDriver, testConfigureAndReadPinFunction) {
 
     const PIN validatedPin = PIN_4;
+    PIN_FUNCTION pinFunctionToSet;
     PIN_FUNCTION pinFunctionToCheck;
-
-    ASSERT_EQ(PIN_CONFIG_ERROR, configurePinFunction(validatedPin, PIN_FUNCTION_INPUT));
-    ASSERT_EQ(PIN_CONFIG_ERROR, readPinFunction(validatedPin, &pinFunctionToCheck));
 
     setupPinConfigDriver();
 
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinFunction(validatedPin, PIN_FUNCTION_ALT_0));
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinFunction(validatedPin, &pinFunctionToCheck));
-    ASSERT_EQ(PIN_FUNCTION_ALT_0, pinFunctionToCheck);
+    pinFunctionToSet = PIN_FUNCTION_ALT_0;
+    configurePinFunction(validatedPin,pinFunctionToSet);
+    pinFunctionToCheck = readPinFunction(validatedPin);
+    ASSERT_EQ(pinFunctionToCheck,pinFunctionToSet);
 
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinFunction(validatedPin, PIN_FUNCTION_ALT_1));
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinFunction(validatedPin, &pinFunctionToCheck));
-    ASSERT_EQ(PIN_FUNCTION_ALT_1, pinFunctionToCheck);
+    pinFunctionToSet = PIN_FUNCTION_ALT_1;
+    configurePinFunction(validatedPin,pinFunctionToSet);
+    pinFunctionToCheck = readPinFunction(validatedPin);
+    ASSERT_EQ(pinFunctionToCheck,pinFunctionToSet);
 
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinFunction(validatedPin, PIN_FUNCTION_ALT_2));
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinFunction(validatedPin, &pinFunctionToCheck));
-    ASSERT_EQ(PIN_FUNCTION_ALT_2, pinFunctionToCheck);
+    pinFunctionToSet = PIN_FUNCTION_ALT_2;
+    configurePinFunction(validatedPin,pinFunctionToSet);
+    pinFunctionToCheck = readPinFunction(validatedPin);
+    ASSERT_EQ(pinFunctionToCheck,pinFunctionToSet);
 
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinFunction(validatedPin, PIN_FUNCTION_ALT_3));
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinFunction(validatedPin, &pinFunctionToCheck));
-    ASSERT_EQ(PIN_FUNCTION_ALT_3, pinFunctionToCheck);
+    pinFunctionToSet = PIN_FUNCTION_ALT_3;
+    configurePinFunction(validatedPin,pinFunctionToSet);
+    pinFunctionToCheck = readPinFunction(validatedPin);
+    ASSERT_EQ(pinFunctionToCheck,pinFunctionToSet);
 
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinFunction(validatedPin, PIN_FUNCTION_ALT_4));
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinFunction(validatedPin, &pinFunctionToCheck));
-    ASSERT_EQ(PIN_FUNCTION_ALT_4, pinFunctionToCheck);
+    pinFunctionToSet = PIN_FUNCTION_ALT_4;
+    configurePinFunction(validatedPin,pinFunctionToSet);
+    pinFunctionToCheck = readPinFunction(validatedPin);
+    ASSERT_EQ(pinFunctionToCheck,pinFunctionToSet);
 
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinFunction(validatedPin, PIN_FUNCTION_ALT_5));
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinFunction(validatedPin, &pinFunctionToCheck));
-    ASSERT_EQ(PIN_FUNCTION_ALT_5, pinFunctionToCheck);
+    pinFunctionToSet = PIN_FUNCTION_ALT_5;
+    configurePinFunction(validatedPin,pinFunctionToSet);
+    pinFunctionToCheck = readPinFunction(validatedPin);
+    ASSERT_EQ(pinFunctionToCheck,pinFunctionToSet);
 
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinFunction(validatedPin, PIN_FUNCTION_OUTPUT));
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinFunction(validatedPin, &pinFunctionToCheck));
-    ASSERT_EQ(PIN_FUNCTION_OUTPUT, pinFunctionToCheck);
+    pinFunctionToSet = PIN_FUNCTION_OUTPUT;
+    configurePinFunction(validatedPin,pinFunctionToSet);
+    pinFunctionToCheck = readPinFunction(validatedPin);
+    ASSERT_EQ(pinFunctionToCheck,pinFunctionToSet);
 
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinFunction(validatedPin, PIN_FUNCTION_INPUT));
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinFunction(validatedPin, &pinFunctionToCheck));
-    ASSERT_EQ(PIN_FUNCTION_INPUT, pinFunctionToCheck);
+    pinFunctionToSet = PIN_FUNCTION_INPUT;
+    configurePinFunction(validatedPin,pinFunctionToSet);
+    pinFunctionToCheck = readPinFunction(validatedPin);
+    ASSERT_EQ(pinFunctionToCheck,pinFunctionToSet);
 
     shutdownPinConfigDriver();
-
-    ASSERT_EQ(PIN_CONFIG_ERROR, configurePinFunction(validatedPin, PIN_FUNCTION_INPUT));
-    ASSERT_EQ(PIN_CONFIG_ERROR, readPinFunction(validatedPin, &pinFunctionToCheck));
 
 }
 
 TEST(PinConfigDriver, testConfigureAndReadPinPullUpDown) {
 
     const PIN validatedPin = PIN_4;
-    PULL_UP_DOWN pullUpDownToCheck;
-
-    ASSERT_EQ(PIN_CONFIG_ERROR, configurePinPullUpDown(validatedPin, PULL_UP_DOWN_NO_RESISTOR));
-    ASSERT_EQ(PIN_CONFIG_ERROR, readPinPullUpDown(validatedPin, &pullUpDownToCheck));
+    PULL_UP_DOWN pinPullUpDownToSet;
+    PULL_UP_DOWN pinPullUpDownToCheck;
 
     setupPinConfigDriver();
 
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinPullUpDown(validatedPin, PULL_UP_DOWN_PULL_UP));
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinPullUpDown(validatedPin, &pullUpDownToCheck));
-    ASSERT_EQ(PULL_UP_DOWN_PULL_UP, pullUpDownToCheck);
+    configurePinFunction(validatedPin,PIN_FUNCTION_INPUT);
 
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinPullUpDown(validatedPin, PULL_UP_DOWN_PULL_DOWN));
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinPullUpDown(validatedPin, &pullUpDownToCheck));
-    ASSERT_EQ(PULL_UP_DOWN_PULL_DOWN, pullUpDownToCheck);
+    pinPullUpDownToSet = PULL_UP_DOWN_PULL_UP;
+    configurePinPullUpDown(validatedPin,pinPullUpDownToSet);
+    pinPullUpDownToCheck = readPinPullUpDown(validatedPin);
+    ASSERT_EQ(pinPullUpDownToCheck,pinPullUpDownToSet);
 
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinPullUpDown(validatedPin, PULL_UP_DOWN_NO_RESISTOR));
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinPullUpDown(validatedPin, &pullUpDownToCheck));
-    ASSERT_EQ(PULL_UP_DOWN_NO_RESISTOR, pullUpDownToCheck);
+    pinPullUpDownToSet = PULL_UP_DOWN_PULL_DOWN;
+    configurePinPullUpDown(validatedPin,pinPullUpDownToSet);
+    pinPullUpDownToCheck = readPinPullUpDown(validatedPin);
+    ASSERT_EQ(pinPullUpDownToCheck,pinPullUpDownToSet);
+
+    pinPullUpDownToSet = PULL_UP_DOWN_RESERVED;
+    configurePinPullUpDown(validatedPin,pinPullUpDownToSet);
+    pinPullUpDownToCheck = readPinPullUpDown(validatedPin);
+    ASSERT_EQ(pinPullUpDownToCheck,pinPullUpDownToSet);
+
+    pinPullUpDownToSet = PULL_UP_DOWN_NO_RESISTOR;
+    configurePinPullUpDown(validatedPin,pinPullUpDownToSet);
+    pinPullUpDownToCheck = readPinPullUpDown(validatedPin);
+    ASSERT_EQ(pinPullUpDownToCheck,pinPullUpDownToSet);
 
     shutdownPinConfigDriver();
-
-    ASSERT_EQ(PIN_CONFIG_ERROR, configurePinPullUpDown(validatedPin, PULL_UP_DOWN_NO_RESISTOR));
-    ASSERT_EQ(PIN_CONFIG_ERROR, readPinPullUpDown(validatedPin, &pullUpDownToCheck));
 
 }
 
 TEST(PinConfigDriver, testConfigureAndReadAndReleasePinEvent) {
 
     const PIN validatedPin = PIN_4;
-    PIN_EVENT pinEventToCheck;
     PIN_FUNCTION pinFunctionToCheck;
+    PIN_EVENT pinEventToSet;
+    PIN_EVENT pinEventToCheck;
     int fileDescriptor = -1;
-
-    ASSERT_EQ(PIN_CONFIG_ERROR, configurePinEventLFS(validatedPin, PIN_EVENT_NO_EVENT, &fileDescriptor));
-    ASSERT_EQ(PIN_CONFIG_ERROR, readPinEvent(validatedPin, &pinEventToCheck));
-    ASSERT_EQ(PIN_CONFIG_ERROR, releasePinEvent(5));
 
     setupPinConfigDriver();
 
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinEventLFS(validatedPin, PIN_EVENT_RISING, &fileDescriptor));
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinEvent(validatedPin, &pinEventToCheck));
-    ASSERT_EQ(PIN_EVENT_RISING, pinEventToCheck);
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinFunction(validatedPin, &pinFunctionToCheck));
-    ASSERT_EQ(PIN_FUNCTION_INPUT, pinFunctionToCheck);
+    pinEventToSet = PIN_EVENT_RISING;
+    configurePinEventLFS(validatedPin, pinEventToSet, &fileDescriptor);
+    pinFunctionToCheck = readPinFunction(validatedPin);
+    pinEventToCheck = readPinEvent(validatedPin);
+    ASSERT_EQ(pinFunctionToCheck, PIN_FUNCTION_INPUT);
+    ASSERT_EQ(pinEventToCheck,pinEventToSet);
     ASSERT_GT(fileDescriptor, 0);
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, releasePinEvent(fileDescriptor));
-
+    releasePinEvent(fileDescriptor);
     fileDescriptor = -1;
 
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinEventLFS(validatedPin, PIN_EVENT_FALLING, &fileDescriptor));
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinEvent(validatedPin, &pinEventToCheck));
-    ASSERT_EQ(PIN_EVENT_FALLING, pinEventToCheck);
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinFunction(validatedPin, &pinFunctionToCheck));
-    ASSERT_EQ(PIN_FUNCTION_INPUT, pinFunctionToCheck);
+    pinEventToSet = PIN_EVENT_FALLING;
+    configurePinEventLFS(validatedPin, pinEventToSet, &fileDescriptor);
+    pinFunctionToCheck = readPinFunction(validatedPin);
+    pinEventToCheck = readPinEvent(validatedPin);
+    ASSERT_EQ(pinFunctionToCheck, PIN_FUNCTION_INPUT);
+    ASSERT_EQ(pinEventToCheck,pinEventToSet);
     ASSERT_GT(fileDescriptor, 0);
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, releasePinEvent(fileDescriptor));
-
+    releasePinEvent(fileDescriptor);
     fileDescriptor = -1;
 
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinEventLFS(validatedPin, PIN_EVENT_BOTH, &fileDescriptor));
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinEvent(validatedPin, &pinEventToCheck));
-    ASSERT_EQ(PIN_EVENT_BOTH, pinEventToCheck);
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinFunction(validatedPin, &pinFunctionToCheck));
-    ASSERT_EQ(PIN_FUNCTION_INPUT, pinFunctionToCheck);
+    pinEventToSet = PIN_EVENT_BOTH;
+    configurePinEventLFS(validatedPin, pinEventToSet, &fileDescriptor);
+    pinFunctionToCheck = readPinFunction(validatedPin);
+    pinEventToCheck = readPinEvent(validatedPin);
+    ASSERT_EQ(pinFunctionToCheck, PIN_FUNCTION_INPUT);
+    ASSERT_EQ(pinEventToCheck,pinEventToSet);
     ASSERT_GT(fileDescriptor, 0);
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, releasePinEvent(fileDescriptor));
-
+    releasePinEvent(fileDescriptor);
     fileDescriptor = -1;
 
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, configurePinEventLFS(validatedPin, PIN_EVENT_NO_EVENT, &fileDescriptor));
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinEvent(validatedPin, &pinEventToCheck));
-    ASSERT_EQ(PIN_EVENT_NO_EVENT, pinEventToCheck);
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, readPinFunction(validatedPin, &pinFunctionToCheck));
-    ASSERT_EQ(PIN_FUNCTION_INPUT, pinFunctionToCheck);
+    pinEventToSet = PIN_EVENT_NO_EVENT;
+    configurePinEventLFS(validatedPin, pinEventToSet, &fileDescriptor);
+    pinFunctionToCheck = readPinFunction(validatedPin);
+    pinEventToCheck = readPinEvent(validatedPin);
+    ASSERT_EQ(pinFunctionToCheck, PIN_FUNCTION_INPUT);
+    ASSERT_EQ(pinEventToCheck,pinEventToSet);
     ASSERT_EQ(fileDescriptor, 0);
-    ASSERT_EQ(PIN_CONFIG_SUCCESS, releasePinEvent(fileDescriptor));
+    releasePinEvent(fileDescriptor);
+    fileDescriptor = -1;
 
     shutdownPinConfigDriver();
-
-    ASSERT_EQ(PIN_CONFIG_ERROR, configurePinEventLFS(validatedPin, PIN_EVENT_NO_EVENT, &fileDescriptor));
-    ASSERT_EQ(PIN_CONFIG_ERROR, readPinEvent(validatedPin, &pinEventToCheck));
-    ASSERT_EQ(PIN_CONFIG_ERROR, releasePinEvent(5));
 
 }

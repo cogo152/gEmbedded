@@ -58,95 +58,69 @@ PIN_IO_STATUS shutdownPinIODriver(void) {
 
 }
 
-PIN_IO_STATUS getPinIOBitField(PIN validatedPin, uint32_t *bitField){
-    if (pinIOInitialized == FALSE) {
-        return PIN_IO_ERROR;
-    } else {
-        *bitField = (1 << (validatedPin % 32) * 1);
-        return PIN_IO_SUCCESS;
-    }
-}
+uint32_t getPinIOBitField(PIN validatedPin){
 
-PIN_IO_STATUS setPin(const uint32_t bitField) {
-
-    if (pinIOInitialized == FALSE) {
-        return PIN_IO_ERROR;
-    } else {
-        *SET = bitField;
-        return PIN_IO_SUCCESS;
-    }
+    return (1 << (validatedPin % 32) * 1);
 
 }
 
-PIN_IO_STATUS clearPin(const uint32_t bitField) {
+void setPin(uint32_t bitField){
 
-    if (pinIOInitialized == FALSE) {
-        return PIN_IO_ERROR;
-    } else {
-        *CLR = bitField;
-        return PIN_IO_SUCCESS;
-    }
+    *SET = bitField;
 
 }
 
-PIN_IO_STATUS readPinLevel(const uint32_t bitField, uint8_t *pinLevelToRead) {
+void clearPin(uint32_t bitField){
 
-    if (pinIOInitialized == FALSE) {
-        return PIN_IO_ERROR;
+    *CLR = bitField;
+
+}
+
+uint8_t readPinLevel(uint32_t bitField){
+
+    uint32_t registerLine = *LEV;
+    registerLine &= bitField;
+    if (registerLine > 0) {
+        return TRUE;
     } else {
-        uint32_t registerLine = *LEV;
-        registerLine &= bitField;
-        if (registerLine > 0) {
-            *pinLevelToRead = TRUE;
-        } else {
-            *pinLevelToRead = FALSE;
-        }
-        return PIN_IO_SUCCESS;
+        return FALSE;
     }
 
 }
 
-PIN_IO_STATUS invokePinEvent(uint32_t bitField){
+void invokePinEvent(uint32_t bitField){
 
-    if (pinIOInitialized == FALSE) {
-        return PIN_IO_ERROR;
-    } else {
-        *EDS = bitField;
-        return PIN_IO_SUCCESS;
-    }
+    *EDS = bitField;
+
 }
 
 PIN_IO_STATUS pollPinEvent(struct pinevent *const pinEvent){
 
-    if (pinIOInitialized == FALSE) {
-        return PIN_IO_ERROR;
-    } else {
-        struct pollfd pollFd;
-        pollFd.fd = pinEvent->fileDescriptor;
-        pollFd.events = POLLIN | POLLPRI;
-        const int pollResult = poll(&pollFd, 1, pinEvent->timeoutInMilSec);
-        switch (pollResult) {
-            case -1: {
+    struct pollfd pollFd;
+    pollFd.fd = pinEvent->fileDescriptor;
+    pollFd.events = POLLIN | POLLPRI;
+    const int pollResult = poll(&pollFd, 1, pinEvent->timeoutInMilSec);
+    switch (pollResult) {
+        case -1: {
+            return PIN_IO_ERROR;
+        }
+        case 0 : {
+            pinEvent->result = PIN_EVENT_RESULT_TIMEOUT;
+            return PIN_IO_SUCCESS;
+        }
+        default: {
+            struct gpioevent_data event;
+            const ssize_t readResult = read(pollFd.fd, &event, sizeof(event));
+            if (readResult < 1) {
                 return PIN_IO_ERROR;
-            }
-            case 0 : {
-                pinEvent->result = PIN_EVENT_RESULT_TIMEOUT;
-                return PIN_IO_SUCCESS;
-            }
-            default: {
-                struct gpioevent_data event;
-                const ssize_t readResult = read(pollFd.fd, &event, sizeof(event));
-                if (readResult < 1) {
-                    return PIN_IO_ERROR;
+            } else {
+                pinEvent->timestamp = event.timestamp;
+                if (event.id == GPIOEVENT_REQUEST_RISING_EDGE) {
+                    pinEvent->result = PIN_EVENT_RESULT_RISING;
                 } else {
-                    pinEvent->timestamp = event.timestamp;
-                    if (event.id == GPIOEVENT_REQUEST_RISING_EDGE) {
-                        pinEvent->result = PIN_EVENT_RESULT_RISING;
-                    } else {
-                        pinEvent->result = PIN_EVENT_RESULT_FALLING;
-                    }
-                    return PIN_IO_SUCCESS;
+                    pinEvent->result = PIN_EVENT_RESULT_FALLING;
                 }
+                return PIN_IO_SUCCESS;
             }
         }
     }

@@ -64,7 +64,8 @@ typedef enum {
 typedef enum {
     PULL_UP_DOWN_NO_RESISTOR = 0b00,
     PULL_UP_DOWN_PULL_UP = 0b01,
-    PULL_UP_DOWN_PULL_DOWN = 0b10
+    PULL_UP_DOWN_PULL_DOWN = 0b10,
+    PULL_UP_DOWN_RESERVED = 0b11,
 } PULL_UP_DOWN;
 
 typedef enum {

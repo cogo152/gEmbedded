@@ -35,15 +35,15 @@ PIN_IO_STATUS setupPinIODriver(void);
 
 PIN_IO_STATUS shutdownPinIODriver(void);
 
-PIN_IO_STATUS getPinIOBitField(PIN validatedPin, uint32_t *bitField);
+uint32_t getPinIOBitField(PIN validatedPin);
 
-PIN_IO_STATUS setPin(uint32_t bitField);
+void setPin(uint32_t bitField);
 
-PIN_IO_STATUS clearPin(uint32_t bitField);
+void clearPin(uint32_t bitField);
 
-PIN_IO_STATUS readPinLevel(uint32_t bitField, uint8_t *pinLevelToRead);
+uint8_t readPinLevel(uint32_t bitField);
 
-PIN_IO_STATUS invokePinEvent(uint32_t bitField);
+void invokePinEvent(uint32_t bitField);
 
 PIN_IO_STATUS pollPinEvent(struct pinevent *pinEvent);
 

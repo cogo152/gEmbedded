@@ -34,69 +34,40 @@ TEST(PinIODriver, testShutdownPinIODriver) {
 }
 
 TEST(PinIODriver, testGetPinIOBitField) {
+
     const PIN validatedPin = PIN_4;
     const uint32_t bitFieldActual = (1 << (validatedPin % 32) * 1);
-    uint32_t bitFieldExpected = 0;
+    uint32_t bitFieldExpected;
 
-    ASSERT_EQ(PIN_IO_ERROR, getPinIOBitField(validatedPin, &bitFieldExpected));
-    ASSERT_EQ(0, bitFieldExpected);
-
-    setupPinIODriver();
-
-    ASSERT_EQ(PIN_IO_SUCCESS, getPinIOBitField(validatedPin, &bitFieldExpected));
+    bitFieldExpected = getPinIOBitField(validatedPin);
     ASSERT_EQ(bitFieldActual, bitFieldExpected);
-
-    shutdownPinIODriver();
-
-    bitFieldExpected = 0;
-
-    ASSERT_EQ(PIN_IO_ERROR, getPinIOBitField(validatedPin, &bitFieldExpected));
-    ASSERT_EQ(0, bitFieldExpected);
 
 }
 
 TEST(PinIODriver, testSetAndReadAndClearPin) {
 
     const PIN validatedPin = PIN_4;
-    uint32_t bitField;
-
-    setupPinIODriver();
-    getPinIOBitField(validatedPin, &bitField);
-    shutdownPinIODriver();
-
-    uint8_t pinLevel = 2;
-
-    ASSERT_EQ(PIN_IO_ERROR, setPin(bitField));
-    ASSERT_EQ(PIN_IO_ERROR, readPinLevel(bitField, &pinLevel));
-    ASSERT_EQ(2, pinLevel);
-    ASSERT_EQ(PIN_IO_ERROR, clearPin(bitField));
+    const uint32_t bitField = getPinIOBitField(validatedPin);
+    uint8_t pinLevel;
 
     setupPinConfigDriver();
     configurePinFunction(validatedPin, PIN_FUNCTION_OUTPUT);
 
     setupPinIODriver();
 
-    ASSERT_EQ(PIN_IO_SUCCESS, setPin(bitField));
-    ASSERT_EQ(PIN_IO_SUCCESS, readPinLevel(bitField, &pinLevel));
-    ASSERT_EQ(TRUE, pinLevel);
+    setPin(bitField);
+    pinLevel = readPinLevel(bitField);
+    ASSERT_EQ(pinLevel, TRUE);
 
-    pinLevel = 2;
-
-    ASSERT_EQ(PIN_IO_SUCCESS, clearPin(bitField));
-    ASSERT_EQ(PIN_IO_SUCCESS, readPinLevel(bitField, &pinLevel));
-    ASSERT_EQ(FALSE, pinLevel);
-
-    pinLevel = 2;
+    clearPin(bitField);
+    pinLevel = readPinLevel(bitField);
+    ASSERT_EQ(pinLevel, FALSE);
 
     shutdownPinIODriver();
 
-    ASSERT_EQ(PIN_IO_ERROR, setPin(bitField));
-    ASSERT_EQ(PIN_IO_ERROR, readPinLevel(bitField, &pinLevel));
-    ASSERT_EQ(2, pinLevel);
-    ASSERT_EQ(PIN_IO_ERROR, clearPin(bitField));
-
     configurePinFunction(validatedPin, PIN_FUNCTION_INPUT);
     shutdownPinConfigDriver();
+
 
 }
 
@@ -108,9 +79,6 @@ TEST(PinIODriver, testReadPinEvent) {
     pinEvent.result = PIN_EVENT_RESULT_RISING;
     pinEvent.timestamp = 2;
 
-    ASSERT_EQ(PIN_IO_ERROR, pollPinEvent(&pinEvent));
-    ASSERT_EQ(PIN_EVENT_RESULT_RISING, pinEvent.result);
-    ASSERT_EQ(2, pinEvent.timestamp);
 
     setupPinConfigDriver();
     configurePinEventLFS(validatedPin, PIN_EVENT_BOTH, &pinEvent.fileDescriptor);
@@ -122,12 +90,6 @@ TEST(PinIODriver, testReadPinEvent) {
     ASSERT_EQ(2, pinEvent.timestamp);
 
     shutdownPinIODriver();
-
-    pinEvent.result = PIN_EVENT_RESULT_RISING;
-
-    ASSERT_EQ(PIN_IO_ERROR, pollPinEvent(&pinEvent));
-    ASSERT_EQ(PIN_EVENT_RESULT_RISING, pinEvent.result);
-    ASSERT_EQ(2, pinEvent.timestamp);
 
     releasePinEvent(pinEvent.fileDescriptor);
     shutdownPinConfigDriver();

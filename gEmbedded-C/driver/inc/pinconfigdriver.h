@@ -26,20 +26,18 @@ PIN_CONFIG_STATUS setupPinConfigDriver(void);
 
 PIN_CONFIG_STATUS shutdownPinConfigDriver(void);
 
-PIN_CONFIG_STATUS configurePinFunction(PIN validatedPin, PIN_FUNCTION validatedPinFunction);
+void configurePinFunction(PIN validatedPin, PIN_FUNCTION validatedPinFunction);
 
-PIN_CONFIG_STATUS readPinFunction(PIN validatedPin, PIN_FUNCTION *pinFunctionToRead);
+PIN_FUNCTION readPinFunction(PIN validatedPin);
 
-PIN_CONFIG_STATUS configurePinPullUpDown(PIN validatedPin, PULL_UP_DOWN validatedPinPullUpDown);
+void configurePinPullUpDown(PIN validatedPin, PULL_UP_DOWN validatedPinPullUpDown);
 
-PIN_CONFIG_STATUS readPinPullUpDown(PIN validatedPin, PULL_UP_DOWN *pinPullUpDownToRead);
-
-PIN_CONFIG_STATUS configurePinEvent(PIN validatedPin, PIN_EVENT validatedPinEvent);
+PULL_UP_DOWN readPinPullUpDown(PIN validatedPin);
 
 PIN_CONFIG_STATUS configurePinEventLFS(PIN validatedPin, PIN_EVENT validatedPinEvent, int *fileDescriptor);
 
-PIN_CONFIG_STATUS readPinEvent(PIN validatedPin, PIN_EVENT *pinEventToRead);
+PIN_EVENT readPinEvent(PIN validatedPin);
 
-PIN_CONFIG_STATUS releasePinEvent(int fileDescriptor);
+void releasePinEvent(int fileDescriptor);
 
 #endif //GEMBEDDED_C_PINCONFIGDRIVER_H
