@@ -8,6 +8,11 @@
 #include "common.h"
 #include "pin.h"
 
+#define SET_OFFSET  (0x1c/4)
+#define CLR_OFFSET  (0x28/4)
+#define LEV_OFFSET  (0x34/4)
+#define EDS_OFFSET  (0x40/4)
+
 typedef enum {
     PIN_IO_SUCCESS = 0,
     PIN_IO_ERROR = 1,
@@ -30,13 +35,15 @@ PIN_IO_STATUS setupPinIODriver(void);
 
 PIN_IO_STATUS shutdownPinIODriver(void);
 
-PIN_IO_STATUS setPin(PIN validatedPin);
+PIN_IO_STATUS getPinIOBitField(PIN validatedPin, uint32_t *bitField);
 
-PIN_IO_STATUS clearPin(PIN validatedPin);
+PIN_IO_STATUS setPin(uint32_t bitField);
 
-PIN_IO_STATUS readPinLevel(PIN validatedPin, uint8_t *pinLevelToRead);
+PIN_IO_STATUS clearPin(uint32_t bitField);
 
-PIN_IO_STATUS invokePinEvent(PIN validatedPin);
+PIN_IO_STATUS readPinLevel(uint32_t bitField, uint8_t *pinLevelToRead);
+
+PIN_IO_STATUS invokePinEvent(uint32_t bitField);
 
 PIN_IO_STATUS pollPinEvent(struct pinevent *pinEvent);
 

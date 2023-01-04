@@ -10,19 +10,27 @@
 #include "mapper.h"
 
 static volatile uint8_t pinIOInitialized = FALSE;
-static struct PinIORegs *pinIORegs = NULL;
+
+static void *gpioBase = NULL;
+
+static volatile uintptr_t *SET = NULL;
+static volatile uintptr_t *CLR = NULL;
+static volatile uintptr_t *LEV = NULL;
+static volatile uintptr_t *EDS = NULL;
 
 PIN_IO_STATUS setupPinIODriver(void) {
 
     if (pinIOInitialized == TRUE) {
         return PIN_IO_ERROR;
     } else {
-        void *gpioBase;
         const MAPPER_STATUS mapStatus = mapBaseRegister(MEMORY_FILE_NAME, BLOCK_SIZE, GPIO_BASE_ADDRESS, &gpioBase);
         if (mapStatus != MAPPER_SUCCESS) {
             return PIN_IO_ERROR;
         } else {
-            pinIORegs = (struct PinIORegs *) gpioBase;
+            SET = ((uintptr_t *) gpioBase + SET_OFFSET);
+            CLR = ((uintptr_t *) gpioBase + CLR_OFFSET);
+            LEV = ((uintptr_t *) gpioBase + LEV_OFFSET);
+            EDS = ((uintptr_t *) gpioBase + EDS_OFFSET);
             pinIOInitialized = TRUE;
             return PIN_IO_SUCCESS;
         }
@@ -35,11 +43,14 @@ PIN_IO_STATUS shutdownPinIODriver(void) {
     if (pinIOInitialized == FALSE) {
         return PIN_IO_ERROR;
     } else {
-        const MAPPER_STATUS unmapStatus = unmapBaseRegister((void **) &pinIORegs, BLOCK_SIZE);
+        const MAPPER_STATUS unmapStatus = unmapBaseRegister(&gpioBase, BLOCK_SIZE);
         if (unmapStatus != MAPPER_SUCCESS) {
             return PIN_IO_ERROR;
         } else {
-            pinIORegs = NULL;
+            SET = NULL;
+            CLR = NULL;
+            LEV = NULL;
+            EDS = NULL;
             pinIOInitialized = FALSE;
             return PIN_IO_SUCCESS;
         }
@@ -47,41 +58,44 @@ PIN_IO_STATUS shutdownPinIODriver(void) {
 
 }
 
-PIN_IO_STATUS setPin(const PIN validatedPin) {
+PIN_IO_STATUS getPinIOBitField(PIN validatedPin, uint32_t *bitField){
+    if (pinIOInitialized == FALSE) {
+        return PIN_IO_ERROR;
+    } else {
+        *bitField = (1 << (validatedPin % 32) * 1);
+        return PIN_IO_SUCCESS;
+    }
+}
+
+PIN_IO_STATUS setPin(const uint32_t bitField) {
 
     if (pinIOInitialized == FALSE) {
         return PIN_IO_ERROR;
     } else {
-        const uint8_t registerSelector = validatedPin / 32;
-        const uint32_t bitField = (1 << (validatedPin % 32));
-        pinIORegs->SET[registerSelector] = bitField;
+        *SET = bitField;
         return PIN_IO_SUCCESS;
     }
 
 }
 
-PIN_IO_STATUS clearPin(const PIN validatedPin) {
+PIN_IO_STATUS clearPin(const uint32_t bitField) {
 
     if (pinIOInitialized == FALSE) {
         return PIN_IO_ERROR;
     } else {
-        const uint8_t registerSelector = validatedPin / 32;
-        const uint32_t bitField = (1 << (validatedPin % 32));
-        pinIORegs->CLR[registerSelector] = bitField;
+        *CLR = bitField;
         return PIN_IO_SUCCESS;
     }
 
 }
 
-PIN_IO_STATUS readPinLevel(const PIN validatedPin, uint8_t *pinLevelToRead) {
+PIN_IO_STATUS readPinLevel(const uint32_t bitField, uint8_t *pinLevelToRead) {
 
     if (pinIOInitialized == FALSE) {
         return PIN_IO_ERROR;
     } else {
-        const uint8_t registerSelector = validatedPin / 32;
-        const uint32_t mask = 1 << (validatedPin % 32);
-        uint32_t registerLine = pinIORegs->LEV[registerSelector];
-        registerLine &= mask;
+        uint32_t registerLine = *LEV;
+        registerLine &= bitField;
         if (registerLine > 0) {
             *pinLevelToRead = TRUE;
         } else {
@@ -92,14 +106,12 @@ PIN_IO_STATUS readPinLevel(const PIN validatedPin, uint8_t *pinLevelToRead) {
 
 }
 
-PIN_IO_STATUS invokePinEvent(PIN validatedPin){
+PIN_IO_STATUS invokePinEvent(uint32_t bitField){
 
     if (pinIOInitialized == FALSE) {
         return PIN_IO_ERROR;
     } else {
-        const uint8_t registerSelector = validatedPin / 32;
-        const uint32_t bitField = (1 << (validatedPin % 32));
-        pinIORegs->EDS[registerSelector] = bitField;
+        *EDS = bitField;
         return PIN_IO_SUCCESS;
     }
 }

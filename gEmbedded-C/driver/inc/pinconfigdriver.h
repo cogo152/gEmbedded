@@ -8,6 +8,15 @@
 #include "common.h"
 #include "pin.h"
 
+#define FSEL_OFFSET     (0x00/4)
+#define REN_OFFSET      (0x4c/4)
+#define FEN_OFFSET      (0x58/4)
+#define HEN_OFFSET      (0x64/4)
+#define LEN_OFFSET      (0x70/4)
+#define AREN_OFFSET     (0x7c/4)
+#define AFEN_OFFSET     (0x88/4)
+#define PUP_PDN_OFFSET  (0xe4/4)
+
 typedef enum {
     PIN_CONFIG_SUCCESS = 0,
     PIN_CONFIG_ERROR = 1,

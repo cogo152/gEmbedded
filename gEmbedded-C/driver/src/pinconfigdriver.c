@@ -10,19 +10,35 @@
 #include "mapper.h"
 
 static volatile uint8_t pinConfigInitialized = FALSE;
-static struct PinConfigRegs *pinConfigRegs = NULL;
+
+static void *gpioBase = NULL;
+
+static volatile uintptr_t *FSEL = NULL;
+static volatile uintptr_t *REN = NULL;
+static volatile uintptr_t *FEN = NULL;
+static volatile uintptr_t *HEN = NULL;
+static volatile uintptr_t *LEN = NULL;
+static volatile uintptr_t *AREN = NULL;
+static volatile uintptr_t *AFEN = NULL;
+static volatile uintptr_t *PUP_PDN = NULL;
 
 PIN_CONFIG_STATUS setupPinConfigDriver(void) {
 
     if (pinConfigInitialized == TRUE) {
         return PIN_CONFIG_ERROR;
     } else {
-        void *gpioBase;
         const MAPPER_STATUS mapStatus = mapBaseRegister(MEMORY_FILE_NAME, BLOCK_SIZE, GPIO_BASE_ADDRESS, &gpioBase);
         if (mapStatus != MAPPER_SUCCESS) {
             return PIN_CONFIG_ERROR;
         } else {
-            pinConfigRegs = (struct PinConfigRegs *) gpioBase;
+            FSEL = ((uintptr_t *) gpioBase + FSEL_OFFSET);
+            REN = ((uintptr_t *) gpioBase + REN_OFFSET);
+            FEN = ((uintptr_t *) gpioBase + FEN_OFFSET);
+            HEN = ((uintptr_t *) gpioBase + HEN_OFFSET);
+            LEN = ((uintptr_t *) gpioBase + LEN_OFFSET);
+            AREN = ((uintptr_t *) gpioBase + AREN_OFFSET);
+            AFEN = ((uintptr_t *) gpioBase + AFEN_OFFSET);
+            PUP_PDN = ((uintptr_t *) gpioBase + PUP_PDN_OFFSET);
             pinConfigInitialized = TRUE;
             return PIN_CONFIG_SUCCESS;
         }
@@ -35,11 +51,18 @@ PIN_CONFIG_STATUS shutdownPinConfigDriver(void) {
     if (pinConfigInitialized == FALSE) {
         return PIN_CONFIG_ERROR;
     } else {
-        const MAPPER_STATUS unmapStatus = unmapBaseRegister((void **) &pinConfigRegs, BLOCK_SIZE);
+        const MAPPER_STATUS unmapStatus = unmapBaseRegister(&gpioBase, BLOCK_SIZE);
         if (unmapStatus != MAPPER_SUCCESS) {
             return PIN_CONFIG_ERROR;
         } else {
-            pinConfigRegs = NULL;
+            FSEL = NULL;
+            REN = NULL;
+            FEN = NULL;
+            HEN = NULL;
+            LEN = NULL;
+            AREN = NULL;
+            AFEN = NULL;
+            PUP_PDN = NULL;
             pinConfigInitialized = FALSE;
             return PIN_CONFIG_SUCCESS;
         }
@@ -52,9 +75,8 @@ PIN_CONFIG_STATUS configurePinFunction(PIN validatedPin, PIN_FUNCTION validatedP
     if (pinConfigInitialized == FALSE) {
         return PIN_CONFIG_ERROR;
     } else {
-        const uint8_t registerSelector = validatedPin / 10;
-        pinConfigRegs->FSEL[registerSelector] &= ~(7 << ((validatedPin % 10) * 3));
-        pinConfigRegs->FSEL[registerSelector] |= (validatedPinFunction << ((validatedPin % 10) * 3));
+        *FSEL &= ~(7 << ((validatedPin % 10) * 3));
+        *FSEL |= (validatedPinFunction << ((validatedPin % 10) * 3));
         return PIN_CONFIG_SUCCESS;
     }
 
@@ -65,10 +87,8 @@ PIN_CONFIG_STATUS readPinFunction(PIN validatedPin, PIN_FUNCTION *pinFunctionToR
     if (pinConfigInitialized == FALSE) {
         return PIN_CONFIG_ERROR;
     } else {
-        const uint8_t registerSelector = validatedPin / 10;
-        const uint32_t registerLine = pinConfigRegs->FSEL[registerSelector];
-        const uint32_t mask = (7 << ((validatedPin % 10) * 3));
-        uint32_t pinFunction = registerLine & mask;
+        const uint32_t registerLine = *FSEL;
+        uint32_t pinFunction = registerLine & (7 << ((validatedPin % 10) * 3));
         pinFunction >>= ((validatedPin % 10) * 3);
         *pinFunctionToRead = pinFunction;
         return PIN_CONFIG_SUCCESS;
@@ -82,9 +102,8 @@ PIN_CONFIG_STATUS configurePinPullUpDown(PIN validatedPin, PULL_UP_DOWN validate
     if (pinConfigInitialized == FALSE) {
         return PIN_CONFIG_ERROR;
     } else {
-        const uint8_t registerSelector = validatedPin / 16;
-        pinConfigRegs->PUP_PDN[registerSelector] &= ~(3 << ((validatedPin % 16) * 2));
-        pinConfigRegs->PUP_PDN[registerSelector] |= (validatedPinPullUpDown << ((validatedPin % 16) * 2));
+        *PUP_PDN &= ~(3 << ((validatedPin % 16) * 2));
+        *PUP_PDN |= (validatedPinPullUpDown << ((validatedPin % 16) * 2));
         return PIN_CONFIG_SUCCESS;
     }
 
@@ -95,10 +114,8 @@ PIN_CONFIG_STATUS readPinPullUpDown(PIN validatedPin, PULL_UP_DOWN *pinPullUpDow
     if (pinConfigInitialized == FALSE) {
         return PIN_CONFIG_ERROR;
     } else {
-        const uint8_t registerSelector = validatedPin / 16;
-        const uint32_t registerLine = pinConfigRegs->PUP_PDN[registerSelector];
-        const uint32_t mask = (3 << ((validatedPin % 16) * 2));
-        uint32_t pinPullUpDown = registerLine & mask;
+        const uint32_t registerLine = *PUP_PDN;
+        uint32_t pinPullUpDown = registerLine & (3 << ((validatedPin % 16) * 2));
         pinPullUpDown >>= ((validatedPin % 16) * 2);
         *pinPullUpDownToRead = pinPullUpDown;
         return PIN_CONFIG_SUCCESS;
@@ -106,30 +123,29 @@ PIN_CONFIG_STATUS readPinPullUpDown(PIN validatedPin, PULL_UP_DOWN *pinPullUpDow
 
 }
 
-PIN_CONFIG_STATUS configurePinEvent(PIN validatedPin, PIN_EVENT validatedPinEvent){
+PIN_CONFIG_STATUS configurePinEvent(PIN validatedPin, PIN_EVENT validatedPinEvent) {
 
     if (pinConfigInitialized == FALSE) {
         return PIN_CONFIG_ERROR;
     } else {
-        const uint8_t registerSelector = validatedPin / 32;
         const uint32_t clearMask = ~(1 << ((validatedPin % 32) * 1));
         const uint32_t setMask = (1 << ((validatedPin % 32) * 1));
         switch (validatedPinEvent) {
             case PIN_EVENT_NO_EVENT : {
-                pinConfigRegs->REN[registerSelector]&=clearMask;
-                pinConfigRegs->FEN[registerSelector]&=clearMask;
+                *REN &= clearMask;
+                *FEN &= clearMask;
             }
-            case PIN_EVENT_RISING:{
-                pinConfigRegs->REN[registerSelector]|=setMask;
+            case PIN_EVENT_RISING: {
+                *REN |= setMask;
                 break;
             }
             case PIN_EVENT_FALLING: {
-                pinConfigRegs->FEN[registerSelector]|=setMask;
+                *FEN |= setMask;
                 break;
             }
             default: {
-                pinConfigRegs->REN[registerSelector]|=setMask;
-                pinConfigRegs->FEN[registerSelector]|=setMask;
+                *REN |= setMask;
+                *FEN |= setMask;
                 break;
             }
         }
@@ -153,9 +169,8 @@ PIN_CONFIG_STATUS configurePinEventLFS(PIN validatedPin, PIN_EVENT validatedPinE
         rq.handleflags = GPIOHANDLE_REQUEST_INPUT;
         switch (validatedPinEvent) {
             case PIN_EVENT_NO_EVENT: {
-                const uint8_t registerSelector = validatedPin / 32;
-                pinConfigRegs->REN[registerSelector] &= ~(1 << ((validatedPin % 32) * 1));
-                pinConfigRegs->FEN[registerSelector] &= ~(1 << ((validatedPin % 32) * 1));
+                *REN &= ~(1 << ((validatedPin % 32) * 1));
+                *FEN &= ~(1 << ((validatedPin % 32) * 1));
                 *fileDescriptor = 0;
                 close(fd);
                 return PIN_CONFIG_SUCCESS;
@@ -191,10 +206,9 @@ PIN_CONFIG_STATUS readPinEvent(PIN validatedPin, PIN_EVENT *pinEventToRead) {
     if (pinConfigInitialized == FALSE) {
         return PIN_CONFIG_ERROR;
     } else {
-        const uint8_t registerSelector = validatedPin / 32;
         const uint32_t mask = (1 << ((validatedPin % 32) * 1));
-        const uint32_t registerLineREN = pinConfigRegs->REN[registerSelector];
-        const uint32_t registerLineFEN = pinConfigRegs->FEN[registerSelector];
+        const uint32_t registerLineREN = *REN;
+        const uint32_t registerLineFEN = *FEN;
         uint32_t pinEventREN = registerLineREN & mask;
         pinEventREN >>= ((validatedPin % 32) * 1);
         uint32_t pinEventFEN = registerLineFEN & mask;
