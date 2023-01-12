@@ -27,8 +27,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 include(GoogleTest)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/api)
-
 set(LIB ${CMAKE_PROJECT_NAME})
 set(LIB_TEST "${LIB}_test")
 
@@ -64,4 +62,3 @@ add_custom_command(
 )
 
 add_subdirectory(driver)
-add_subdirectory(controller)

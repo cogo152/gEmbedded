@@ -30,6 +30,3 @@ target_sources(
         PRIVATE
         ${LIB_TEST_SRC}
 )
-
-add_subdirectory(lfs)
-add_subdirectory(bcm2711)
