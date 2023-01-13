@@ -31,5 +31,5 @@ target_sources(
         ${LIB_TEST_SRC}
 )
 
-add_subdirectory(lfs)
-add_subdirectory(bcm2711)
+add_subdirectory(memorymap)
+add_subdirectory(filesystem)
