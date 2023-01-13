@@ -25,7 +25,7 @@ static GPIO_STATUS setOutputPin(uint8_t pinReference) {
     return GPIO_SUCCESS;
 }
 
-static GPIO_STATUS readOutputPin(uint8_t pinReference) {
+static GPIO_STATUS readOutputPin(uint8_t pinReference, uint8_t *pinLevel) {
 
     return GPIO_SUCCESS;
 }
@@ -45,7 +45,7 @@ static GPIO_STATUS openInputPin(uint8_t pinNumber, uint8_t pullUpDown, uint8_t *
     return GPIO_SUCCESS;
 }
 
-static GPIO_STATUS readInputPin(uint8_t pinReference, uint8_t *valueToRead) {
+static GPIO_STATUS readInputPin(uint8_t pinReference, uint8_t *pinLevel) {
 
     return GPIO_SUCCESS;
 }

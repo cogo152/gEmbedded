@@ -26,10 +26,10 @@ static volatile uintptr_t *CLR = NULL;
 static volatile uintptr_t *LEV = NULL;
 static volatile uintptr_t *EDS = NULL;
 
-static uint8_t *outputPins;
-static uint8_t *inputPins;
-static uint8_t *listenerPins;
-static uint8_t *alternatePins;
+static uint32_t *outputPins;
+static uint32_t *inputPins;
+static uint32_t *listenerPins;
+static uint32_t *alternatePins;
 
 static GPIO_STATUS setupGpioDriver(void) {
 
@@ -38,22 +38,22 @@ static GPIO_STATUS setupGpioDriver(void) {
         return GPIO_ERROR;
     }
 
-    outputPins = (uint8_t *) malloc(INITIAL_PIN_ARRAY_SIZE * sizeof(uint8_t));
+    outputPins = (uint32_t *) malloc(INITIAL_PIN_ARRAY_SIZE * sizeof(uint32_t));
     if (outputPins == NULL) {
         return GPIO_ERROR;
     }
 
-    inputPins = (uint8_t *) malloc(INITIAL_PIN_ARRAY_SIZE * sizeof(uint8_t));
+    inputPins = (uint32_t *) malloc(INITIAL_PIN_ARRAY_SIZE * sizeof(uint32_t));
     if (inputPins == NULL) {
         return GPIO_ERROR;
     }
 
-    listenerPins = (uint8_t *) malloc(INITIAL_PIN_ARRAY_SIZE * sizeof(uint8_t));
+    listenerPins = (uint32_t *) malloc(INITIAL_PIN_ARRAY_SIZE * sizeof(uint32_t));
     if (listenerPins == NULL) {
         return GPIO_ERROR;
     }
 
-    alternatePins = (uint8_t *) malloc(INITIAL_PIN_ARRAY_SIZE * sizeof(uint8_t));
+    alternatePins = (uint32_t *) malloc(INITIAL_PIN_ARRAY_SIZE * sizeof(uint32_t));
     if (alternatePins == NULL) {
         return GPIO_ERROR;
     }
@@ -83,10 +83,10 @@ static GPIO_STATUS shutdownGpioDriver(void) {
         return GPIO_ERROR;
     }
 
-    free((void *)outputPins);
-    free((void *)inputPins);
-    free((void *)listenerPins);
-    free((void *)alternatePins);
+    free((void *) outputPins);
+    free((void *) inputPins);
+    free((void *) listenerPins);
+    free((void *) alternatePins);
 
     FSEL = NULL;
     REN = NULL;
@@ -105,27 +105,59 @@ static GPIO_STATUS shutdownGpioDriver(void) {
     return GPIO_SUCCESS;
 }
 
+
+static void setPinFunction(uint8_t pinNumber, uint8_t pinFunction) {
+
+    uint8_t const registerSelector = pinNumber / 10;
+
+    FSEL[registerSelector] &= ~(7 << ((pinNumber % 10) * 3));
+    FSEL[registerSelector] |= (pinFunction << ((pinNumber % 10) * 3));
+
+}
+
 static GPIO_STATUS openOutputPin(uint8_t pinNumber, uint8_t *pinReference) {
+
+    static volatile uint8_t index = 0;
+
+    setPinFunction(pinNumber, PIN_FUNCTION_OUTPUT);
+    outputPins[index] = 1 << ((pinNumber % 32) * 1);
+    *pinReference = index;
+    ++index;
 
     return GPIO_SUCCESS;
 }
 
 static GPIO_STATUS setOutputPin(uint8_t pinReference) {
 
+    *SET = outputPins[pinReference];
+
     return GPIO_SUCCESS;
 }
 
-static GPIO_STATUS readOutputPin(uint8_t pinReference) {
+static GPIO_STATUS readOutputPin(uint8_t pinReference, uint8_t *pinLevel) {
+
+    volatile uint32_t registerLine = *LEV;
+    registerLine &= outputPins[pinReference];
+    if (registerLine > 0) {
+        *pinLevel = PIN_LEVEL_HIGH;
+    } else {
+        *pinLevel = PIN_LEVEL_LOW;
+    }
 
     return GPIO_SUCCESS;
 }
 
 static GPIO_STATUS clearOutputPin(uint8_t pinReference) {
 
+    *CLR = outputPins[pinReference];
+
     return GPIO_SUCCESS;
+
 }
 
 static GPIO_STATUS closeOutputPin(uint8_t pinReference) {
+
+    outputPins[pinReference] = 0;
 
     return GPIO_SUCCESS;
 }
@@ -135,7 +167,7 @@ static GPIO_STATUS openInputPin(uint8_t pinNumber, uint8_t pullUpDown, uint8_t *
     return GPIO_SUCCESS;
 }
 
-static GPIO_STATUS readInputPin(uint8_t pinReference, uint8_t *valueToRead) {
+static GPIO_STATUS readInputPin(uint8_t pinReference, uint8_t *pinLevel) {
 
     return GPIO_SUCCESS;
 }
