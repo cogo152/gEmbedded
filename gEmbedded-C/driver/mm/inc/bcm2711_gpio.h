@@ -8,6 +8,10 @@
 #include "common.h"
 #include "bcm2711_common.h"
 
+#define SIZE    (2U)
+#define TRUE    (1U)
+#define FALSE   (0U)
+
 #define GPIO_BASE_ADDRESS   (PERIPHERAL_BASE_ADDRESS+0x00200000)
 
 #define FSEL_OFFSET         (0x00/4)
