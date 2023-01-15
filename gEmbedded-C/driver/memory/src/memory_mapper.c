@@ -2,7 +2,7 @@
 // Created by sondahi on 06.12.22.
 //
 
-#include "mapper.h"
+#include "memory_mapper.h"
 
 MAPPER_STATUS
 mapBaseRegister(const char *const fileName, const size_t length, const off_t offset, void **const pointer) {

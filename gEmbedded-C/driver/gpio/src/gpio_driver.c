@@ -4,13 +4,13 @@
 
 #include <stdlib.h>
 
-#include "gpiodriver.h"
-#include "bcm2711_gpio.h"
-#include "mapper.h"
+#include "gpio_peripheral.h"
+#include "gpio_driver.h"
+#include "memory_mapper.h"
 
 static volatile uint8_t initialized = FALSE;
-static void *gpioBase = NULL;
 
+static void *gpioBase = NULL;
 static volatile uintptr_t *FSEL = NULL;
 static volatile uintptr_t *REN = NULL;
 static volatile uintptr_t *FEN = NULL;
@@ -27,7 +27,7 @@ static volatile uintptr_t *EDS = NULL;
 static uint32_t *outputPins = NULL;
 static volatile uint8_t outputPinsSize = 0;
 
-static GPIO_CONFIG_STATUS setupGpioDriver(void) {
+GPIO_CONFIG_STATUS setupGpioDriver(void) {
 
     if(initialized == TRUE){
         return GPIO_CONFIG_ERROR;
@@ -38,11 +38,11 @@ static GPIO_CONFIG_STATUS setupGpioDriver(void) {
         return GPIO_CONFIG_ERROR;
     }
 
-    outputPins = (uint32_t *) malloc(SIZE * sizeof(uint32_t));
+    outputPins = (uint32_t *) malloc(PIN_ARRAY_LENGTH * sizeof(uint32_t));
     if (outputPins == NULL) {
         return GPIO_CONFIG_ERROR;
     } else{
-        outputPinsSize = SIZE;
+        outputPinsSize = PIN_ARRAY_LENGTH;
     }
 
     FSEL = ((uintptr_t *) gpioBase) + FSEL_OFFSET;
@@ -64,7 +64,7 @@ static GPIO_CONFIG_STATUS setupGpioDriver(void) {
 
 }
 
-static GPIO_CONFIG_STATUS shutdownGpioDriver(void) {
+GPIO_CONFIG_STATUS shutdownGpioDriver(void) {
 
     if(initialized == FALSE){
         return GPIO_CONFIG_ERROR;
@@ -104,7 +104,7 @@ static void setPinFunction(uint8_t pinNumber, uint8_t pinFunction) {
 
 }
 
-static GPIO_CONFIG_STATUS openOutputPin(uint8_t pinNumber) {
+GPIO_CONFIG_STATUS openOutputPin(uint8_t pinNumber) {
 
     if(initialized == FALSE){
         return GPIO_CONFIG_ERROR;
@@ -116,7 +116,7 @@ static GPIO_CONFIG_STATUS openOutputPin(uint8_t pinNumber) {
 
 }
 
-static GPIO_CONFIG_STATUS registerOutputPin(uint8_t pinNumber, uint8_t *pinReference){
+GPIO_CONFIG_STATUS registerOutputPin(uint8_t pinNumber, uint8_t *pinReference){
 
     if(initialized == FALSE){
         return GPIO_CONFIG_ERROR;
@@ -124,11 +124,11 @@ static GPIO_CONFIG_STATUS registerOutputPin(uint8_t pinNumber, uint8_t *pinRefer
 
     static volatile uint8_t index = 0;
     if(index == outputPinsSize){
-        outputPins = (uint32_t *) realloc((void *) outputPins, (outputPinsSize * sizeof(uint32_t)) + (SIZE * sizeof(uint32_t)));
+        outputPins = (uint32_t *) realloc((void *) outputPins, (outputPinsSize * sizeof(uint32_t)) + (PIN_ARRAY_LENGTH * sizeof(uint32_t)));
         if(outputPins == NULL){
             return GPIO_CONFIG_ERROR;
         } else {
-            outputPinsSize += SIZE;
+            outputPinsSize += PIN_ARRAY_LENGTH;
         }
     }
     outputPins[index] = 1 << ((pinNumber % 32) * 1);
@@ -138,7 +138,7 @@ static GPIO_CONFIG_STATUS registerOutputPin(uint8_t pinNumber, uint8_t *pinRefer
     return GPIO_CONFIG_SUCCESS;
 }
 
-static GPIO_IO_STATUS setHighOutputPin(uint8_t pinReference) {
+GPIO_IO_STATUS setHighOutputPin(uint8_t pinReference) {
 
     if(initialized == FALSE){
         return GPIO_IO_ERROR;
@@ -149,7 +149,7 @@ static GPIO_IO_STATUS setHighOutputPin(uint8_t pinReference) {
     return GPIO_IO_SUCCESS;
 }
 
-static GPIO_IO_STATUS readOutputPin(uint8_t pinReference, uint8_t *pinLevel) {
+GPIO_IO_STATUS readOutputPin(uint8_t pinReference, uint8_t *pinLevel) {
 
     if(initialized == FALSE){
         return GPIO_IO_ERROR;
@@ -166,7 +166,7 @@ static GPIO_IO_STATUS readOutputPin(uint8_t pinReference, uint8_t *pinLevel) {
     return GPIO_IO_SUCCESS;
 }
 
-static GPIO_IO_STATUS setLowOutputPin(uint8_t pinReference) {
+GPIO_IO_STATUS setLowOutputPin(uint8_t pinReference) {
 
     if(initialized == FALSE){
         return GPIO_IO_ERROR;
@@ -178,7 +178,7 @@ static GPIO_IO_STATUS setLowOutputPin(uint8_t pinReference) {
 
 }
 
-static GPIO_CONFIG_STATUS closeOutputPin(uint8_t pinReference) {
+GPIO_CONFIG_STATUS closeOutputPin(uint8_t pinReference) {
 
     if(initialized == FALSE){
         return GPIO_CONFIG_ERROR;
@@ -187,30 +187,4 @@ static GPIO_CONFIG_STATUS closeOutputPin(uint8_t pinReference) {
     outputPins[pinReference] = 0;
 
     return GPIO_CONFIG_SUCCESS;
-}
-
-void bindGpioMM(void) {
-
-    gpioDriver.setupGpioDriver = setupGpioDriver;
-    gpioDriver.shutdownGpioDriver = shutdownGpioDriver;
-    gpioDriver.openOutputPin = openOutputPin;
-    gpioDriver.registerOutputPin = registerOutputPin;
-    gpioDriver.setHighOutputPin = setHighOutputPin;
-    gpioDriver.readOutputPin = readOutputPin;
-    gpioDriver.setLowOutputPin = setLowOutputPin;
-    gpioDriver.closeOutputPin = closeOutputPin;
-
-}
-
-void unbindGpioMM(void) {
-
-    gpioDriver.setupGpioDriver = NULL;
-    gpioDriver.shutdownGpioDriver = NULL;
-    gpioDriver.openOutputPin = NULL;
-    gpioDriver.registerOutputPin = NULL;
-    gpioDriver.setHighOutputPin = NULL;
-    gpioDriver.readOutputPin = NULL;
-    gpioDriver.setLowOutputPin = NULL;
-    gpioDriver.closeOutputPin = NULL;
-
 }

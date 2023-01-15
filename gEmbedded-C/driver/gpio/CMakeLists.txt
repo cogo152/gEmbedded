@@ -19,3 +19,14 @@ target_sources(
         PUBLIC
         ${LIB_SRC}
 )
+
+aux_source_directory(
+        ${CMAKE_CURRENT_SOURCE_DIR}/test
+        LIB_TEST_SRC
+)
+
+target_sources(
+        ${LIB_TEST}
+        PRIVATE
+        ${LIB_TEST_SRC}
+)

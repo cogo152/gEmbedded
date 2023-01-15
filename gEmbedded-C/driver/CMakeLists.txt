@@ -1,16 +1,7 @@
 set(
         INC
-        ${CMAKE_CURRENT_SOURCE_DIR}/inc
-)
-
-aux_source_directory(
-        ${CMAKE_CURRENT_SOURCE_DIR}/src
-        LIB_SRC
-)
-
-aux_source_directory(
-        ${CMAKE_CURRENT_SOURCE_DIR}/test
-        LIB_TEST_SRC
+        ${CMAKE_CURRENT_SOURCE_DIR}/api
+        ${CMAKE_CURRENT_SOURCE_DIR}/common
 )
 
 target_include_directories(
@@ -19,17 +10,16 @@ target_include_directories(
         ${INC}
 )
 
-target_sources(
-        ${LIB}
-        PUBLIC
-        ${LIB_SRC}
+set(
+        INC_TEST
+        ${CMAKE_CURRENT_SOURCE_DIR}/commontest
 )
 
-target_sources(
+target_include_directories(
         ${LIB_TEST}
         PRIVATE
-        ${LIB_TEST_SRC}
+        ${INC_TEST}
 )
 
-add_subdirectory(mm)
-add_subdirectory(fs)
+add_subdirectory(memory)
+add_subdirectory(gpio)

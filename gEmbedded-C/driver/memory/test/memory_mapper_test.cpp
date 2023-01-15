@@ -2,19 +2,12 @@
 // Created by sondahi on 06.12.22.
 //
 
-#include "gtest/gtest.h"
+#include "common_test.h"
+#include "memory_test.h"
 
 extern "C" {
-#include "mapper.h"
+#include "memory_mapper.h"
 }
-
-#define FILE_NAME           ("/dev/gpiomem")
-#define LENGTH              (0X1000)
-#define OFFSET              (0)
-
-#define INVALID_FILE_NAME   ("/dev/invalidFile")
-#define INVALID_LENGTH      (0)
-
 
 void static *pointer = nullptr;
 
@@ -23,26 +16,26 @@ TEST(MapperTest, testMapBaseRegister) {
     MAPPER_STATUS status;
 
     // MAPPER_FILE_NAME_ERROR : if the fileName is NULL.
-    status = mapBaseRegister(nullptr, LENGTH, OFFSET, &pointer);
+    status = mapBaseRegister(nullptr, MAPPER_BLOCK_SIZE, MAPPER_OFFSET, &pointer);
     EXPECT_EQ(status, MAPPER_ERROR);
 
     // MAPPER_LENGTH_ERROR : if the length is less than 1.
-    status = mapBaseRegister(FILE_NAME, INVALID_LENGTH, OFFSET, &pointer);
+    status = mapBaseRegister(MAPPER_FILE_NAME, MAPPER_INVALID_BLOCK_SIZE, MAPPER_OFFSET, &pointer);
     EXPECT_EQ(status, MAPPER_ERROR);
 
     // MAPPER_POINTER_ERROR : if the pointer is NULL.
-    status = mapBaseRegister(FILE_NAME, LENGTH, OFFSET, nullptr);
+    status = mapBaseRegister(MAPPER_FILE_NAME, MAPPER_BLOCK_SIZE, MAPPER_OFFSET, nullptr);
     EXPECT_EQ(status, MAPPER_ERROR);
 
     // MAPPER_FILE_OPEN_ERROR : if the fileName is invalid.
-    status = mapBaseRegister(INVALID_FILE_NAME, LENGTH, OFFSET, &pointer);
+    status = mapBaseRegister(MAPPER_INVALID_FILE_NAME, MAPPER_BLOCK_SIZE, MAPPER_OFFSET, &pointer);
     EXPECT_EQ(status, MAPPER_ERROR);
 
     // MAPPER_MAP_ERROR : if the mapping fails.
-    status = mapBaseRegister(FILE_NAME, LENGTH, 1, &pointer);
+    status = mapBaseRegister(MAPPER_FILE_NAME, MAPPER_BLOCK_SIZE, 1, &pointer);
     EXPECT_EQ(status, MAPPER_ERROR);
 
-    status = mapBaseRegister(FILE_NAME, LENGTH, OFFSET, &pointer);
+    status = mapBaseRegister(MAPPER_FILE_NAME, MAPPER_BLOCK_SIZE, MAPPER_OFFSET, &pointer);
     EXPECT_EQ(status, MAPPER_SUCCESS);
     EXPECT_NE(pointer, nullptr);
 
@@ -57,22 +50,22 @@ TEST(MapperTest, testUnmapBaseRegister) {
     void *invalidPointer = (void *) 1;
 
     // MAPPER_POINTER_ERROR : if the **pointer is NULL.
-    status = unmapBaseRegister(nullptr, LENGTH);
+    status = unmapBaseRegister(nullptr, MAPPER_BLOCK_SIZE);
     EXPECT_EQ(status, MAPPER_ERROR);
 
     // MAPPER_POINTER_ERROR : if the *pointer is NULL.
-    status = unmapBaseRegister(&nullPointer, LENGTH);
+    status = unmapBaseRegister(&nullPointer, MAPPER_BLOCK_SIZE);
     EXPECT_EQ(status, MAPPER_ERROR);
 
     // MAPPER_LENGTH_ERROR : if the length is less than 1.
-    status = unmapBaseRegister(&pointer, INVALID_LENGTH);
+    status = unmapBaseRegister(&pointer, MAPPER_INVALID_BLOCK_SIZE);
     EXPECT_EQ(status, MAPPER_ERROR);
 
     // MAPPER_UNMAP_ERROR : if the unmapping fails.
-    status = unmapBaseRegister(&invalidPointer, LENGTH);
+    status = unmapBaseRegister(&invalidPointer, MAPPER_BLOCK_SIZE);
     EXPECT_EQ(status, MAPPER_ERROR);
 
-    status = unmapBaseRegister(&pointer, LENGTH);
+    status = unmapBaseRegister(&pointer, MAPPER_BLOCK_SIZE);
     EXPECT_EQ(status, MAPPER_SUCCESS);
     EXPECT_EQ(pointer, nullptr);
 

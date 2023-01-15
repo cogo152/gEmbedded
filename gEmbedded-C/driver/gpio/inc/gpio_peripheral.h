@@ -1,18 +1,13 @@
 //
-// Created by sondahi on 13.01.23.
+// Created by sondahi on 15.01.23.
 //
 
-#ifndef GEMBEDDED_C_BCM2711_GPIO_H
-#define GEMBEDDED_C_BCM2711_GPIO_H
+#ifndef GEMBEDDED_C_GPIO_PERIPHERAL_H
+#define GEMBEDDED_C_GPIO_PERIPHERAL_H
 
-#include "common.h"
-#include "bcm2711_common.h"
+#include "common_peripheral.h"
 
-#define SIZE    (2U)
-#define TRUE    (1U)
-#define FALSE   (0U)
-
-#define GPIO_BASE_ADDRESS   (PERIPHERAL_BASE_ADDRESS+0x00200000)
+#define GPIO_BASE_ADDRESS   (PERIPHERAL_BASE_ADDRESS+0x00200000U)
 
 #define FSEL_OFFSET         (0x00/4)
 #define REN_OFFSET          (0x4c/4)
@@ -28,4 +23,4 @@
 #define LEV_OFFSET          (0x34/4)
 #define EDS_OFFSET          (0x40/4)
 
-#endif //GEMBEDDED_C_BCM2711_GPIO_H
+#endif //GEMBEDDED_C_GPIO_PERIPHERAL_H
