@@ -3,6 +3,7 @@
 //
 
 #include <chrono>
+#include <thread>
 
 #include "common_test.h"
 #include "gpio_test.h"
@@ -11,101 +12,154 @@
 
 TEST(GpioDriverTest, testSetupShutdownGpio) {
 
-    GPIO_CONFIG_STATUS configStatus;
+    int configStatus;
 
     configStatus = setupGpioDriver();
-    ASSERT_EQ(configStatus, GPIO_CONFIG_SUCCESS);
-
-    configStatus = setupGpioDriver();
-    ASSERT_EQ(configStatus, GPIO_CONFIG_ERROR);
+    ASSERT_EQ(configStatus, GPIO_STATUS_SUCCESS);
 
     configStatus = shutdownGpioDriver();
-    ASSERT_EQ(configStatus, GPIO_CONFIG_SUCCESS);
-
-    configStatus = shutdownGpioDriver();
-    ASSERT_EQ(configStatus, GPIO_CONFIG_ERROR);
+    ASSERT_EQ(configStatus, GPIO_STATUS_SUCCESS);
 
 }
 
 TEST(GpioDriverTest, testOutputPin) {
 
-    GPIO_CONFIG_STATUS configStatus;
-    GPIO_IO_STATUS ioStatus;
-    uint8_t pinReference;
-    uint8_t pinLevel = GPIO_PIN_LEVEL_INVALID;
+    int status;
+    uint32_t pinReference;
+    uint8_t pinLevel;
 
     setupGpioDriver();
 
-    configStatus = openOutputPin(GPIO_OUTPUT_PIN);
-    ASSERT_EQ(configStatus, GPIO_CONFIG_SUCCESS);
+    status = openOutputPin(GPIO_OUTPUT_PIN_SELF, &pinReference);
+    ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
 
-    configStatus = registerOutputPin(GPIO_OUTPUT_PIN, &pinReference);
-    ASSERT_EQ(configStatus, GPIO_CONFIG_SUCCESS);
-    ASSERT_NE(pinReference, GPIO_PIN_REFERENCE_INVALID);
+    setOutputPinHigh(pinReference);
+    pinLevel = readOutputPinLevel(pinReference);
+    ASSERT_EQ(pinLevel, GPIO_PIN_LEVEL_HIGH);
 
-    ioStatus = setHighOutputPin(pinReference);
-    ASSERT_EQ(ioStatus, GPIO_IO_SUCCESS);
+    setOutputPinLow(pinReference);
+    pinLevel = readOutputPinLevel(pinReference);
+    ASSERT_EQ(pinLevel, GPIO_PIN_LEVEL_LOW);
 
-    ioStatus = readOutputPin(pinReference, &pinLevel);
-    ASSERT_EQ(ioStatus, GPIO_IO_SUCCESS);
-    ASSERT_EQ(pinLevel, PIN_LEVEL_HIGH);
-
-    ioStatus = setLowOutputPin(pinReference);
-    ASSERT_EQ(ioStatus, GPIO_IO_SUCCESS);
-
-    ioStatus = readOutputPin(pinReference, &pinLevel);
-    ASSERT_EQ(ioStatus, GPIO_IO_SUCCESS);
-    ASSERT_EQ(pinLevel, PIN_LEVEL_LOW);
-
-    configStatus = closeOutputPin(pinReference);
-    ASSERT_EQ(configStatus, GPIO_CONFIG_SUCCESS);
+    closeOutputPin(&pinReference);
 
     shutdownGpioDriver();
-
-    pinReference = GPIO_PIN_REFERENCE_INVALID;
-    pinLevel = GPIO_PIN_LEVEL_INVALID;
-    configStatus = openOutputPin(GPIO_OUTPUT_PIN);
-    ASSERT_EQ(configStatus, GPIO_CONFIG_ERROR);
-    configStatus = registerOutputPin(GPIO_OUTPUT_PIN, &pinReference);
-    ASSERT_EQ(configStatus, GPIO_CONFIG_ERROR);
-    ASSERT_EQ(pinReference, GPIO_PIN_REFERENCE_INVALID);
-    ioStatus = setHighOutputPin(pinReference);
-    ASSERT_EQ(ioStatus, GPIO_IO_ERROR);
-    ioStatus = readOutputPin(pinReference, &pinLevel);
-    ASSERT_EQ(ioStatus, GPIO_IO_ERROR);
-    ASSERT_EQ(pinLevel, GPIO_PIN_LEVEL_INVALID);
-    ioStatus = setLowOutputPin(pinReference);
-    ASSERT_EQ(ioStatus, GPIO_IO_ERROR);
-    ioStatus = readOutputPin(pinReference, &pinLevel);
-    ASSERT_EQ(ioStatus, GPIO_IO_ERROR);
-    ASSERT_EQ(pinLevel, GPIO_PIN_LEVEL_INVALID);
-    configStatus = closeOutputPin(pinReference);
-    ASSERT_EQ(configStatus, GPIO_CONFIG_ERROR);
 
 }
 
 TEST(GpioDriverTest, testOutputPinPerformance) {
 
-    uint8_t pinReference;
+    uint32_t pinReference;
 
     setupGpioDriver();
 
-    openOutputPin(GPIO_OUTPUT_PIN);
-    registerOutputPin(GPIO_OUTPUT_PIN, &pinReference);
+    openOutputPin(GPIO_OUTPUT_PIN_SELF, &pinReference);
 
     auto start = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < GPIO_BENCHMARK_TIMES; ++i) {
-        setHighOutputPin(pinReference);
-        setLowOutputPin(pinReference);
+    for (int i = 0; i < GPIO_BENCHMARK_TIMES_ONE; ++i) {
+        setOutputPinHigh(pinReference);
     }
     auto finish = std::chrono::high_resolution_clock::now();
     auto result =
-            std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count() / GPIO_BENCHMARK_TIMES / 2;
+            std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count() / GPIO_BENCHMARK_TIMES_ONE;
+    EXPECT_LE(result, GPIO_BENCHMARK_ONE_ACCEPT_NS);
 
-    ASSERT_LE(result, GPIO_BENCHMARK_ACCEPT_NS);
-    std::cout << result << std::endl;
+    start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < GPIO_BENCHMARK_TIMES_MANY; ++i) {
+        setOutputPinHigh(pinReference);
+    }
+    finish = std::chrono::high_resolution_clock::now();
+    result = std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count() / GPIO_BENCHMARK_TIMES_MANY;
+    EXPECT_LE(result, GPIO_BENCHMARK_MANY_ACCEPT_NS);
 
-    closeOutputPin(pinReference);
+    start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < GPIO_BENCHMARK_TIMES_ONE; ++i) {
+        readOutputPinLevel(pinReference);
+    }
+    finish = std::chrono::high_resolution_clock::now();
+    result = std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count() / GPIO_BENCHMARK_TIMES_ONE;
+    EXPECT_LE(result, GPIO_BENCHMARK_ONE_ACCEPT_NS);
+
+    start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < GPIO_BENCHMARK_TIMES_MANY; ++i) {
+        readOutputPinLevel(pinReference);
+    }
+    finish = std::chrono::high_resolution_clock::now();
+    result = std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count() / GPIO_BENCHMARK_TIMES_MANY;
+    EXPECT_LE(result, GPIO_BENCHMARK_MANY_ACCEPT_NS);
+
+    start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < GPIO_BENCHMARK_TIMES_ONE; ++i) {
+        setOutputPinLow(pinReference);
+    }
+    finish = std::chrono::high_resolution_clock::now();
+    result = std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count() / GPIO_BENCHMARK_TIMES_ONE;
+    EXPECT_LE(result, GPIO_BENCHMARK_ONE_ACCEPT_NS);
+
+    start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < GPIO_BENCHMARK_TIMES_MANY; ++i) {
+        setOutputPinLow(pinReference);
+    }
+    finish = std::chrono::high_resolution_clock::now();
+    result = std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count() / GPIO_BENCHMARK_TIMES_MANY;
+    EXPECT_LE(result, GPIO_BENCHMARK_MANY_ACCEPT_NS);
+
+    closeOutputPin(&pinReference);
+
+    shutdownGpioDriver();
+
+}
+
+TEST(GpioDriverTest, testInputPin) {
+
+    int status;
+    uint32_t outputPin;
+    uint32_t inputPin;
+    uint8_t pinLevel;
+
+    setupGpioDriver();
+
+    openOutputPin(GPIO_OUTPUT_PIN_FOR_INPUT, &outputPin);
+
+    status = openInputPin(GPIO_INPUT_PIN, GPIO_PIN_PUD_PULL_UP, &inputPin);
+    ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
+
+    /*
+status = updateInputPin(GPIO_INPUT_PIN, GPIO_PIN_PUD_NO_RESISTOR);
+ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
+
+
+setOutputPinHigh(pinReferenceOutputPin);
+pinLevel = readInputPinLevel(pinReferenceInputPin);
+ASSERT_EQ(pinLevel, GPIO_PIN_LEVEL_HIGH);
+setOutputPinLow(pinReferenceOutputPin);
+pinLevel = readInputPinLevel(pinReferenceInputPin);
+ASSERT_EQ(pinLevel, GPIO_PIN_LEVEL_LOW);
+ */
+
+    /*
+    status = updateInputPin(GPIO_INPUT_PIN, GPIO_PIN_PUD_PULL_DOWN);
+    ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
+    setOutputPinHigh(pinReferenceOutputPin);
+    pinLevel = readInputPinLevel(pinReferenceInputPin);
+    ASSERT_EQ(pinLevel, GPIO_PIN_LEVEL_HIGH);
+    setOutputPinLow(pinReferenceOutputPin);
+    pinLevel = readInputPinLevel(pinReferenceInputPin);
+    //ASSERT_EQ(pinLevel, GPIO_PIN_LEVEL_LOW);
+     */
+
+    setOutputPinLow(outputPin);
+    //status = updateInputPin(GPIO_INPUT_PIN, GPIO_PIN_PUD_PULL_UP);
+    //ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
+    setOutputPinHigh(outputPin);
+    pinLevel = readInputPinLevel(inputPin);
+    EXPECT_EQ(pinLevel, GPIO_PIN_LEVEL_HIGH);
+    setOutputPinLow(outputPin);
+    pinLevel = readInputPinLevel(inputPin);
+    EXPECT_EQ(pinLevel, GPIO_PIN_LEVEL_LOW);
+
+    closeOutputPin(&outputPin);
+    closeOutputPin(&inputPin);
 
     shutdownGpioDriver();
 

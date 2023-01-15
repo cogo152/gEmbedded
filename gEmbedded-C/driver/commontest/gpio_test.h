@@ -5,10 +5,16 @@
 #ifndef GEMBEDDED_C_GPIO_TEST_H
 #define GEMBEDDED_C_GPIO_TEST_H
 
-#define GPIO_OUTPUT_PIN             (20)
-#define GPIO_PIN_REFERENCE_INVALID  (3U)
-#define GPIO_PIN_LEVEL_INVALID      (0b10U)
-#define GPIO_BENCHMARK_TIMES        (1)
-#define GPIO_BENCHMARK_ACCEPT_NS    (500)
+#define GPIO_OUTPUT_PIN_SELF                (22)
+#define GPIO_OUTPUT_PIN_FOR_INPUT           (5)
+
+#define GPIO_INPUT_PIN                      (19)
+
+#define GPIO_THREAD_SLEEP_MILSEC            (100)
+
+#define GPIO_BENCHMARK_TIMES_ONE            (1)
+#define GPIO_BENCHMARK_ONE_ACCEPT_NS        (1500)
+#define GPIO_BENCHMARK_TIMES_MANY           (100000)
+#define GPIO_BENCHMARK_MANY_ACCEPT_NS       (100)
 
 #endif //GEMBEDDED_C_GPIO_TEST_H

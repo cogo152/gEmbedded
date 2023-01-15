@@ -8,8 +8,6 @@
 #include "gpio_driver.h"
 #include "memory_mapper.h"
 
-static volatile uint8_t initialized = FALSE;
-
 static void *gpioBase = NULL;
 static volatile uintptr_t *FSEL = NULL;
 static volatile uintptr_t *REN = NULL;
@@ -24,25 +22,11 @@ static volatile uintptr_t *CLR = NULL;
 static volatile uintptr_t *LEV = NULL;
 static volatile uintptr_t *EDS = NULL;
 
-static uint32_t *outputPins = NULL;
-static volatile uint8_t outputPinsSize = 0;
-
-GPIO_CONFIG_STATUS setupGpioDriver(void) {
-
-    if(initialized == TRUE){
-        return GPIO_CONFIG_ERROR;
-    }
+int setupGpioDriver(void) {
 
     const MAPPER_STATUS mapStatus = mapBaseRegister(MEMORY_FILE_NAME, BLOCK_SIZE, GPIO_BASE_ADDRESS, &gpioBase);
     if (mapStatus != MAPPER_SUCCESS) {
-        return GPIO_CONFIG_ERROR;
-    }
-
-    outputPins = (uint32_t *) malloc(PIN_ARRAY_LENGTH * sizeof(uint32_t));
-    if (outputPins == NULL) {
-        return GPIO_CONFIG_ERROR;
-    } else{
-        outputPinsSize = PIN_ARRAY_LENGTH;
+        return GPIO_STATUS_CONFIG_ERROR;
     }
 
     FSEL = ((uintptr_t *) gpioBase) + FSEL_OFFSET;
@@ -58,24 +42,16 @@ GPIO_CONFIG_STATUS setupGpioDriver(void) {
     LEV = ((uintptr_t *) gpioBase + LEV_OFFSET);
     EDS = ((uintptr_t *) gpioBase + EDS_OFFSET);
 
-    initialized = TRUE;
-
-    return GPIO_CONFIG_SUCCESS;
+    return GPIO_STATUS_SUCCESS;
 
 }
 
-GPIO_CONFIG_STATUS shutdownGpioDriver(void) {
-
-    if(initialized == FALSE){
-        return GPIO_CONFIG_ERROR;
-    }
+int shutdownGpioDriver(void) {
 
     const MAPPER_STATUS unmapStatus = unmapBaseRegister(&gpioBase, BLOCK_SIZE);
     if (unmapStatus != MAPPER_SUCCESS) {
-        return GPIO_CONFIG_ERROR;
+        return GPIO_STATUS_CONFIG_ERROR;
     }
-
-    free((void *) outputPins);
 
     FSEL = NULL;
     REN = NULL;
@@ -90,101 +66,146 @@ GPIO_CONFIG_STATUS shutdownGpioDriver(void) {
     LEV = NULL;
     EDS = NULL;
 
-    initialized = FALSE;
-
-    return GPIO_CONFIG_SUCCESS;
+    return GPIO_STATUS_SUCCESS;
 }
 
-
-static void setPinFunction(uint8_t pinNumber, uint8_t pinFunction) {
+static void setPinFunction(const uint8_t pinNumber, const uint8_t pinFunction) {
 
     const uint8_t registerSelector = pinNumber / 10;
-    FSEL[registerSelector] &= ~(7 << ((pinNumber % 10) * 3));
+    FSEL[registerSelector] &= ~(0b111 << ((pinNumber % 10) * 3));
     FSEL[registerSelector] |= (pinFunction << ((pinNumber % 10) * 3));
 
 }
 
-GPIO_CONFIG_STATUS openOutputPin(uint8_t pinNumber) {
+static uint8_t readPinFunction(const uint8_t pinNumber) {
 
-    if(initialized == FALSE){
-        return GPIO_CONFIG_ERROR;
-    }
-
-    setPinFunction(pinNumber, PIN_FUNCTION_OUTPUT);
-
-    return GPIO_CONFIG_SUCCESS;
+    const uint8_t registerSelector = pinNumber / 10;
+    const uint32_t registerLine = FSEL[registerSelector];
+    const uint32_t mask = (0b111 << ((pinNumber % 10) * 3));
+    uint32_t pinFunction = registerLine & mask;
+    pinFunction >>= ((pinNumber % 10) * 3);
+    return pinFunction;
 
 }
 
-GPIO_CONFIG_STATUS registerOutputPin(uint8_t pinNumber, uint8_t *pinReference){
+static void setPinPullUpDown(const uint8_t pinNumber, const uint8_t pullUpDown) {
 
-    if(initialized == FALSE){
-        return GPIO_CONFIG_ERROR;
-    }
+    const uint8_t registerSelector = pinNumber / 16;
+    PUP_PDN[registerSelector] &= ~(0b11 << ((pinNumber % 16) * 2));
+    PUP_PDN[registerSelector] |= (pullUpDown << ((pinNumber % 16) * 2));
 
-    static volatile uint8_t index = 0;
-    if(index == outputPinsSize){
-        outputPins = (uint32_t *) realloc((void *) outputPins, (outputPinsSize * sizeof(uint32_t)) + (PIN_ARRAY_LENGTH * sizeof(uint32_t)));
-        if(outputPins == NULL){
-            return GPIO_CONFIG_ERROR;
-        } else {
-            outputPinsSize += PIN_ARRAY_LENGTH;
-        }
-    }
-    outputPins[index] = 1 << ((pinNumber % 32) * 1);
-    *pinReference = index;
-    ++index;
-
-    return GPIO_CONFIG_SUCCESS;
 }
 
-GPIO_IO_STATUS setHighOutputPin(uint8_t pinReference) {
+static uint8_t readPinPullUpDown(const uint8_t pinNumber) {
 
-    if(initialized == FALSE){
-        return GPIO_IO_ERROR;
-    }
+    const uint8_t registerSelector = pinNumber / 16;
+    const uint32_t registerLine = PUP_PDN[registerSelector];
+    const uint32_t mask = (0b11 << ((pinNumber % 16) * 2));
+    uint32_t pullUpDown = registerLine & mask;
+    pullUpDown >>= ((pinNumber % 16) * 2);
+    return pullUpDown;
 
-    *SET = outputPins[pinReference];
-
-    return GPIO_IO_SUCCESS;
 }
 
-GPIO_IO_STATUS readOutputPin(uint8_t pinReference, uint8_t *pinLevel) {
+static uint32_t readPinLevel(const uint32_t pinReference) {
 
-    if(initialized == FALSE){
-        return GPIO_IO_ERROR;
+    uint32_t registerLine = *LEV;
+    registerLine &= pinReference;
+
+    return registerLine;
+
+}
+
+int openOutputPin(const uint8_t pinNumber, uint32_t *const pinReference) {
+
+    setPinFunction(pinNumber, GPIO_PIN_FUNCTION_OUTPUT);
+    const uint8_t pinFunction = readPinFunction(pinNumber);
+    if (pinFunction != GPIO_PIN_FUNCTION_OUTPUT) {
+        return GPIO_STATUS_CONFIG_ERROR;
     }
 
-    volatile uint32_t registerLine = *LEV;
-    registerLine &= outputPins[pinReference];
-    if (registerLine > 0) {
-        *pinLevel = PIN_LEVEL_HIGH;
+    *pinReference = 0b1 << ((pinNumber % 32) * 1);
+
+    return GPIO_STATUS_SUCCESS;
+
+}
+
+void setOutputPinHigh(const uint32_t pinReference) {
+
+    *SET = pinReference;
+
+}
+
+uint8_t readOutputPinLevel(const uint32_t pinReference) {
+
+    const uint32_t pinLevel = readPinLevel(pinReference);
+
+    if (pinLevel > 0) {
+        return GPIO_PIN_LEVEL_HIGH;
     } else {
-        *pinLevel = PIN_LEVEL_LOW;
+        return GPIO_PIN_LEVEL_LOW;
     }
-
-    return GPIO_IO_SUCCESS;
-}
-
-GPIO_IO_STATUS setLowOutputPin(uint8_t pinReference) {
-
-    if(initialized == FALSE){
-        return GPIO_IO_ERROR;
-    }
-
-    *CLR = outputPins[pinReference];
-
-    return GPIO_IO_SUCCESS;
 
 }
 
-GPIO_CONFIG_STATUS closeOutputPin(uint8_t pinReference) {
+void setOutputPinLow(const uint32_t pinReference) {
 
-    if(initialized == FALSE){
-        return GPIO_CONFIG_ERROR;
+    *CLR = pinReference;
+
+}
+
+void closeOutputPin(uint32_t *const pinReference) {
+
+    *pinReference = 0;
+
+}
+
+int openInputPin(const uint8_t pinNumber, const uint8_t pinPullUpDown, uint32_t *const pinReference) {
+
+    setPinFunction(pinNumber, GPIO_PIN_FUNCTION_INPUT);
+    const uint8_t pinFunction = readPinFunction(pinNumber);
+    if (pinFunction != GPIO_PIN_FUNCTION_INPUT) {
+        return GPIO_STATUS_CONFIG_ERROR;
     }
 
-    outputPins[pinReference] = 0;
+    setPinPullUpDown(pinNumber, pinPullUpDown);
+    const uint8_t _pinPullUpDown = readPinPullUpDown(pinNumber);
+    if (_pinPullUpDown != pinPullUpDown) {
+        return GPIO_STATUS_CONFIG_ERROR;
+    }
 
-    return GPIO_CONFIG_SUCCESS;
+    *pinReference = 0b1 << ((pinNumber % 32) * 1);
+
+    return GPIO_STATUS_SUCCESS;
+
+}
+
+int updateInputPin(const uint8_t pinNumber, const uint8_t pinPullUpDown) {
+
+    setPinPullUpDown(pinNumber, pinPullUpDown);
+    const uint8_t _pinPullUpDown = readPinPullUpDown(pinNumber);
+    if (_pinPullUpDown != pinPullUpDown) {
+        return GPIO_STATUS_CONFIG_ERROR;
+    }
+
+    return GPIO_STATUS_SUCCESS;
+
+}
+
+uint8_t readInputPinLevel(const uint32_t pinReference) {
+
+    const uint32_t pinLevel = readPinLevel(pinReference);
+
+    if (pinLevel > 0) {
+        return GPIO_PIN_LEVEL_HIGH;
+    } else {
+        return GPIO_PIN_LEVEL_LOW;
+    }
+
+}
+
+void closeInputPin(uint32_t *const pinReference) {
+
+    *pinReference = 0;
+
 }
