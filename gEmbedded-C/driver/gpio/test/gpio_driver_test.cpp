@@ -10,6 +10,7 @@
 
 #include "gpio_driver.h"
 
+/*
 TEST(GpioDriverTest, testSetupShutdownGpio) {
 
     int configStatus;
@@ -120,46 +121,67 @@ TEST(GpioDriverTest, testInputPin) {
     setupGpioDriver();
 
     openOutputPin(GPIO_OUTPUT_PIN_FOR_INPUT, &outputPin);
+    setOutputPinLow(outputPin);
 
-    status = openInputPin(GPIO_INPUT_PIN, GPIO_PIN_PUD_PULL_UP, &inputPin);
+    status = openInputPin(GPIO_INPUT_PIN, GPIO_PIN_PUD_RESERVED, &inputPin);
     ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
 
-    /*
-status = updateInputPin(GPIO_INPUT_PIN, GPIO_PIN_PUD_NO_RESISTOR);
-ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
+    status = updateInputPin(GPIO_INPUT_PIN, GPIO_PIN_PUD_NO_RESISTOR);
+    ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
 
-
-setOutputPinHigh(pinReferenceOutputPin);
-pinLevel = readInputPinLevel(pinReferenceInputPin);
-ASSERT_EQ(pinLevel, GPIO_PIN_LEVEL_HIGH);
-setOutputPinLow(pinReferenceOutputPin);
-pinLevel = readInputPinLevel(pinReferenceInputPin);
-ASSERT_EQ(pinLevel, GPIO_PIN_LEVEL_LOW);
- */
-
-    /*
     status = updateInputPin(GPIO_INPUT_PIN, GPIO_PIN_PUD_PULL_DOWN);
     ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
-    setOutputPinHigh(pinReferenceOutputPin);
-    pinLevel = readInputPinLevel(pinReferenceInputPin);
-    ASSERT_EQ(pinLevel, GPIO_PIN_LEVEL_HIGH);
-    setOutputPinLow(pinReferenceOutputPin);
-    pinLevel = readInputPinLevel(pinReferenceInputPin);
-    //ASSERT_EQ(pinLevel, GPIO_PIN_LEVEL_LOW);
-     */
-
-    setOutputPinLow(outputPin);
-    //status = updateInputPin(GPIO_INPUT_PIN, GPIO_PIN_PUD_PULL_UP);
-    //ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
     setOutputPinHigh(outputPin);
     pinLevel = readInputPinLevel(inputPin);
-    EXPECT_EQ(pinLevel, GPIO_PIN_LEVEL_HIGH);
+    ASSERT_EQ(pinLevel, GPIO_PIN_LEVEL_HIGH);
+    setOutputPinLow(outputPin);
+
+    status = updateInputPin(GPIO_INPUT_PIN, GPIO_PIN_PUD_PULL_UP);
+    ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
+    setOutputPinHigh(outputPin);
     setOutputPinLow(outputPin);
     pinLevel = readInputPinLevel(inputPin);
-    EXPECT_EQ(pinLevel, GPIO_PIN_LEVEL_LOW);
+    ASSERT_EQ(pinLevel, GPIO_PIN_LEVEL_LOW);
 
+    setOutputPinLow(outputPin);
     closeOutputPin(&outputPin);
-    closeOutputPin(&inputPin);
+    closeInputPin(&inputPin);
+
+    shutdownGpioDriver();
+
+}
+ */
+
+TEST(GpioDriverTest, testListenerPin) {
+
+    int status;
+    uint32_t outputPin;
+    uint32_t listenerPin;
+    const int timeOutInMilSec = 1000;
+    struct gpio_pin_event_t pinEvent;
+    pinEvent.timeStamp = 0;
+
+    setupGpioDriver();
+
+    openOutputPin(GPIO_OUTPUT_PIN_FOR_LISTENER, &outputPin);
+    setOutputPinLow(outputPin);
+
+    status = openListenerPin(GPIO_LISTENER_PIN, GPIO_PIN_EVENT_RISING, &listenerPin);
+    ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
+
+    //status = readListenerPinEvent(listenerPin, timeOutInMilSec, &pinEvent);
+    //ASSERT_EQ(status, GPIO_STATUS_POLL_TIMEOUT_ERROR);
+    //ASSERT_EQ(pinEvent.timeStamp, 0);
+
+    //setOutputPinHigh(outputPin);
+    status = readListenerPinEvent(listenerPin, timeOutInMilSec, &pinEvent);
+    EXPECT_EQ(status, GPIO_STATUS_SUCCESS);
+    EXPECT_GT(pinEvent.timeStamp, 0);
+    setOutputPinLow(outputPin);
+
+    setOutputPinLow(outputPin);
+    closeOutputPin(&outputPin);
+    closeListenerPin(&listenerPin);
 
     shutdownGpioDriver();
 

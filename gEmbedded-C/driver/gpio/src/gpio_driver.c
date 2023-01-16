@@ -3,6 +3,9 @@
 //
 
 #include <stdlib.h>
+#include <linux/gpio.h>
+#include <sys/ioctl.h>
+#include <sys/poll.h>
 
 #include "gpio_peripheral.h"
 #include "gpio_driver.h"
@@ -207,5 +210,85 @@ uint8_t readInputPinLevel(const uint32_t pinReference) {
 void closeInputPin(uint32_t *const pinReference) {
 
     *pinReference = 0;
+
+}
+
+int openListenerPin(const uint8_t pinNumber, const uint8_t pinEvent, uint32_t *const pinReference) {
+
+    const int fd = open(GPIO_CHIP, O_RDONLY);
+    if (fd < 0) {
+        return GPIO_STATUS_CONFIG_ERROR;
+    }
+
+    struct gpioevent_request rq;
+    rq.lineoffset = pinNumber;
+    rq.handleflags = GPIOHANDLE_REQUEST_INPUT;
+    if (pinEvent == GPIO_PIN_EVENT_RISING) {
+        rq.eventflags = GPIOEVENT_EVENT_RISING_EDGE;
+    } else if (pinEvent == GPIO_PIN_EVENT_FALLING) {
+        rq.eventflags = GPIOEVENT_EVENT_FALLING_EDGE;
+    } else {
+        rq.eventflags = GPIOEVENT_REQUEST_BOTH_EDGES;
+    }
+
+    const int ic = ioctl(fd, GPIO_GET_LINEEVENT_IOCTL, &rq);
+    close(fd);
+    if (ic < 0) {
+        return GPIO_STATUS_CONFIG_ERROR;
+    }
+
+    *pinReference = rq.fd;
+
+    return GPIO_STATUS_SUCCESS;
+
+}
+
+int updateListenerPin(const uint8_t pinNumber, const uint8_t pinEvent, uint32_t *const pinReference) {
+
+    closeListenerPin(pinReference);
+
+    return openListenerPin(pinNumber,pinEvent,pinReference);
+
+}
+
+int readListenerPinEvent(const uint32_t pinReference, const int timeoutInMilSec, struct gpio_pin_event_t *const pinEvent) {
+
+    struct gpioevent_data data;
+    struct pollfd pfd;
+    int rv;
+    ssize_t rd;
+
+    pfd.fd = (int) pinReference;
+    pfd.events = POLLIN | POLLPRI;
+    rv = poll(&pfd, 1, timeoutInMilSec);
+
+    switch (rv) {
+        case -1: {
+            return GPIO_STATUS_POLL_IO_ERROR;
+        }
+        case 0: {
+            return GPIO_STATUS_POLL_TIMEOUT_ERROR;
+        }
+        default: {
+            rd = read (pfd.fd, &data, sizeof (data));
+            if(rd <= 0){
+                return GPIO_STATUS_FILE_IO_ERROR;
+            } else {
+                pinEvent->timeStamp = data.timestamp;
+                if (data.id == GPIOEVENT_REQUEST_RISING_EDGE) {
+                    pinEvent->event = GPIO_PIN_EVENT_RISING;
+                } else {
+                    pinEvent->event = GPIO_PIN_EVENT_FALLING;
+                }
+                return GPIO_STATUS_SUCCESS;
+            }
+        }
+    }
+}
+
+void closeListenerPin(uint32_t *const pinReference) {
+
+    const int _pinReference = (int) *pinReference;
+    close(_pinReference);
 
 }

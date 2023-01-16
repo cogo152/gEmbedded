@@ -7,10 +7,9 @@
 
 #define GPIO_OUTPUT_PIN_SELF                (22)
 #define GPIO_OUTPUT_PIN_FOR_INPUT           (5)
-
+#define GPIO_OUTPUT_PIN_FOR_LISTENER        (6)
 #define GPIO_INPUT_PIN                      (19)
-
-#define GPIO_THREAD_SLEEP_MILSEC            (100)
+#define GPIO_LISTENER_PIN                   (26)
 
 #define GPIO_BENCHMARK_TIMES_ONE            (1)
 #define GPIO_BENCHMARK_ONE_ACCEPT_NS        (1500)
