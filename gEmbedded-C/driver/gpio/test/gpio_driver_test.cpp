@@ -10,63 +10,6 @@
 
 #include "gpio_driver.h"
 
-TEST(GpioDriverTest, testInputPin) {
-
-    int status;
-    struct output_pin_t outputPin;
-    outputPin.number = GPIO_OUTPUT_PIN_FOR_LISTENER;
-
-    struct input_pin_t inputPin;
-    inputPin.number = GPIO_LISTENER_PIN;
-
-    setupGpioDriver();
-    openOutputPin(&outputPin);
-
-    inputPin.reference = 0;
-    inputPin.pullUpDown = GPIO_PIN_PUD_NO_RESISTOR;
-    status = openInputPin(&inputPin);
-    EXPECT_EQ(status, GPIO_STATUS_SUCCESS);
-    EXPECT_GT(inputPin.reference, 0);
-
-    readInputPinLevel(&inputPin);
-    EXPECT_EQ(inputPin.level, GPIO_PIN_LEVEL_LOW);
-    setOutputPinHigh(&outputPin);
-    std::this_thread::sleep_for(std::chrono::milliseconds(GPIO_SLEEP_IN_MILSEC));
-    readInputPinLevel(&inputPin);
-    EXPECT_EQ(inputPin.level, GPIO_PIN_LEVEL_HIGH);
-
-
-    //setOutputPinLow(&outputPin);
-
-    inputPin.pullUpDown = GPIO_PIN_PUD_PULL_UP;
-    status = updateInputPin(&inputPin);
-    EXPECT_EQ(status, GPIO_STATUS_SUCCESS);
-    setOutputPinHigh(&outputPin);
-    readInputPinLevel(&inputPin);
-    EXPECT_EQ(inputPin.level, GPIO_PIN_LEVEL_HIGH);
-    setOutputPinLow(&outputPin);
-    EXPECT_EQ(inputPin.level, GPIO_PIN_LEVEL_LOW);
-
-    inputPin.pullUpDown = GPIO_PIN_PUD_PULL_DOWN;
-    status = updateInputPin(&inputPin);
-    EXPECT_EQ(status, GPIO_STATUS_SUCCESS);
-    setOutputPinHigh(&outputPin);
-    readInputPinLevel(&inputPin);
-    EXPECT_EQ(inputPin.level, GPIO_PIN_LEVEL_HIGH);
-    setOutputPinLow(&outputPin);
-    EXPECT_EQ(inputPin.level, GPIO_PIN_LEVEL_LOW);
-
-    closeOutputPin(&outputPin);
-
-    closeInputPin(&inputPin);
-    EXPECT_EQ(inputPin.reference, 0);
-
-    shutdownGpioDriver();
-
-}
-
-/*
-
 TEST(GpioDriverTest, testSetupShutdownGpio) {
 
     int status;
@@ -83,7 +26,7 @@ TEST(GpioDriverTest, testOutputPin) {
 
     int status;
     struct output_pin_t outputPin;
-    outputPin.number = GPIO_OUTPUT_PIN_SELF;
+    outputPin.number = GPIO_OUTPUT_SELF;
     outputPin.reference = 0;
 
     setupGpioDriver();
@@ -107,14 +50,99 @@ TEST(GpioDriverTest, testOutputPin) {
 
 }
 
+TEST(GpioDriverTest, testInputPin) {
+    int status;
+
+    struct output_pin_t pullDown_OUTPUTPIN;
+    struct input_pin_t pullDown_INPUTPIN;
+
+    pullDown_OUTPUTPIN.number = GPIO_PULLDOWN_OUTPUT;
+    pullDown_INPUTPIN.number = GPIO_PULLDOWN_INPUT;
+
+    setupGpioDriver();
+
+    openOutputPin(&pullDown_OUTPUTPIN);
+
+    pullDown_INPUTPIN.pullUpDown = GPIO_PIN_PUD_NO_RESISTOR;
+    pullDown_INPUTPIN.reference = 0;
+    status = openInputPin(&pullDown_INPUTPIN);
+    ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
+    ASSERT_GT(pullDown_INPUTPIN.reference, 0);
+
+    setOutputPinHigh(&pullDown_OUTPUTPIN);
+    std::this_thread::sleep_for(std::chrono::milliseconds(GPIO_SLEEP_IN_MILSEC));
+    readInputPinLevel(&pullDown_INPUTPIN);
+    ASSERT_EQ(pullDown_INPUTPIN.level, GPIO_PIN_LEVEL_HIGH);
+    setOutputPinLow(&pullDown_OUTPUTPIN);
+    std::this_thread::sleep_for(std::chrono::milliseconds(GPIO_SLEEP_IN_MILSEC));
+    readInputPinLevel(&pullDown_INPUTPIN);
+    ASSERT_EQ(pullDown_INPUTPIN.level, GPIO_PIN_LEVEL_LOW);
+
+    pullDown_INPUTPIN.pullUpDown = GPIO_PIN_PUD_PULL_DOWN;
+    status = updateInputPin(&pullDown_INPUTPIN);
+    ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
+
+    setOutputPinHigh(&pullDown_OUTPUTPIN);
+    std::this_thread::sleep_for(std::chrono::milliseconds(GPIO_SLEEP_IN_MILSEC));
+    readInputPinLevel(&pullDown_INPUTPIN);
+    ASSERT_EQ(pullDown_INPUTPIN.level, GPIO_PIN_LEVEL_HIGH);
+    setOutputPinLow(&pullDown_OUTPUTPIN);
+    std::this_thread::sleep_for(std::chrono::milliseconds(GPIO_SLEEP_IN_MILSEC));
+    readInputPinLevel(&pullDown_INPUTPIN);
+    ASSERT_EQ(pullDown_INPUTPIN.level, GPIO_PIN_LEVEL_LOW);
+
+    closeOutputPin(&pullDown_OUTPUTPIN);
+    closeInputPin(&pullDown_INPUTPIN);
+
+    struct output_pin_t pullUp_OUTPUTPIN;
+    struct input_pin_t pullUp_INPUTPIN;
+
+    pullUp_OUTPUTPIN.number = GPIO_PULLUP_OUTPUT;
+    pullUp_INPUTPIN.number = GPIO_PULLUP_INPUT;
+    openOutputPin(&pullUp_OUTPUTPIN);
+
+    pullUp_INPUTPIN.pullUpDown = GPIO_PIN_PUD_NO_RESISTOR;
+    pullUp_INPUTPIN.reference = 0;
+    status = openInputPin(&pullUp_INPUTPIN);
+    ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
+    ASSERT_GT(pullUp_INPUTPIN.reference, 0);
+
+    setOutputPinHigh(&pullUp_OUTPUTPIN);
+    std::this_thread::sleep_for(std::chrono::milliseconds(GPIO_SLEEP_IN_MILSEC));
+    readInputPinLevel(&pullUp_INPUTPIN);
+    ASSERT_EQ(pullUp_INPUTPIN.level, GPIO_PIN_LEVEL_LOW);
+    setOutputPinLow(&pullUp_OUTPUTPIN);
+    std::this_thread::sleep_for(std::chrono::milliseconds(GPIO_SLEEP_IN_MILSEC));
+    readInputPinLevel(&pullUp_INPUTPIN);
+    ASSERT_EQ(pullUp_INPUTPIN.level, GPIO_PIN_LEVEL_HIGH);
+
+    pullUp_INPUTPIN.pullUpDown = GPIO_PIN_PUD_PULL_UP;
+    status = updateInputPin(&pullUp_INPUTPIN);
+    ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
+
+    setOutputPinHigh(&pullUp_OUTPUTPIN);
+    std::this_thread::sleep_for(std::chrono::milliseconds(GPIO_SLEEP_IN_MILSEC));
+    readInputPinLevel(&pullUp_INPUTPIN);
+    ASSERT_EQ(pullUp_INPUTPIN.level, GPIO_PIN_LEVEL_LOW);
+    setOutputPinLow(&pullUp_OUTPUTPIN);
+    std::this_thread::sleep_for(std::chrono::milliseconds(GPIO_SLEEP_IN_MILSEC));
+    readInputPinLevel(&pullUp_INPUTPIN);
+    ASSERT_EQ(pullUp_INPUTPIN.level, GPIO_PIN_LEVEL_HIGH);
+
+    closeOutputPin(&pullUp_OUTPUTPIN);
+    closeInputPin(&pullUp_INPUTPIN);
+
+    shutdownGpioDriver();
+
+}
 
 static void invokeRising(struct output_pin_t *outputPin) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(GPIO_LISTENER_PIN_TIMEOUT_MILSEC / 2));
+    std::this_thread::sleep_for(std::chrono::milliseconds(GPIO_SLEEP_IN_MILSEC / 2));
     setOutputPinHigh(outputPin);
 }
 
 static void invokeFalling(struct output_pin_t *outputPin) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(GPIO_LISTENER_PIN_TIMEOUT_MILSEC / 2));
+    std::this_thread::sleep_for(std::chrono::milliseconds(GPIO_SLEEP_IN_MILSEC / 2));
     setOutputPinLow(outputPin);
 }
 
@@ -122,10 +150,10 @@ TEST(GpioDriverTest, testListenerPin) {
 
     int status;
     struct output_pin_t outputPin;
-    outputPin.number = GPIO_OUTPUT_PIN_FOR_LISTENER;
+    outputPin.number = GPIO_LISTENER_OUTPUT;
 
     struct listener_pin_t listenerPin;
-    listenerPin.number = GPIO_LISTENER_PIN;
+    listenerPin.number = GPIO_LISTENER_INPUT;
 
     setupGpioDriver();
     openOutputPin(&outputPin);
@@ -145,7 +173,7 @@ TEST(GpioDriverTest, testListenerPin) {
     ASSERT_EQ(listenerPin.reference, 0);
 
     // set pinevent both
-    listenerPin.timeoutInMilSec = GPIO_LISTENER_PIN_TIMEOUT_MILSEC;
+    listenerPin.timeoutInMilSec = GPIO_SLEEP_IN_MILSEC;
     listenerPin.reference = 0;
     listenerPin.cevent = GPIO_PIN_EVENT_BOTH;
     status = openListenerPin(&listenerPin);
@@ -237,4 +265,43 @@ TEST(GpioDriverTest, testListenerPin) {
 
 }
 
- */
+TEST(GpioDriverTest, testAlternatePin) {
+
+    int status;
+    struct alternate_pin_t alternatePin;
+    alternatePin.number = GPIO_ALTERNATE_SELF;
+
+    setupGpioDriver();
+
+    alternatePin.function = GPIO_PIN_FUNCTION_ALT0;
+    status = openAlternatePin(&alternatePin);
+    ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
+
+    alternatePin.function = GPIO_PIN_FUNCTION_ALT1;
+    status = updateAlternatePin(&alternatePin);
+    ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
+
+    alternatePin.function = GPIO_PIN_FUNCTION_ALT2;
+    status = updateAlternatePin(&alternatePin);
+    ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
+
+    alternatePin.function = GPIO_PIN_FUNCTION_ALT2;
+    status = updateAlternatePin(&alternatePin);
+    ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
+
+    alternatePin.function = GPIO_PIN_FUNCTION_ALT3;
+    status = updateAlternatePin(&alternatePin);
+    ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
+
+    alternatePin.function = GPIO_PIN_FUNCTION_ALT4;
+    status = updateAlternatePin(&alternatePin);
+    ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
+
+    alternatePin.function = GPIO_PIN_FUNCTION_ALT5;
+    status = updateAlternatePin(&alternatePin);
+    ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
+
+    closeAlternatePin(&alternatePin);
+    shutdownGpioDriver();
+
+}

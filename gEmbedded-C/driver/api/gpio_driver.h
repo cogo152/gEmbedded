@@ -126,8 +126,9 @@ int readListenerPinEvent(struct listener_pin_t *listenerPin);
 
 void closeListenerPin(struct listener_pin_t *listenerPin);
 
+// returns GPIO_STATUS_CONFIG_ERROR if pin function configuration fails
 int openAlternatePin(struct alternate_pin_t *alternatePin);
-
+int updateAlternatePin(struct alternate_pin_t *alternatePin);
 void closeAlternatePin(struct alternate_pin_t *alternatePin);
 
 #ifdef __cplusplus

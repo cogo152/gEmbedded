@@ -377,3 +377,29 @@ void closeListenerPin(struct listener_pin_t *const listenerPin) {
     listenerPin->reference = 0;
 
 }
+
+int openAlternatePin(struct alternate_pin_t *const alternatePin) {
+
+    setPinFunction(alternatePin->number, alternatePin->function);
+    const uint8_t _pinFunction = readPinFunction(alternatePin->number);
+    if (_pinFunction != alternatePin->function) {
+        return GPIO_STATUS_CONFIG_ERROR;
+    }
+
+    return GPIO_STATUS_SUCCESS;
+
+}
+
+int updateAlternatePin(struct alternate_pin_t *const alternatePin) {
+
+    closeAlternatePin(alternatePin);
+
+    return openAlternatePin(alternatePin);
+
+}
+
+void closeAlternatePin(struct alternate_pin_t *const alternatePin) {
+
+    setPinFunction(alternatePin->number, GPIO_PIN_FUNCTION_INPUT);
+
+}
