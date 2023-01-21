@@ -79,3 +79,118 @@ int shutdownI2cDriver(void) {
     return I2C_STATUS_SUCCESS;
 
 }
+
+int openSlaveConnection(struct i2c_slave_t *const i2cSlave) {
+
+    if (i2cSlave->status == I2C_SLAVE_OPENED){
+        return I2C_STATUS_CONFIG_ERROR;
+    }
+
+    i2cSlave->clockDivider = CORE_CLOCK_SPEED / i2cSlave->clockSpeedInHz;
+    i2cSlave->dataDelay = I2C_DEL_DIV(i2cSlave->fallingDelay, i2cSlave->risingDelay);
+
+    const uint32_t outputLength = i2cSlave->outputLength;
+    const uint8_t data = i2cSlave->outputBuffer[0];
+    const uint32_t inputLength = i2cSlave->inputLength;
+
+    i2cSlave->outputLength = 1;
+    i2cSlave->outputBuffer[0] = i2cSlave->address;
+    i2cSlave->inputLength = 1;
+
+    const int sendStatus = sendToSlave(i2cSlave);
+    const int receiveStatus = receiveFromSlave(i2cSlave);
+
+    i2cSlave->outputLength = outputLength;
+    i2cSlave->outputBuffer[0] = data;
+    i2cSlave->inputLength = inputLength;
+
+    if (sendStatus != I2C_STATUS_SUCCESS) {
+        return sendStatus;
+    }
+
+    if (receiveStatus != I2C_STATUS_SUCCESS) {
+        return sendStatus;
+    }
+
+    i2cSlave->status = I2C_SLAVE_OPENED;
+
+    return I2C_STATUS_SUCCESS;
+}
+
+int sendToSlave(struct i2c_slave_t *const i2cSlave) {
+
+    if (i2cSlave->status == I2C_SLAVE_CLOSED){
+        return I2C_STATUS_CONFIG_ERROR;
+    }
+
+    volatile int count = 0;
+
+    *DLEN = i2cSlave->outputLength;
+    *A = i2cSlave->address;
+    *DIV = i2cSlave->clockDivider;
+    *DEL = i2cSlave->dataDelay;
+    *CLKT = i2cSlave->clockStretchTimeout;
+    *S = I2C_S_CLEAR;
+    *C = I2C_C_SEND;
+
+    while (!(*S & I2C_S_DONE)) {
+        while (count < i2cSlave->outputLength && *S & I2C_S_TXD) {
+            *FIFO = i2cSlave->outputBuffer[count++];
+        }
+    }
+
+    uint32_t volatile const status = *S;
+
+    if (status & I2C_S_ERR) {
+        return I2C_STATUS_NO_ACKNOWLEDGE;
+    } else if (status & I2C_S_CLKT) {
+        return I2C_STATUS_CLOCK_STRETCH_TIMEOUT;
+    } else if (count < i2cSlave->outputLength) {
+        return I2C_STATUS_DATA_LOSS;
+    } else {
+        return I2C_STATUS_SUCCESS;
+    }
+
+}
+
+int receiveFromSlave(struct i2c_slave_t *const i2cSlave) {
+
+    if (i2cSlave->status == I2C_SLAVE_CLOSED){
+        return I2C_STATUS_CONFIG_ERROR;
+    }
+
+    volatile int count = 0;
+
+    *DLEN = i2cSlave->inputLength;
+    *A = i2cSlave->address;
+    *DIV = i2cSlave->clockDivider;
+    *DEL = i2cSlave->dataDelay;
+    *CLKT = i2cSlave->clockStretchTimeout;
+    *S = I2C_S_CLEAR;
+    *C = I2C_C_RECEIVE;
+
+    while (!(*S & I2C_S_DONE)) {
+        while (count < i2cSlave->inputLength && *S & I2C_S_RXD) {
+            i2cSlave->inputBuffer[count++] = (*FIFO & 0x000000ff);
+        }
+    }
+
+    uint32_t volatile const status = *S;
+
+    if (status & I2C_S_ERR) {
+        return I2C_STATUS_NO_ACKNOWLEDGE;
+    } else if (status & I2C_S_CLKT) {
+        return I2C_STATUS_CLOCK_STRETCH_TIMEOUT;
+    } else if (count < i2cSlave->outputLength) {
+        return I2C_STATUS_DATA_LOSS;
+    } else {
+        return I2C_STATUS_SUCCESS;
+    }
+
+}
+
+void closeSlaveConnection(struct i2c_slave_t *const i2cSlave) {
+
+    i2cSlave->status = I2C_SLAVE_CLOSED;
+
+}

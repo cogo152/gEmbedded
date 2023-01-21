@@ -9,7 +9,7 @@ extern "C" {
 #include "memory_mapper.h"
 }
 
-void static *pointer = nullptr;
+static void  *pointer = nullptr;
 
 TEST(MapperTest, testMapBaseRegister) {
 

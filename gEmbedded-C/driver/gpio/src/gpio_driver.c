@@ -3,6 +3,10 @@
 //
 
 #include <stdlib.h>
+
+#include <stdio.h>
+
+#include <stdlib.h>
 #include <linux/gpio.h>
 #include <sys/ioctl.h>
 #include <sys/poll.h>
@@ -179,27 +183,42 @@ static uint32_t readPinLevel(const uint32_t pinReference) {
 
 int openOutputPin(struct output_pin_t *const outputPin) {
 
+    if (outputPin->status == GPIO_PIN_OPENED) {
+        return GPIO_STATUS_CONFIG_ERROR;
+    }
+
     setPinFunction(outputPin->number, GPIO_PIN_FUNCTION_OUTPUT);
     const uint8_t _pinFunction = readPinFunction(outputPin->number);
     if (_pinFunction != GPIO_PIN_FUNCTION_OUTPUT) {
-        outputPin->reference = 0;
         return GPIO_STATUS_CONFIG_ERROR;
     }
 
     outputPin->reference = 0b1 << ((outputPin->number % 32) * 1);
     setOutputPinLow(outputPin);
 
+    outputPin->status = GPIO_PIN_OPENED;
+
     return GPIO_STATUS_SUCCESS;
 
 }
 
-void setOutputPinHigh(struct output_pin_t *const outputPin) {
+int setOutputPinHigh(struct output_pin_t *const outputPin) {
+
+    if (outputPin->status == GPIO_PIN_CLOSED) {
+        return GPIO_STATUS_CONFIG_ERROR;
+    }
 
     *SET = outputPin->reference;
 
+    return GPIO_STATUS_SUCCESS;
+
 }
 
-void readOutputPinLevel(struct output_pin_t *const outputPin) {
+int readOutputPinLevel(struct output_pin_t *const outputPin) {
+
+    if (outputPin->status == GPIO_PIN_CLOSED) {
+        return GPIO_STATUS_CONFIG_ERROR;
+    }
 
     const uint32_t pinLevel = readPinLevel(outputPin->reference);
 
@@ -209,11 +228,18 @@ void readOutputPinLevel(struct output_pin_t *const outputPin) {
         outputPin->level = GPIO_PIN_LEVEL_LOW;
     }
 
+    return GPIO_STATUS_SUCCESS;
 }
 
-void setOutputPinLow(struct output_pin_t *const outputPin) {
+int setOutputPinLow(struct output_pin_t *const outputPin) {
+
+    if (outputPin->status == GPIO_PIN_CLOSED) {
+        return GPIO_STATUS_CONFIG_ERROR;
+    }
 
     *CLR = outputPin->reference;
+
+    return GPIO_STATUS_SUCCESS;
 
 }
 
@@ -222,11 +248,16 @@ void closeOutputPin(struct output_pin_t *const outputPin) {
     setOutputPinLow(outputPin);
     setPinFunction(outputPin->number, GPIO_PIN_FUNCTION_INPUT);
     setPinPullUpDown(outputPin->number, GPIO_PIN_PUD_PULL_DOWN);
-    outputPin->reference = 0;
+
+    outputPin->status = GPIO_PIN_CLOSED;
 
 }
 
 int openInputPin(struct input_pin_t *const inputPin) {
+
+    if (inputPin->status == GPIO_PIN_OPENED) {
+        return GPIO_STATUS_CONFIG_ERROR;
+    }
 
     setPinFunction(inputPin->number, GPIO_PIN_FUNCTION_INPUT);
     const uint8_t _pinFunction = readPinFunction(inputPin->number);
@@ -242,23 +273,29 @@ int openInputPin(struct input_pin_t *const inputPin) {
 
     inputPin->reference = 0b1 << ((inputPin->number % 32) * 1);
 
+    inputPin->status = GPIO_PIN_OPENED;
+
     return GPIO_STATUS_SUCCESS;
 
 }
 
 int updateInputPin(struct input_pin_t *const inputPin) {
 
-    setPinPullUpDown(inputPin->number, inputPin->pullUpDown);
-    const uint8_t _pinPullUpDown = readPinPullUpDown(inputPin->number);
-    if (_pinPullUpDown != inputPin->pullUpDown) {
+    if (inputPin->status == GPIO_PIN_CLOSED) {
         return GPIO_STATUS_CONFIG_ERROR;
     }
 
-    return GPIO_STATUS_SUCCESS;
+    closeInputPin(inputPin);
+
+    return openInputPin(inputPin);
 
 }
 
-void readInputPinLevel(struct input_pin_t *const inputPin) {
+int readInputPinLevel(struct input_pin_t *const inputPin) {
+
+    if (inputPin->status == GPIO_PIN_CLOSED) {
+        return GPIO_STATUS_CONFIG_ERROR;
+    }
 
     const uint32_t pinLevel = readPinLevel(inputPin->reference);
 
@@ -268,21 +305,29 @@ void readInputPinLevel(struct input_pin_t *const inputPin) {
         inputPin->level = GPIO_PIN_LEVEL_LOW;
     }
 
+    return GPIO_STATUS_SUCCESS;
+
 }
 
 void closeInputPin(struct input_pin_t *const inputPin) {
 
     setPinPullUpDown(inputPin->number, GPIO_PIN_PUD_PULL_DOWN);
-    inputPin->reference = 0;
+
+    inputPin->status = GPIO_PIN_CLOSED;
 
 }
 
 int openListenerPin(struct listener_pin_t *const listenerPin) {
 
-    if (listenerPin->timeoutInMilSec <= 0) {
-        listenerPin->reference = 0;
+    if (listenerPin->status == GPIO_PIN_OPENED) {
         return GPIO_STATUS_CONFIG_ERROR;
     }
+
+    if (listenerPin->timeoutInMilSec <= 0) {
+        return GPIO_STATUS_CONFIG_ERROR;
+    }
+
+    printf("HERE");
 
     const int fd = open(GPIO_CHIP, O_RDONLY);
     if (fd < 0) {
@@ -322,11 +367,17 @@ int openListenerPin(struct listener_pin_t *const listenerPin) {
 
     listenerPin->reference = rq.fd;
 
+    listenerPin->status = GPIO_PIN_OPENED;
+
     return GPIO_STATUS_SUCCESS;
 
 }
 
 int updateListenerPin(struct listener_pin_t *const listenerPin) {
+
+    if (listenerPin->status == GPIO_PIN_CLOSED) {
+        return GPIO_STATUS_CONFIG_ERROR;
+    }
 
     closeListenerPin(listenerPin);
 
@@ -335,6 +386,10 @@ int updateListenerPin(struct listener_pin_t *const listenerPin) {
 }
 
 int readListenerPinEvent(struct listener_pin_t *const listenerPin) {
+
+    if (listenerPin->status == GPIO_PIN_CLOSED) {
+        return GPIO_STATUS_CONFIG_ERROR;
+    }
 
     struct gpioevent_data data;
     struct pollfd pfd;
@@ -374,11 +429,16 @@ void closeListenerPin(struct listener_pin_t *const listenerPin) {
 
     close(listenerPin->reference);
     setPinPullUpDown(listenerPin->number, GPIO_PIN_PUD_PULL_DOWN);
-    listenerPin->reference = 0;
+
+    listenerPin->status = GPIO_PIN_CLOSED;
 
 }
 
 int openAlternatePin(struct alternate_pin_t *const alternatePin) {
+
+    if (alternatePin->status == GPIO_PIN_OPENED) {
+        return GPIO_STATUS_CONFIG_ERROR;
+    }
 
     setPinFunction(alternatePin->number, alternatePin->function);
     const uint8_t _pinFunction = readPinFunction(alternatePin->number);
@@ -386,11 +446,17 @@ int openAlternatePin(struct alternate_pin_t *const alternatePin) {
         return GPIO_STATUS_CONFIG_ERROR;
     }
 
+    alternatePin->status = GPIO_PIN_OPENED;
+
     return GPIO_STATUS_SUCCESS;
 
 }
 
 int updateAlternatePin(struct alternate_pin_t *const alternatePin) {
+
+    if (alternatePin->status == GPIO_PIN_CLOSED) {
+        return GPIO_STATUS_CONFIG_ERROR;
+    }
 
     closeAlternatePin(alternatePin);
 
@@ -401,5 +467,7 @@ int updateAlternatePin(struct alternate_pin_t *const alternatePin) {
 void closeAlternatePin(struct alternate_pin_t *const alternatePin) {
 
     setPinFunction(alternatePin->number, GPIO_PIN_FUNCTION_INPUT);
+
+    alternatePin->status = GPIO_PIN_CLOSED;
 
 }

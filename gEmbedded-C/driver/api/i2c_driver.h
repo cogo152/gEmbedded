@@ -11,17 +11,36 @@ extern "C" {
 #include "common.h"
 #include "driver_exception.h"
 
-// config values
+#define I2C_SLAVE_OPENED    (1)
+#define I2C_SLAVE_CLOSED    (0)
 
+// config values
 struct i2c_slave_t {
-    uint8_t number;
-    uint8_t level;
-    uint32_t reference;
+    uint32_t inputLength;
+    uint32_t inputBuffer[8];
+    uint32_t outputLength;
+    uint8_t outputBuffer[8];
+    uint8_t address;
+    uint16_t clockDivider;
+    uint32_t clockSpeedInHz;
+    uint32_t dataDelay;
+    uint16_t fallingDelay;
+    uint16_t risingDelay;
+    uint16_t clockStretchTimeout;
+    volatile uint16_t status;
 };
 
 int setupI2cDriver(void);
 
 int shutdownI2cDriver(void);
+
+int openSlaveConnection(struct i2c_slave_t *i2cSlave);
+
+int sendToSlave(struct i2c_slave_t *i2cSlave);
+
+int receiveFromSlave(struct i2c_slave_t *i2cSlave);
+
+void closeSlaveConnection(struct i2c_slave_t *i2cSlave);
 
 #ifdef __cplusplus
 }

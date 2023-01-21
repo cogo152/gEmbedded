@@ -46,11 +46,15 @@ extern "C" {
 #define GPIO_PIN_LEVEL_HIGH             (0b1U)
 #define GPIO_PIN_LEVEL_LOW              (0b0U)
 
+#define GPIO_PIN_OPENED                 (1)
+#define GPIO_PIN_CLOSED                 (0)
+
 // parameter values
 
 struct output_pin_t {
     uint8_t number;
     uint8_t level;
+    volatile uint16_t status;
     uint32_t reference;
 };
 
@@ -58,6 +62,7 @@ struct input_pin_t {
     uint8_t number;
     uint8_t pullUpDown;
     uint8_t level;
+    volatile uint8_t status;
     uint32_t reference;
 };
 
@@ -65,6 +70,7 @@ struct listener_pin_t {
     uint8_t number;
     uint8_t cevent;
     uint8_t revent;
+    volatile uint8_t status;
     int reference;
     int timeoutInMilSec;
     uint64_t timeStamp;
@@ -73,6 +79,7 @@ struct listener_pin_t {
 struct alternate_pin_t {
     uint8_t number;
     uint8_t function;
+    volatile uint16_t status;
 };
 
 // returns GPIO_STATUS_CONFIG_ERROR if mapping fails
@@ -84,11 +91,11 @@ int shutdownGpioDriver(void);
 // returns GPIO_STATUS_CONFIG_ERROR if pin function configuration fails
 int openOutputPin(struct output_pin_t *outputPin);
 
-void setOutputPinHigh(struct output_pin_t *outputPin);
+int setOutputPinHigh(struct output_pin_t *outputPin);
 
-void readOutputPinLevel(struct output_pin_t *outputPin);
+int readOutputPinLevel(struct output_pin_t *outputPin);
 
-void setOutputPinLow(struct output_pin_t *outputPin);
+int setOutputPinLow(struct output_pin_t *outputPin);
 
 void closeOutputPin(struct output_pin_t *outputPin);
 
@@ -96,7 +103,7 @@ int openInputPin(struct input_pin_t *inputPin);
 
 int updateInputPin(struct input_pin_t *inputPin);
 
-void readInputPinLevel(struct input_pin_t *inputPin);
+int readInputPinLevel(struct input_pin_t *inputPin);
 
 void closeInputPin(struct input_pin_t *inputPin);
 
@@ -123,7 +130,9 @@ void closeListenerPin(struct listener_pin_t *listenerPin);
 
 // returns GPIO_STATUS_CONFIG_ERROR if pin function configuration fails
 int openAlternatePin(struct alternate_pin_t *alternatePin);
+
 int updateAlternatePin(struct alternate_pin_t *alternatePin);
+
 void closeAlternatePin(struct alternate_pin_t *alternatePin);
 
 #ifdef __cplusplus

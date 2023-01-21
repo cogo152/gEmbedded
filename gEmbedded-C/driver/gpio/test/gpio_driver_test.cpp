@@ -11,7 +11,6 @@
 #include "driver_context.h"
 #include "gpio_driver.h"
 
-
 TEST(GpioDriverTest, testOutputPin) {
 
     int status;
@@ -34,7 +33,6 @@ TEST(GpioDriverTest, testOutputPin) {
     ASSERT_EQ(outputPin.level, GPIO_PIN_LEVEL_LOW);
 
     closeOutputPin(&outputPin);
-    ASSERT_EQ(outputPin.reference, 0);
 
     shutdownDrivers();
 
@@ -154,14 +152,12 @@ TEST(GpioDriverTest, testListenerPin) {
     listenerPin.reference = 1;
     status = openListenerPin(&listenerPin);
     ASSERT_EQ(status, GPIO_STATUS_CONFIG_ERROR);
-    ASSERT_EQ(listenerPin.reference, 0);
 
     // timeout = 0
     listenerPin.timeoutInMilSec = -1;
     listenerPin.reference = 1;
     status = openListenerPin(&listenerPin);
     ASSERT_EQ(status, GPIO_STATUS_CONFIG_ERROR);
-    ASSERT_EQ(listenerPin.reference, 0);
 
     // set pinevent both
     listenerPin.timeoutInMilSec = GPIO_SLEEP_IN_MILSEC;
@@ -250,7 +246,6 @@ TEST(GpioDriverTest, testListenerPin) {
     closeOutputPin(&outputPin);
 
     closeListenerPin(&listenerPin);
-    ASSERT_EQ(listenerPin.reference, 0);
 
     shutdownDrivers();
 

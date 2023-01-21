@@ -7,4 +7,6 @@
 
 #include "gtest/gtest.h"
 
+#define CORE_CLOCK_SPEED        (1500000000U)
+
 #endif //GEMBEDDED_C_COMMON_TEST_H
