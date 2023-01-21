@@ -17,9 +17,9 @@ extern "C" {
 // config values
 struct i2c_slave_t {
     uint32_t inputLength;
-    uint32_t inputBuffer[8];
+    uint32_t *inputBuffer;
     uint32_t outputLength;
-    uint8_t outputBuffer[8];
+    uint8_t *outputBuffer;
     uint8_t address;
     uint16_t clockDivider;
     uint32_t clockSpeedInHz;

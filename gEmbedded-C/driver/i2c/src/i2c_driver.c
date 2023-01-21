@@ -92,10 +92,12 @@ int openSlaveConnection(struct i2c_slave_t *const i2cSlave) {
     const uint32_t outputLength = i2cSlave->outputLength;
     const uint8_t data = i2cSlave->outputBuffer[0];
     const uint32_t inputLength = i2cSlave->inputLength;
+    const uint16_t status = i2cSlave->status;
 
     i2cSlave->outputLength = 1;
     i2cSlave->outputBuffer[0] = i2cSlave->address;
     i2cSlave->inputLength = 1;
+    i2cSlave->status = I2C_SLAVE_OPENED;
 
     const int sendStatus = sendToSlave(i2cSlave);
     const int receiveStatus = receiveFromSlave(i2cSlave);
@@ -103,6 +105,7 @@ int openSlaveConnection(struct i2c_slave_t *const i2cSlave) {
     i2cSlave->outputLength = outputLength;
     i2cSlave->outputBuffer[0] = data;
     i2cSlave->inputLength = inputLength;
+    i2cSlave->status = status;
 
     if (sendStatus != I2C_STATUS_SUCCESS) {
         return I2C_STATUS_CONFIG_ERROR;
