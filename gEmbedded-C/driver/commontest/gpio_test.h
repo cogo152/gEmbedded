@@ -2,12 +2,13 @@
 // Created by sondahi on 15.01.23.
 //
 
-#include "gpio_driver.h"
-
 #ifndef GEMBEDDED_C_GPIO_TEST_H
 #define GEMBEDDED_C_GPIO_TEST_H
 
+#include "common_test.h"
+
 #include "gpio_driver.h"
+#include "driver_context.h"
 
 #define GPIO_OUTPUT_SELF                    (22)
 #define GPIO_OUTPUT_PULLDOWN                (17)

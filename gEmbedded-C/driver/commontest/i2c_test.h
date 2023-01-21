@@ -5,7 +5,10 @@
 #ifndef GEMBEDDED_C_I2C_TEST_H
 #define GEMBEDDED_C_I2C_TEST_H
 
+#include "common_test.h"
+
 #include "i2c_driver.h"
+#include "driver_context.h"
 
 #define I2C_SLAVE_ADDRESS               (0x4bU)
 #define I2C_SLAVE_CHANNEL               (0b10000000U)

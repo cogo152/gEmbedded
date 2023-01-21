@@ -82,7 +82,7 @@ int shutdownI2cDriver(void) {
 
 int openSlaveConnection(struct i2c_slave_t *const i2cSlave) {
 
-    if (i2cSlave->status == I2C_SLAVE_OPENED){
+    if (i2cSlave->status == I2C_SLAVE_OPENED) {
         return I2C_STATUS_CONFIG_ERROR;
     }
 
@@ -122,7 +122,7 @@ int openSlaveConnection(struct i2c_slave_t *const i2cSlave) {
 
 int sendToSlave(struct i2c_slave_t *const i2cSlave) {
 
-    if (i2cSlave->status == I2C_SLAVE_CLOSED){
+    if (i2cSlave->status == I2C_SLAVE_CLOSED) {
         return I2C_STATUS_CONFIG_ERROR;
     }
 
@@ -158,7 +158,7 @@ int sendToSlave(struct i2c_slave_t *const i2cSlave) {
 
 int receiveFromSlave(struct i2c_slave_t *const i2cSlave) {
 
-    if (i2cSlave->status == I2C_SLAVE_CLOSED){
+    if (i2cSlave->status == I2C_SLAVE_CLOSED) {
         return I2C_STATUS_CONFIG_ERROR;
     }
 

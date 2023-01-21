@@ -5,10 +5,7 @@
 #include <chrono>
 #include <thread>
 
-#include "common_test.h"
 #include "gpio_test.h"
-
-#include "driver_context.h"
 
 TEST(GpioDriverTest, testOutputPin) {
 
