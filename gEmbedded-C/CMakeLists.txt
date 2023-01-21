@@ -57,4 +57,5 @@ add_custom_command(
         COMMAND ${CMAKE_OBJDUMP} -S --disassemble ${LIB_TEST} > library_test.list
 )
 
+# order is important for test
 add_subdirectory(driver)

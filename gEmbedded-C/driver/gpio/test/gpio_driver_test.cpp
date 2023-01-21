@@ -8,19 +8,9 @@
 #include "common_test.h"
 #include "gpio_test.h"
 
+#include "driver_context.h"
 #include "gpio_driver.h"
 
-TEST(GpioDriverTest, testSetupShutdownGpio) {
-
-    int status;
-
-    status = setupGpioDriver();
-    ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
-
-    status = shutdownGpioDriver();
-    ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
-
-}
 
 TEST(GpioDriverTest, testOutputPin) {
 
@@ -29,7 +19,7 @@ TEST(GpioDriverTest, testOutputPin) {
     outputPin.number = GPIO_OUTPUT_SELF;
     outputPin.reference = 0;
 
-    setupGpioDriver();
+    setupDrivers();
 
     status = openOutputPin(&outputPin);
     ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
@@ -46,7 +36,7 @@ TEST(GpioDriverTest, testOutputPin) {
     closeOutputPin(&outputPin);
     ASSERT_EQ(outputPin.reference, 0);
 
-    shutdownGpioDriver();
+    shutdownDrivers();
 
 }
 
@@ -59,7 +49,7 @@ TEST(GpioDriverTest, testInputPin) {
     pullDown_OUTPUTPIN.number = GPIO_PULLDOWN_OUTPUT;
     pullDown_INPUTPIN.number = GPIO_PULLDOWN_INPUT;
 
-    setupGpioDriver();
+    setupDrivers();
 
     openOutputPin(&pullDown_OUTPUTPIN);
 
@@ -132,7 +122,7 @@ TEST(GpioDriverTest, testInputPin) {
     closeOutputPin(&pullUp_OUTPUTPIN);
     closeInputPin(&pullUp_INPUTPIN);
 
-    shutdownGpioDriver();
+    shutdownDrivers();
 
 }
 
@@ -155,7 +145,8 @@ TEST(GpioDriverTest, testListenerPin) {
     struct listener_pin_t listenerPin;
     listenerPin.number = GPIO_LISTENER_INPUT;
 
-    setupGpioDriver();
+    setupDrivers();
+
     openOutputPin(&outputPin);
 
     // timeout < 0
@@ -261,7 +252,7 @@ TEST(GpioDriverTest, testListenerPin) {
     closeListenerPin(&listenerPin);
     ASSERT_EQ(listenerPin.reference, 0);
 
-    shutdownGpioDriver();
+    shutdownDrivers();
 
 }
 
@@ -271,7 +262,7 @@ TEST(GpioDriverTest, testAlternatePin) {
     struct alternate_pin_t alternatePin;
     alternatePin.number = GPIO_ALTERNATE_SELF;
 
-    setupGpioDriver();
+    setupDrivers();
 
     alternatePin.function = GPIO_PIN_FUNCTION_ALT0;
     status = openAlternatePin(&alternatePin);
@@ -302,6 +293,7 @@ TEST(GpioDriverTest, testAlternatePin) {
     ASSERT_EQ(status, GPIO_STATUS_SUCCESS);
 
     closeAlternatePin(&alternatePin);
-    shutdownGpioDriver();
+
+    shutdownDrivers();
 
 }

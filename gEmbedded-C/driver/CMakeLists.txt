@@ -21,5 +21,8 @@ target_include_directories(
         ${INC_TEST}
 )
 
+# order is important for test
 add_subdirectory(memory)
+add_subdirectory(context)
 add_subdirectory(gpio)
+add_subdirectory(i2c)

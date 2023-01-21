@@ -9,6 +9,7 @@ extern "C" {
 #endif
 
 #include "common.h"
+#include "driver_exception.h"
 
 // config values
 
@@ -44,12 +45,6 @@ extern "C" {
 #define GPIO_CHIP                       ("/dev/gpiochip0")
 #define GPIO_PIN_LEVEL_HIGH             (0b1U)
 #define GPIO_PIN_LEVEL_LOW              (0b0U)
-
-#define GPIO_STATUS_SUCCESS             (0)
-#define GPIO_STATUS_CONFIG_ERROR        (-1)
-#define GPIO_STATUS_POLL_IO_ERROR       (-2)
-#define GPIO_STATUS_POLL_TIMEOUT_ERROR  (-3)
-#define GPIO_STATUS_FILE_IO_ERROR       (-4)
 
 // parameter values
 
