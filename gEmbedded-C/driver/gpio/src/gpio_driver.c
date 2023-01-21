@@ -2,11 +2,6 @@
 // Created by sondahi on 12.01.23.
 //
 
-#include <stdlib.h>
-
-#include <stdio.h>
-
-#include <stdlib.h>
 #include <linux/gpio.h>
 #include <sys/ioctl.h>
 #include <sys/poll.h>
@@ -323,45 +318,42 @@ int openListenerPin(struct listener_pin_t *const listenerPin) {
         return GPIO_STATUS_CONFIG_ERROR;
     }
 
-    if (listenerPin->timeoutInMilSec <= 0) {
-        return GPIO_STATUS_CONFIG_ERROR;
-    }
-
-    printf("HERE");
-
     const int fd = open(GPIO_CHIP, O_RDONLY);
     if (fd < 0) {
-        listenerPin->reference = 0;
         return GPIO_STATUS_CONFIG_ERROR;
     }
 
     struct gpioevent_request rq;
     rq.lineoffset = listenerPin->number;
     rq.handleflags = GPIOHANDLE_REQUEST_INPUT;
-    if (listenerPin->cevent == GPIO_PIN_EVENT_RISING) {
-        rq.eventflags = GPIOEVENT_EVENT_RISING_EDGE;
-    } else if (listenerPin->cevent == GPIO_PIN_EVENT_FALLING) {
-        rq.eventflags = GPIOEVENT_EVENT_FALLING_EDGE;
-    } else {
-        rq.eventflags = GPIOEVENT_REQUEST_BOTH_EDGES;
+    switch (listenerPin->cevent) {
+        case GPIO_PIN_EVENT_RISING: {
+            rq.eventflags = GPIOEVENT_EVENT_RISING_EDGE;
+            break;
+        }
+        case GPIO_PIN_EVENT_FALLING: {
+            rq.eventflags = GPIOEVENT_EVENT_FALLING_EDGE;
+            break;
+        }
+        default: {
+            rq.eventflags = GPIOEVENT_REQUEST_BOTH_EDGES;
+            break;
+        }
     }
 
     const int ic = ioctl(fd, GPIO_GET_LINEEVENT_IOCTL, &rq);
     close(fd);
     if (ic < 0) {
-        listenerPin->reference = 0;
         return GPIO_STATUS_CONFIG_ERROR;
     }
 
     const uint8_t _pinFunction = readPinFunction(listenerPin->number);
     if (_pinFunction != GPIO_PIN_FUNCTION_INPUT) {
-        listenerPin->reference = 0;
         return GPIO_STATUS_CONFIG_ERROR;
     }
 
     const uint8_t _pinEvent = readPinEvent(listenerPin->number);
     if (_pinEvent != listenerPin->cevent) {
-        listenerPin->reference = 0;
         return GPIO_STATUS_CONFIG_ERROR;
     }
 
@@ -400,11 +392,9 @@ int readListenerPinEvent(struct listener_pin_t *const listenerPin) {
     const int rv = poll(&pfd, 1, listenerPin->timeoutInMilSec);
     switch (rv) {
         case -1: {
-            listenerPin->timeStamp = 0;
             return GPIO_STATUS_POLL_IO_ERROR;
         }
         case 0: {
-            listenerPin->timeStamp = 0;
             return GPIO_STATUS_POLL_TIMEOUT_ERROR;
         }
         default: {
