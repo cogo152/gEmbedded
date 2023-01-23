@@ -4,7 +4,7 @@
 
 #include "i2c_peripheral.h"
 #include "i2c_driver.h"
-#include "gpio_driver.h"
+#include "gpio_driver.txt"
 #include "memory_mapper.h"
 
 static struct alternate_pin_t sdaPin;

@@ -5,10 +5,6 @@
 #include "common_test.h"
 #include "memory_test.h"
 
-extern "C" {
-#include "memory_mapper.h"
-}
-
 static void  *pointer = nullptr;
 
 TEST(MapperTest, testMapBaseRegister) {

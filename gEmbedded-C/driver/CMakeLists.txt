@@ -1,7 +1,6 @@
 set(
         INC
         ${CMAKE_CURRENT_SOURCE_DIR}/api
-        ${CMAKE_CURRENT_SOURCE_DIR}/common
 )
 
 target_include_directories(
@@ -22,7 +21,7 @@ target_include_directories(
 )
 
 # order is important for test
-add_subdirectory(memory)
-add_subdirectory(context)
-add_subdirectory(gpio)
-add_subdirectory(i2c)
+add_subdirectory(common)
+#add_subdirectory(context)
+add_subdirectory(pin)
+#add_subdirectory(i2c)

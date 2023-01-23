@@ -3,7 +3,8 @@
 //
 
 #include "driver_context.h"
-#include "gpio_driver.h"
+#include "pin_config_driver.h"
+#include "pin_io_driver.h"
 #include "i2c_driver.h"
 
 int setupDrivers(void) {

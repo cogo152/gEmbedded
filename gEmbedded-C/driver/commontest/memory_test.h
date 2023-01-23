@@ -5,6 +5,10 @@
 #ifndef GEMBEDDED_C_MEMORY_TEST_H
 #define GEMBEDDED_C_MEMORY_TEST_H
 
+extern "C" {
+#include "memory_mapper.h"
+}
+
 /*
  * mapper definitions
  */
