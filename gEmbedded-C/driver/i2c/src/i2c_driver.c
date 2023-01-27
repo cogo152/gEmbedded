@@ -147,15 +147,23 @@ int openSlaveConnection(i2c_slave_t *const i2cSlave) {
     return I2C_CONFIG_EXCEPTION_NO_EXCEPTION;
 }
 
-int sendToSlave(i2c_slave_t *const i2cSlave) {
+static void configureSlave(i2c_slave_t *const i2cSlave){
 
-    volatile int count = 0;
-
-    *registers.DLEN = i2cSlave->outputLength;
     *registers.A = i2cSlave->address;
     *registers.DIV = i2cSlave->clockDivider;
     *registers.DEL = i2cSlave->dataDelay;
     *registers.CLKT = i2cSlave->clockStretchTimeout;
+
+}
+
+int sendToSlave(i2c_slave_t *const i2cSlave) {
+
+    configureSlave(i2cSlave);
+
+    *registers.DLEN = i2cSlave->outputLength;
+
+    volatile int count = 0;
+
     *registers.S = I2C_S_CLEAR;
     *registers.C = I2C_C_SEND;
 
@@ -181,13 +189,12 @@ int sendToSlave(i2c_slave_t *const i2cSlave) {
 
 int receiveFromSlave(i2c_slave_t *const i2cSlave) {
 
-    volatile int count = 0;
+    configureSlave(i2cSlave);
 
     *registers.DLEN = i2cSlave->inputLength;
-    *registers.A = i2cSlave->address;
-    *registers.DIV = i2cSlave->clockDivider;
-    *registers.DEL = i2cSlave->dataDelay;
-    *registers.CLKT = i2cSlave->clockStretchTimeout;
+
+    volatile int count = 0;
+
     *registers.S = I2C_S_CLEAR;
     *registers.C = I2C_C_RECEIVE;
 
