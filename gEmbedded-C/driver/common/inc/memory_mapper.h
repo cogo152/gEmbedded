@@ -9,7 +9,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "common.h"
+#include "common.h" // no size_t vs
 
 #define MEMORY_FILE_NAME    ("/dev/mem")
 #define BLOCK_SIZE          (0X1000)
@@ -17,13 +17,12 @@
 #define PROT_FLAG           (PROT_READ | PROT_WRITE)
 #define MAP_FLAG            (MAP_SHARED)
 
-typedef enum {
-    MAPPER_SUCCESS = 0,
-    MAPPER_ERROR = 1
-} MAPPER_STATUS;
+#define MAPPER_EXCEPTION_NO_EXCEPTION       (0)
+#define MAPPER_EXCEPTION_MAPPING_ERROR      (-1)
+#define MAPPER_EXCEPTION_UNMAPPING_ERROR    (-2)
 
-MAPPER_STATUS mapBaseRegister(const char *fileName, size_t length, off_t offset, void **pointer);
+int mapBaseRegister(const char *fileName, size_t length, off_t offset, void **pointer);
 
-MAPPER_STATUS unmapBaseRegister(void **pointer, size_t length);
+int unmapBaseRegister(void **pointer, size_t length);
 
 #endif //GEMBEDDED_C_MEMORY_MAPPER_H

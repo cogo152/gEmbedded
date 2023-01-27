@@ -8,7 +8,4 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define TRUE    (0b1U)
-#define FALSE   (0b0U)
-
 #endif //GEMBEDDED_C_COMMON_H

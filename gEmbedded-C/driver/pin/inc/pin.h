@@ -7,22 +7,22 @@
 
 #include "common.h"
 
-struct output_pin_t {
+typedef struct output_pin {
     uint8_t number;
     uint8_t level;
     uint32_t reference;
     volatile uint32_t status;
-};
+} output_pin_t;
 
-struct input_pin_t {
+typedef struct input_pin {
     uint8_t number;
     uint8_t pullUpDown;
     uint8_t level;
     volatile uint8_t status;
     uint32_t reference;
-};
+} input_pin_t;
 
-struct listener_pin_t {
+typedef struct listener_pin {
     uint8_t number;
     uint8_t cevent;
     uint8_t revent;
@@ -30,12 +30,6 @@ struct listener_pin_t {
     int reference;
     int timeoutInMilSec;
     uint64_t timeStamp;
-};
-
-struct alternate_pin_t {
-    uint8_t number;
-    uint8_t function;
-    volatile uint16_t status;
-};
+} listener_pin_t;
 
 #endif //GEMBEDDED_C_PIN_H
