@@ -29,12 +29,12 @@ static void closeBSCPins();
 int setupI2cDriver(void) {
 
     const int gpioBaseStatus = mapBaseRegister(MEMORY_FILE_NAME, BLOCK_SIZE, GPIO_BASE_ADDRESS, &gpioBase);
-    if (gpioBaseStatus != MAPPER_EXCEPTION_NO_EXCEPTION) {
+    if (gpioBaseStatus != MAPPER_EXCEPTION_NO_ERROR) {
         return I2C_DRIVER_EXCEPTION_SETUP_ERROR;
     }
 
     const int bscBaseStatus = mapBaseRegister(MEMORY_FILE_NAME, BLOCK_SIZE, BSC1_BASE_ADDRESS, &bscBase);
-    if (bscBaseStatus != MAPPER_EXCEPTION_NO_EXCEPTION) {
+    if (bscBaseStatus != MAPPER_EXCEPTION_NO_ERROR) {
         return I2C_DRIVER_EXCEPTION_SETUP_ERROR;
     }
 
@@ -65,12 +65,12 @@ int shutdownI2cDriver(void) {
     closeBSCPins();
 
     const int gpioBaseStatus = unmapBaseRegister(&gpioBase, BLOCK_SIZE);
-    if (gpioBaseStatus != MAPPER_EXCEPTION_NO_EXCEPTION) {
+    if (gpioBaseStatus != MAPPER_EXCEPTION_NO_ERROR) {
         return I2C_DRIVER_EXCEPTION_SHUTDOWN_ERROR;
     }
 
     const int bscBaseStatus = unmapBaseRegister(&bscBase, BLOCK_SIZE);
-    if (bscBaseStatus != MAPPER_EXCEPTION_NO_EXCEPTION) {
+    if (bscBaseStatus != MAPPER_EXCEPTION_NO_ERROR) {
         return I2C_DRIVER_EXCEPTION_SHUTDOWN_ERROR;
     }
 

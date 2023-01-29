@@ -17,7 +17,7 @@
 #define PROT_FLAG           (PROT_READ | PROT_WRITE)
 #define MAP_FLAG            (MAP_SHARED)
 
-#define MAPPER_EXCEPTION_NO_EXCEPTION       (0)
+#define MAPPER_EXCEPTION_NO_ERROR           (0)
 #define MAPPER_EXCEPTION_MAPPING_ERROR      (-1)
 #define MAPPER_EXCEPTION_UNMAPPING_ERROR    (-2)
 

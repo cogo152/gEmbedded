@@ -35,7 +35,7 @@ int mapBaseRegister(const char *const fileName, const size_t length, const off_t
 
     close(memoryFileDescriptor);
 
-    return MAPPER_EXCEPTION_NO_EXCEPTION;
+    return MAPPER_EXCEPTION_NO_ERROR;
 
 }
 
@@ -61,6 +61,6 @@ int unmapBaseRegister(void **const pointer, size_t const length) {
         *pointer = NULL;
     }
 
-    return MAPPER_EXCEPTION_NO_EXCEPTION;
+    return MAPPER_EXCEPTION_NO_ERROR;
 
 }

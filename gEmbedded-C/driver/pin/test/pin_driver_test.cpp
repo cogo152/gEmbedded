@@ -20,33 +20,33 @@ extern "C" {
 #define PIN_INPUT_PULLUP                   (21)
 #define PIN_LISTENER                       (6)
 
-#define PIN_SLEEP_IN_MILSEC                (1000)
+#define PIN_SLEEP_IN_MILSEC                (10)
 
-output_pin_t outputPin_SELF = {
+static output_pin_t outputPin_SELF = {
         .number = PIN_OUTPUT_SELF
 };
 
-output_pin_t outputPin_PULLDOWN = {
+static output_pin_t outputPin_PULLDOWN = {
         .number = PIN_OUTPUT_PULLDOWN
 };
 
-output_pin_t outputPin_PULLUP = {
+static output_pin_t outputPin_PULLUP = {
         .number = PIN_OUTPUT_PULLUP
 };
 
-output_pin_t outputPin_LISTENER = {
+static output_pin_t outputPin_LISTENER = {
         .number = PIN_OUTPUT_LISTENER,
 };
 
-input_pin_t inputPin_PULLDOWN = {
+static input_pin_t inputPin_PULLDOWN = {
         .number = PIN_INPUT_PULLDOWN,
 };
 
-input_pin_t inputPin_PULLUP = {
+static input_pin_t inputPin_PULLUP = {
         .number = PIN_INPUT_PULLUP,
 };
 
-listener_pin_t listenerPin = {
+static listener_pin_t listenerPin = {
         .number = PIN_LISTENER,
         .timeoutInMilSec = PIN_SLEEP_IN_MILSEC
 };
@@ -54,22 +54,22 @@ listener_pin_t listenerPin = {
 static int testSetupPinDriver() {
 
     const int status = setupPinDriver();
-    if (status != PIN_DRIVER_EXCEPTION_NO_EXCEPTION) {
+    if (status != PIN_DRIVER_EXCEPTION_NO_ERROR) {
         return status;
     }
 
-    return PIN_DRIVER_EXCEPTION_NO_EXCEPTION;
+    return PIN_DRIVER_EXCEPTION_NO_ERROR;
 
 }
 
 static int testShutdownPinDriver() {
 
     const int status = shutdownPinDriver();
-    if (status != PIN_DRIVER_EXCEPTION_NO_EXCEPTION) {
+    if (status != PIN_DRIVER_EXCEPTION_NO_ERROR) {
         return status;
     }
 
-    return PIN_DRIVER_EXCEPTION_NO_EXCEPTION;
+    return PIN_DRIVER_EXCEPTION_NO_ERROR;
 
 }
 
@@ -77,10 +77,10 @@ TEST(PinDriverTest, testSetupShutdownPinDriver) {
 
     int status;
     status = testSetupPinDriver();
-    ASSERT_EQ(status, PIN_DRIVER_EXCEPTION_NO_EXCEPTION);
+    ASSERT_EQ(status, PIN_DRIVER_EXCEPTION_NO_ERROR);
 
     status = testShutdownPinDriver();
-    ASSERT_EQ(status, PIN_DRIVER_EXCEPTION_NO_EXCEPTION);
+    ASSERT_EQ(status, PIN_DRIVER_EXCEPTION_NO_ERROR);
 
 }
 
@@ -91,7 +91,7 @@ TEST(PinDriverTest, testOutputPin) {
     setupPinDriver();
 
     status = openOutputPin(&outputPin_SELF);
-    ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_EXCEPTION);
+    ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_ERROR);
     ASSERT_EQ(outputPin_SELF.reference, 1 << ((outputPin_SELF.number % 32) * 1));
 
     setOutputPinHigh(&outputPin_SELF);
@@ -117,7 +117,7 @@ TEST(PinDriverTest, testInputPin) {
 
     inputPin_PULLDOWN.pullUpDown = PIN_CONFIG_PUD_NO_RESISTOR;
     status = openInputPin(&inputPin_PULLDOWN);
-    ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_EXCEPTION);
+    ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_ERROR);
     ASSERT_EQ(inputPin_PULLDOWN.reference, 1 << ((inputPin_PULLDOWN.number % 32) * 1));
 
     setOutputPinHigh(&outputPin_PULLDOWN);
@@ -131,7 +131,7 @@ TEST(PinDriverTest, testInputPin) {
 
     inputPin_PULLDOWN.pullUpDown = PIN_CONFIG_PUD_PULL_DOWN;
     status = updateInputPin(&inputPin_PULLDOWN);
-    ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_EXCEPTION);
+    ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_ERROR);
 
     setOutputPinHigh(&outputPin_PULLDOWN);
     std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
@@ -144,7 +144,7 @@ TEST(PinDriverTest, testInputPin) {
 
     inputPin_PULLUP.pullUpDown = PIN_CONFIG_PUD_NO_RESISTOR;
     status = openInputPin(&inputPin_PULLUP);
-    ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_EXCEPTION);
+    ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_ERROR);
     ASSERT_EQ(inputPin_PULLUP.reference, 1 << ((inputPin_PULLUP.number % 32) * 1));
 
     setOutputPinHigh(&outputPin_PULLUP);
@@ -158,7 +158,7 @@ TEST(PinDriverTest, testInputPin) {
 
     inputPin_PULLUP.pullUpDown = PIN_CONFIG_PUD_PULL_UP;
     status = updateInputPin(&inputPin_PULLUP);
-    ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_EXCEPTION);
+    ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_ERROR);
 
     setOutputPinHigh(&outputPin_PULLUP);
     std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
@@ -199,7 +199,7 @@ TEST(PinDriverTest, testListenerPin) {
     // set pinevent both
     listenerPin.cevent = PIN_CONFIG_EVENT_BOTH;
     status = openListenerPin(&listenerPin);
-    ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_EXCEPTION);
+    ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_ERROR);
     ASSERT_GT(listenerPin.reference, 0);
 
     // no trigger timeout
@@ -211,7 +211,7 @@ TEST(PinDriverTest, testListenerPin) {
     std::thread risingSuccessOnBoth(invokeRising, &outputPin_LISTENER);
     status = readListenerPinEvent(&listenerPin);
     risingSuccessOnBoth.join();
-    ASSERT_EQ(status, PIN_IO_EXCEPTION_NO_EXCEPTION);
+    ASSERT_EQ(status, PIN_IO_EXCEPTION_NO_ERROR);
     ASSERT_EQ(listenerPin.revent, PIN_IO_EVENT_RISING);
     ASSERT_GT(listenerPin.timeStamp, 0);
 
@@ -220,7 +220,7 @@ TEST(PinDriverTest, testListenerPin) {
     std::thread fallingSuccessOnBoth(invokeFalling, &outputPin_LISTENER);
     status = readListenerPinEvent(&listenerPin);
     fallingSuccessOnBoth.join();
-    ASSERT_EQ(status, PIN_IO_EXCEPTION_NO_EXCEPTION);
+    ASSERT_EQ(status, PIN_IO_EXCEPTION_NO_ERROR);
     ASSERT_EQ(listenerPin.revent, PIN_IO_EVENT_FALLING);
     ASSERT_GT(listenerPin.timeStamp, 0);
 
@@ -229,7 +229,7 @@ TEST(PinDriverTest, testListenerPin) {
     // update event rising success
     listenerPin.cevent = PIN_CONFIG_EVENT_RISING;
     status = updateListenerPin(&listenerPin);
-    ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_EXCEPTION);
+    ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_ERROR);
 
     // trig falling fail timeout on rising
     std::thread fallingFailOnRising(invokeFalling, &outputPin_LISTENER);
@@ -242,7 +242,7 @@ TEST(PinDriverTest, testListenerPin) {
     std::thread risingSuccessOnRising(invokeRising, &outputPin_LISTENER);
     status = readListenerPinEvent(&listenerPin);
     risingSuccessOnRising.join();
-    ASSERT_EQ(status, PIN_IO_EXCEPTION_NO_EXCEPTION);
+    ASSERT_EQ(status, PIN_IO_EXCEPTION_NO_ERROR);
     ASSERT_EQ(listenerPin.revent, PIN_IO_EVENT_RISING);
     ASSERT_GT(listenerPin.timeStamp, 0);
 
@@ -251,7 +251,7 @@ TEST(PinDriverTest, testListenerPin) {
     // update event falling success
     listenerPin.cevent = PIN_CONFIG_EVENT_FALLING;
     status = updateListenerPin(&listenerPin);
-    ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_EXCEPTION);
+    ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_ERROR);
 
     // trig rising fail timeout on falling
     std::thread risingFailOnFalling(invokeRising, &outputPin_LISTENER);
@@ -264,7 +264,7 @@ TEST(PinDriverTest, testListenerPin) {
     std::thread fallingSuccessOnFalling(invokeFalling, &outputPin_LISTENER);
     status = readListenerPinEvent(&listenerPin);
     fallingSuccessOnFalling.join();
-    ASSERT_EQ(status, PIN_IO_EXCEPTION_NO_EXCEPTION);
+    ASSERT_EQ(status, PIN_IO_EXCEPTION_NO_ERROR);
     ASSERT_EQ(listenerPin.revent, PIN_IO_EVENT_FALLING);
     ASSERT_GT(listenerPin.timeStamp, 0);
 

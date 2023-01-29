@@ -35,7 +35,7 @@ TEST(MapperTest, testMapBaseRegister) {
     EXPECT_EQ(status, MAPPER_EXCEPTION_MAPPING_ERROR);
 
     status = mapBaseRegister(MAPPER_FILE_NAME, MAPPER_BLOCK_SIZE, MAPPER_OFFSET, &pointer);
-    EXPECT_EQ(status, MAPPER_EXCEPTION_NO_EXCEPTION);
+    EXPECT_EQ(status, MAPPER_EXCEPTION_NO_ERROR);
     EXPECT_NE(pointer, nullptr);
 
 }
@@ -61,7 +61,7 @@ TEST(MapperTest, testUnmapBaseRegister) {
     EXPECT_EQ(status, MAPPER_EXCEPTION_UNMAPPING_ERROR);
 
     status = unmapBaseRegister(&pointer, MAPPER_BLOCK_SIZE);
-    EXPECT_EQ(status, MAPPER_EXCEPTION_NO_EXCEPTION);
+    EXPECT_EQ(status, MAPPER_EXCEPTION_NO_ERROR);
     EXPECT_EQ(pointer, nullptr);
 
 }

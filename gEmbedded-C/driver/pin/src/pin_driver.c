@@ -29,7 +29,7 @@ static gpio_registers_t registers = {
 int setupPinDriver(void) {
 
     const int status = mapBaseRegister(MEMORY_FILE_NAME, BLOCK_SIZE, GPIO_BASE_ADDRESS, &base);
-    if (status != MAPPER_EXCEPTION_NO_EXCEPTION) {
+    if (status != MAPPER_EXCEPTION_NO_ERROR) {
         return PIN_DRIVER_EXCEPTION_SETUP_ERROR;
     }
     const volatile uintptr_t offset = (uintptr_t) base;
@@ -47,14 +47,14 @@ int setupPinDriver(void) {
     registers.GPAFEN = (uintptr_t *) (offset + GPIO_GPAFEN_OFFSET);
     registers.GPPUD = (uintptr_t *) (offset + GPIO_GPPUD_OFFSET);
 
-    return PIN_DRIVER_EXCEPTION_NO_EXCEPTION;
+    return PIN_DRIVER_EXCEPTION_NO_ERROR;
 
 }
 
 int shutdownPinDriver(void) {
 
     const int status = unmapBaseRegister(&base, BLOCK_SIZE);
-    if (status != MAPPER_EXCEPTION_NO_EXCEPTION) {
+    if (status != MAPPER_EXCEPTION_NO_ERROR) {
         return PIN_DRIVER_EXCEPTION_SHUTDOWN_ERROR;
     }
     registers.GPFSEL = NULL;
@@ -70,7 +70,7 @@ int shutdownPinDriver(void) {
     registers.GPAFEN = NULL;
     registers.GPPUD = NULL;
 
-    return PIN_DRIVER_EXCEPTION_NO_EXCEPTION;
+    return PIN_DRIVER_EXCEPTION_NO_ERROR;
 
 }
 
@@ -167,15 +167,24 @@ int openOutputPin(output_pin_t *const outputPin) {
 
     outputPin->reference = 1 << ((outputPin->number % 32) * 1);
 
-    return PIN_CONFIG_EXCEPTION_NO_EXCEPTION;
+    return PIN_CONFIG_EXCEPTION_NO_ERROR;
 
 }
 
+/*
 void setOutputPinHigh(output_pin_t *const outputPin) {
 
     registers.GPSET[0] = outputPin->reference;
 
 }
+ */
+
+void setOutputPinHigh(int reference){
+
+    registers.GPSET[0] = reference;
+
+}
+
 
 void readOutputPinLevel(output_pin_t *const outputPin) {
 
@@ -217,7 +226,7 @@ int openInputPin(input_pin_t *const inputPin) {
 
     inputPin->reference = 1 << ((inputPin->number % 32) * 1);
 
-    return PIN_CONFIG_EXCEPTION_NO_EXCEPTION;
+    return PIN_CONFIG_EXCEPTION_NO_ERROR;
 
 }
 
@@ -290,7 +299,7 @@ int openListenerPin(listener_pin_t *const listenerPin) {
 
     listenerPin->reference = rq.fd;
 
-    return PIN_CONFIG_EXCEPTION_NO_EXCEPTION;
+    return PIN_CONFIG_EXCEPTION_NO_ERROR;
 
 }
 
@@ -329,7 +338,7 @@ int readListenerPinEvent(listener_pin_t *const listenerPin) {
                     listenerPin->revent = PIN_IO_EVENT_FALLING;
                 }
                 listenerPin->timeStamp = data.timestamp;
-                return PIN_IO_EXCEPTION_NO_EXCEPTION;
+                return PIN_IO_EXCEPTION_NO_ERROR;
             }
         }
     }
