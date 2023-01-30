@@ -20,9 +20,9 @@ static int isPinValid(const int pinNumber) {
 
 }
 
-int validateOutputPin(output_pin_t *const outputPin) {
+int validateOutputPin(pin_t *const pin) {
 
-    const int result = isPinValid(outputPin->number);
+    const int result = isPinValid(pin->cNumber);
     if (result == 0) {
         return PIN_VALIDATOR_EXCEPTION_NUMBER_ERROR;
     }
@@ -30,12 +30,12 @@ int validateOutputPin(output_pin_t *const outputPin) {
     return PIN_VALIDATOR_EXCEPTION_NO_ERROR;
 }
 
-int validateInputPin(input_pin_t *const inputPin) {
+int validateInputPin(pin_t *const pin) {
 
     return PIN_VALIDATOR_EXCEPTION_NO_ERROR;
 }
 
-int validateListenerPin(listener_pin_t *const listenerPin) {
+int validateListenerPin(pin_t *const pin) {
 
     return PIN_VALIDATOR_EXCEPTION_NO_ERROR;
 }

@@ -10,21 +10,21 @@ extern "C" {
 #endif
 
 #include "common.h"
-#include "pin_exception.h"
+#include "pin_status.h"
 
-int pinControllerSetup(void);
+int setupPinController(void);
 
-int pintControllerShutdown(void);
+int shutdownPinController(void);
 
-int outputPinOpen(int pinNumber, int *reference);
+int openOutputPin(int pinNumber, int *reference);
 
-int outputPinSet(int reference);
+int setOutputPinHigh(int reference);
 
-int outputPinRead(int reference, int *level);
+int readOutputPinLevel(int reference, int *level);
 
-int outputPinClear(int reference);
+int setOutputLow(int reference);
 
-int outputPinClose(int reference);
+int closeOutputPin(int reference);
 
 #ifdef __cplusplus
 }

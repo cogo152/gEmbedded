@@ -126,9 +126,4 @@ typedef volatile struct i2c_registers {
  * I2C DRIVER BLOCK BEGIN
  */
 
-extern void setPinFunction(volatile uintptr_t *GPFSEL, uint8_t pinNumber, uint8_t pinFunction);
-
-extern uint8_t readPinFunction(volatile uintptr_t *GPFSEL, uint8_t pinNumber);
-
-
 #endif //GEMBEDDED_C_PERIPHERAL_BCM2711_H

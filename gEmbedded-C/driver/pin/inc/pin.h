@@ -9,32 +9,17 @@
 #include "pthread.h"
 
 typedef struct {
-    int number;
-    int level;
-    uint32_t reference;
-    int status;
-    pthread_mutex_t mutex;
-
-} output_pin_t;
-
-typedef struct {
-    int number;
-    uint8_t pullUpDown;
-    int level;
-    uint32_t reference;
-    int status;
-    pthread_mutex_t mutex;
-} input_pin_t;
-
-typedef struct {
-    int number;
-    int cevent;
-    int revent;
-    int timeoutInMilSec;
-    uint64_t timeStamp;
-    int reference;
-    int status;
-    pthread_mutex_t mutex;
-} listener_pin_t;
+    pthread_mutex_t sLock;
+    int sState;
+    uint8_t cNumber;
+    uint8_t cFunction;
+    uint8_t cPullUpDown;
+    uint8_t cEvent;
+    int cEventTimeout;
+    uint32_t ioReference;
+    uint32_t ioLevel;
+    int ioEvent;
+    uint64_t ioTimeStamp;
+} pin_t;
 
 #endif //GEMBEDDED_C_PIN_H

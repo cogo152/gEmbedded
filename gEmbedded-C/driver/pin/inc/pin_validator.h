@@ -6,14 +6,14 @@
 #define GEMBEDDED_C_PIN_VALIDATOR_H
 
 #include "pin.h"
-#include "pin_exception.h"
+#include "pin_status.h"
 
 #define MAX_VALID_PIN_SIZE  (12)
 
-int validateOutputPin(output_pin_t *outputPin);
+int validateOutputPin(pin_t *pin);
 
-int validateInputPin(input_pin_t *inputPin);
+int validateInputPin(pin_t *pin);
 
-int validateListenerPin(listener_pin_t *listenerPin);
+int validateListenerPin(pin_t *pin);
 
 #endif //GEMBEDDED_C_PIN_VALIDATOR_H

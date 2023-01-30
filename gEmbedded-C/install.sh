@@ -8,5 +8,6 @@ mkdir ${TARGET_API}
 rm -rf ${TARGET_LIBRARY}
 mkdir ${TARGET_LIBRARY}
 
+cp ./common/*.h ${TARGET_API}
 cp ./controller/inc/*.h ${TARGET_API}
 cp ./build/libgEmbedded-C.a  ${TARGET_LIBRARY}

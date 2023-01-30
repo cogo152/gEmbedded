@@ -2,8 +2,8 @@
 // Created by sondahi on 28.01.23.
 //
 
-#ifndef GEMBEDDED_C_PIN_EXCEPTION_H
-#define GEMBEDDED_C_PIN_EXCEPTION_H
+#ifndef GEMBEDDED_C_PIN_STATUS_H
+#define GEMBEDDED_C_PIN_STATUS_H
 
 #define PIN_CONTROLLER_EXCEPTION_NO_ERROR       (0)
 #define PIN_CONTROLLER_INITIALIZED_NO_ERROR           (0)
@@ -36,5 +36,12 @@
 
 #define PIN_STORE_EXCEPTION_NO_ERROR            (-13)
 
+#define PIN_IO_LEVEL_HIGH                       (1)
+#define PIN_IO_LEVEL_LOW                        (0)
+#define PIN_IO_EVENT_RISING                     (1)
+#define PIN_IO_EVENT_FALLING                    (0)
 
-#endif //GEMBEDDED_C_PIN_EXCEPTION_H
+#define PIN_STATE_ELIGIBLE                     (1)
+#define PIN_STATE_INELIGIBLE                   (0)
+
+#endif //GEMBEDDED_C_PIN_STATUS_H

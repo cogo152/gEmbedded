@@ -5,16 +5,16 @@
 #ifndef GEMBEDDED_C_PIN_SESSION_H
 #define GEMBEDDED_C_PIN_SESSION_H
 
-#include <pthread.h>
+#include "pin.h"
+#include "pin_status.h"
 
-#include "pin_exception.h"
 
-int initSession(pthread_mutex_t *mutex);
+int initSession(pin_t *pin);
 
-int lockSession(pthread_mutex_t *mutex);
+int lockSession(pin_t *pin);
 
-int unlockSession(pthread_mutex_t *mutex);
+int unlockSession(pin_t *pin);
 
-int destroySession(pthread_mutex_t *mutex);
+int destroySession(pin_t *pin);
 
 #endif //GEMBEDDED_C_PIN_SESSION_H

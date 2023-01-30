@@ -6,42 +6,34 @@
 #define GEMBEDDED_C_PIN_DRIVER_H
 
 #include "pin.h"
-#include "pin_exception.h"
+#include "pin_status.h"
 
-#define PIN_IO_LEVEL_HIGH                       (1)
-#define PIN_IO_LEVEL_LOW                        (0)
-#define PIN_IO_EVENT_RISING                     (1)
-#define PIN_IO_EVENT_FALLING                    (0)
+int initPinDriver(void);
 
-int setupPinDriver(void);
+int destroyPinDriver(void);
 
-int shutdownPinDriver(void);
+int initOutputPin(pin_t *pin);
 
-int openOutputPin(output_pin_t *outputPin);
+void destroyOutputPin(pin_t *pin);
 
-//void setOutputPinHigh(output_pin_t *outputPin);
-void setOutputPinHigh(int reference);
+int initInputPin(pin_t *pin);
 
-void readOutputPinLevel(output_pin_t *outputPin);
+int updateInputPin(pin_t *pin);
 
-void setOutputPinLow(output_pin_t *outputPin);
+void destroyInputPin(pin_t *pin);
 
-void closeOutputPin(output_pin_t *outputPin);
+int initListenerPin(pin_t *pin);
 
-int openInputPin(input_pin_t *inputPin);
+int updateListenerPin(pin_t *pin);
 
-int updateInputPin(input_pin_t *inputPin);
+void destroyListenerPin(pin_t *pin);
 
-void readInputPinLevel(input_pin_t *inputPin);
+void setPin(pin_t *pin);
 
-void closeInputPin(input_pin_t *inputPin);
+void clearPin(pin_t *pin);
 
-int openListenerPin(listener_pin_t *listenerPin);
+void readPin(pin_t *pin);
 
-int updateListenerPin(listener_pin_t *listenerPin);
-
-int readListenerPinEvent(listener_pin_t *listenerPin);
-
-void closeListenerPin(listener_pin_t *listenerPin);
+int pollPin(pin_t *pin);
 
 #endif //GEMBEDDED_C_PIN_DRIVER_H

@@ -4,6 +4,8 @@
 
 #include <pthread.h>
 
+#include "peripheral.h"
+
 #include "pin_controller.h"
 #include "pin.h"
 #include "pin_session.h"
@@ -13,105 +15,106 @@
 
 static pthread_mutex_t controllerMutex = PTHREAD_MUTEX_INITIALIZER;
 
-int pinControllerSetup(void){
+int setupPinController(void){
 
-    setupPinDriver();
-
-    return PIN_CONTROLLER_EXCEPTION_NO_ERROR;
-
-}
-
-int pintControllerShutdown(void){
-
-    shutdownPinDriver();
+    initPinDriver();
 
     return PIN_CONTROLLER_EXCEPTION_NO_ERROR;
 
 }
 
-int outputPinOpen(int pinNumber, int *reference){
+int shutdownPinController(void){
 
-    output_pin_t outputPin;
-    pthread_mutex_t sessionMutex;
+    destroyPinDriver();
 
-    initSession(&sessionMutex);
+    return PIN_CONTROLLER_EXCEPTION_NO_ERROR;
 
-    outputPin.mutex=sessionMutex;
-    outputPin.number = pinNumber;
+}
+
+int openOutputPin(int pinNumber, int *reference){
+
+    pin_t outputPin;
+    outputPin.cNumber = pinNumber;
+    outputPin.cFunction = PIN_CONFIG_FUNCTION_OUTPUT;
 
     validateOutputPin(&outputPin);
 
-    openOutputPin(&outputPin);
+    initSession(&outputPin);
 
-    outputPin.status = 1;
+    initOutputPin(&outputPin);
 
-    pin_t pin;
-
-    pin.outputPin = outputPin;
-
-    addPin(pin,reference);
+    addPin(outputPin,reference);
 
     return PIN_CONTROLLER_EXCEPTION_NO_ERROR;
 
 }
 
-int outputPinSet(int reference){
+int setOutputPinHigh(int reference){
 
-    output_pin_t *const outputPin = &getPin(reference)->outputPin;
+    pin_t *const outputPin = getPin(reference);
 
-    lockSession(&outputPin->mutex);
+    lockSession(outputPin);
 
-    // check status
+    unlockSession(outputPin);
 
-    unlockSession(&outputPin->mutex);
-
-    setOutputPinHigh(outputPin);
+    setPin(outputPin);
 
     return PIN_CONTROLLER_EXCEPTION_NO_ERROR;
 
 }
 
-int outputPinRead(int reference, int *level){
+int readOutputPinLevel(int reference, int *level){
 
 
-    output_pin_t *const outputPin = &getPin(reference)->outputPin;
+    pin_t *const outputPin = getPin(reference);
 
-    lockSession(&outputPin->mutex);
+    lockSession(outputPin);
 
-    // check status
+    unlockSession(outputPin);
 
-    unlockSession(&outputPin->mutex);
+    readPin(outputPin);
 
-    readOutputPinLevel(outputPin);
-
-    *level = outputPin->level;
+    if(outputPin->ioLevel > 0){
+        *level = PIN_IO_LEVEL_HIGH;
+    } else {
+        *level = PIN_IO_LEVEL_LOW;
+    }
 
     return PIN_CONTROLLER_EXCEPTION_NO_ERROR;
 
 
 }
 
-int outputPinClear(int reference){
+int setOutputLow(int reference){
 
-    output_pin_t *const outputPin = &getPin(reference)->outputPin;
+    pin_t *const outputPin = getPin(reference);
 
-    lockSession(&outputPin->mutex);
+    lockSession(outputPin);
 
-    // check status
+    if(outputPin->sState <0 ){
+        return -1;
+    }
 
-    unlockSession(&outputPin->mutex);
+    unlockSession(outputPin);
 
-    setOutputPinLow(outputPin);
+    clearPin(outputPin);
 
     return PIN_CONTROLLER_EXCEPTION_NO_ERROR;
-
 }
 
-int outputPinClose(int reference){
+int closeOutputPin(int reference){
 
-    output_pin_t *const outputPin = &getPin(reference)->outputPin;
+    pin_t *const outputPin = getPin(reference);
 
-    closeOutputPin(outputPin);
+    lockSession(outputPin);
+
+    if(outputPin->sState <0 ){
+        return -1;
+    }
+
+    unlockSession(outputPin);
+
+    destroyOutputPin(outputPin);
 
     removePin(reference);
 

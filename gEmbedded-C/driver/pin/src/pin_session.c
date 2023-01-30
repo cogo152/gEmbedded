@@ -3,11 +3,11 @@
 //
 
 #include "pin_session.h"
-#include "pin_exception.h"
+#include "pin_status.h"
 
-int initSession(pthread_mutex_t *const mutex) {
+int initSession(pin_t *const pin) {
 
-    const int status = pthread_mutex_init(mutex, NULL);
+    const int status = pthread_mutex_init(&pin->sLock, NULL);
     if (status != 0) {
         return PIN_SESSION_EXCEPTION_INIT_ERROR;
     }
@@ -16,9 +16,9 @@ int initSession(pthread_mutex_t *const mutex) {
 
 }
 
-int lockSession(pthread_mutex_t *const mutex) {
+int lockSession(pin_t *const pin) {
 
-    const int status = pthread_mutex_lock(mutex);
+    const int status = pthread_mutex_lock(&pin->sLock);
     if (status != 0) {
         return PIN_SESSION_EXCEPTION_LOCK_ERROR;
     }
@@ -27,9 +27,9 @@ int lockSession(pthread_mutex_t *const mutex) {
 
 }
 
-int unlockSession(pthread_mutex_t *const mutex) {
+int unlockSession(pin_t *const pin) {
 
-    const int status = pthread_mutex_unlock(mutex);
+    const int status = pthread_mutex_unlock(&pin->sLock);
     if (status != 0) {
         return PIN_SESSION_EXCEPTION_UNLOCK_ERROR;
     }
@@ -38,9 +38,9 @@ int unlockSession(pthread_mutex_t *const mutex) {
 
 }
 
-int destroySession(pthread_mutex_t *const mutex) {
+int destroySession(pin_t *const pin) {
 
-    const int status = pthread_mutex_destroy(mutex);
+    const int status = pthread_mutex_destroy(&pin->sLock);
     if (status != 0) {
         return PIN_SESSION_EXCEPTION_DESTROY_ERROR;
     }
