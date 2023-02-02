@@ -3,7 +3,6 @@
 //
 
 #include "pin_session.h"
-#include "pin_status.h"
 
 int initSession(pin_t *const pin) {
 

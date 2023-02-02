@@ -6,8 +6,13 @@
 #define GEMBEDDED_C_PIN_SESSION_H
 
 #include "pin.h"
-#include "pin_status.h"
 
+
+#define PIN_SESSION_EXCEPTION_NO_ERROR          (0)
+#define PIN_SESSION_EXCEPTION_INIT_ERROR        (-1)
+#define PIN_SESSION_EXCEPTION_LOCK_ERROR        (-2)
+#define PIN_SESSION_EXCEPTION_UNLOCK_ERROR      (-3)
+#define PIN_SESSION_EXCEPTION_DESTROY_ERROR     (-4)
 
 int initSession(pin_t *pin);
 

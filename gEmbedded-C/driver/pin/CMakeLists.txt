@@ -14,10 +14,10 @@ aux_source_directory(
         LIB_SRC
 )
 
-#aux_source_directory(
-#        ${CMAKE_CURRENT_SOURCE_DIR}/test
-#        LIB_TEST_SRC
-#)
+aux_source_directory(
+        ${CMAKE_CURRENT_SOURCE_DIR}/test
+        LIB_TEST_SRC
+)
 
 target_sources(
         ${LIB}
@@ -25,8 +25,8 @@ target_sources(
         ${LIB_SRC}
 )
 
-#target_sources(
-#        ${LIB_TEST}
-#        PRIVATE
-#        ${LIB_TEST_SRC}
-#)
+target_sources(
+        ${LIB_TEST}
+        PRIVATE
+        ${LIB_TEST_SRC}
+)

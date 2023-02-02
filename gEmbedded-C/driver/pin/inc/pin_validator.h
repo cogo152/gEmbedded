@@ -6,9 +6,13 @@
 #define GEMBEDDED_C_PIN_VALIDATOR_H
 
 #include "pin.h"
-#include "pin_status.h"
 
-#define MAX_VALID_PIN_SIZE  (12)
+#define PIN_VALIDATOR_EXCEPTION_NO_ERROR            (0)
+#define PIN_VALIDATOR_EXCEPTION_NUMBER_ERROR        (-1)
+#define PIN_VALIDATOR_EXCEPTION_FUNCTION_ERROR      (-2)
+#define PIN_VALIDATOR_EXCEPTION_PUD_ERROR           (-3)
+#define PIN_VALIDATOR_EXCEPTION_EVENT_ERROR         (-4)
+#define PIN_VALIDATOR_EXCEPTION_EVENT_TIMEOUT_ERROR (-5)
 
 int validateOutputPin(pin_t *pin);
 

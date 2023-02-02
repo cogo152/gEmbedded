@@ -8,6 +8,9 @@
 #include "common.h"
 #include "pthread.h"
 
+#define PIN_STATE_ELIGIBLE                          (1)
+#define PIN_STATE_INELIGIBLE                        (0)
+
 typedef struct {
     pthread_mutex_t sLock;
     int sState;

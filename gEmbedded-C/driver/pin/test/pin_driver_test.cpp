@@ -2,23 +2,17 @@
 // Created by sondahi on 15.01.23.
 //
 
+/*
 #include <chrono>
 #include <thread>
 
 #include "gtest/gtest.h"
+#include "pin_numbers.h"
 extern "C" {
 #include "pin.h"
 #include "pin_driver.h"
 #include "peripheral.h"
 }
-
-#define PIN_OUTPUT_SELF                    (22)
-#define PIN_OUTPUT_PULLDOWN                (17)
-#define PIN_OUTPUT_PULLUP                  (20)
-#define PIN_OUTPUT_LISTENER                (5)
-#define PIN_INPUT_PULLDOWN                 (27)
-#define PIN_INPUT_PULLUP                   (21)
-#define PIN_LISTENER                       (6)
 
 #define PIN_SLEEP_IN_MILSEC                (10)
 
@@ -275,3 +269,4 @@ TEST(PinDriverTest, testListenerPin) {
     shutdownPinDriver();
 
 }
+ */

@@ -3,28 +3,17 @@
 //
 
 #include "pin_validator.h"
-
-static const int validPins[MAX_VALID_PIN_SIZE] = {
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
-};
-
-static int isPinValid(const int pinNumber) {
-
-    for (int i = 0; i < MAX_VALID_PIN_SIZE; ++i) {
-        if (validPins[i] == pinNumber) {
-            return 1;
-        }
-    }
-
-    return 0;
-
-}
+#include "peripheral.h"
 
 int validateOutputPin(pin_t *const pin) {
 
-    const int result = isPinValid(pin->cNumber);
-    if (result == 0) {
+    const int result = isElementInArray(gpioPins, MAX_GPIO_PIN_SIZE, pin->cNumber);
+    if (result != 0) {
         return PIN_VALIDATOR_EXCEPTION_NUMBER_ERROR;
+    }
+
+    if (pin->cFunction != PIN_CONFIG_FUNCTION_OUTPUT) {
+        return PIN_VALIDATOR_EXCEPTION_FUNCTION_ERROR;
     }
 
     return PIN_VALIDATOR_EXCEPTION_NO_ERROR;
@@ -32,10 +21,60 @@ int validateOutputPin(pin_t *const pin) {
 
 int validateInputPin(pin_t *const pin) {
 
+    const int result = isElementInArray(gpioPins, MAX_GPIO_PIN_SIZE, pin->cNumber);
+    if (result != 0) {
+        return PIN_VALIDATOR_EXCEPTION_NUMBER_ERROR;
+    }
+
+    if (pin->cFunction != PIN_CONFIG_FUNCTION_INPUT) {
+        return PIN_VALIDATOR_EXCEPTION_FUNCTION_ERROR;
+    }
+
+    switch (pin->cPullUpDown) {
+        case PIN_CONFIG_PUD_NO_RESISTOR:
+        case PIN_CONFIG_PUD_PULL_UP:
+        case PIN_CONFIG_PUD_PULL_DOWN:
+            break;
+        default:
+            return PIN_VALIDATOR_EXCEPTION_PUD_ERROR;
+    }
+
     return PIN_VALIDATOR_EXCEPTION_NO_ERROR;
 }
 
 int validateListenerPin(pin_t *const pin) {
 
+    const int result = isElementInArray(gpioPins, MAX_GPIO_PIN_SIZE, pin->cNumber);
+    if (result != 0) {
+        return PIN_VALIDATOR_EXCEPTION_NUMBER_ERROR;
+    }
+
+    if (pin->cFunction != PIN_CONFIG_FUNCTION_INPUT) {
+        return PIN_VALIDATOR_EXCEPTION_FUNCTION_ERROR;
+    }
+
+    switch (pin->cPullUpDown) {
+        case PIN_CONFIG_PUD_NO_RESISTOR:
+        case PIN_CONFIG_PUD_PULL_UP:
+        case PIN_CONFIG_PUD_PULL_DOWN:
+            break;
+        default:
+            return PIN_VALIDATOR_EXCEPTION_PUD_ERROR;
+    }
+
+    switch (pin->cEvent) {
+        case PIN_CONFIG_EVENT_RISING:
+        case PIN_CONFIG_EVENT_FALLING:
+        case PIN_CONFIG_EVENT_BOTH:
+            break;
+        default:
+            return PIN_VALIDATOR_EXCEPTION_EVENT_ERROR;
+    }
+
+    if (pin->cEventTimeout <= 0) {
+        return PIN_VALIDATOR_EXCEPTION_EVENT_TIMEOUT_ERROR;
+    }
+
     return PIN_VALIDATOR_EXCEPTION_NO_ERROR;
+
 }

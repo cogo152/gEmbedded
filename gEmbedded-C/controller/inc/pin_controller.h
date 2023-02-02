@@ -10,7 +10,10 @@ extern "C" {
 #endif
 
 #include "common.h"
-#include "pin_status.h"
+
+#define PIN_CONTROLLER_EXCEPTION_NO_ERROR           (0)
+#define PIN_CONTROLLER_INITIALIZED_ERROR            (-1)
+#define PIN_DRIVER_NOT_INITIALIZED_ERROR            (-2)
 
 int setupPinController(void);
 

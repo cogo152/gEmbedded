@@ -75,32 +75,11 @@ int destroyPinDriver(void) {
 
 }
 
-void setPinFunction(pin_t *const pin) {
-
-    const uint8_t registerSelector = pin->cNumber / PIN_CONFIG_FUNCTION_MOD_DIV;
-    const uint32_t clearValue = ~(PIN_CONFIG_FUNCTION_MASK << ((pin->cNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL));
-    const uint32_t setValue = pin->cFunction << ((pin->cNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL);
-    registers.GPFSEL[registerSelector] &= clearValue;
-    registers.GPFSEL[registerSelector] |= setValue;
-
-}
-
-uint8_t getPinFunction(pin_t *const pin) {
-
-    const uint8_t registerSelector = pin->cNumber / PIN_CONFIG_FUNCTION_MOD_DIV;
-    const uint32_t registerLine = registers.GPFSEL[registerSelector];
-    const uint32_t maskValue = PIN_CONFIG_FUNCTION_MASK << ((pin->cNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL);
-    uint32_t pinFunction = registerLine & maskValue;
-    pinFunction >>= ((pin->cNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL);
-
-    return pinFunction;
-
-}
-
 void setPinPullUpDown(pin_t *const pin) {
 
     const uint8_t registerSelector = pin->cNumber / PIN_CONFIG_PUD_MOD_DIV;
-    const uint32_t clearValue = ~(PIN_CONFIG_PUD_MASK << ((pin->cNumber % PIN_CONFIG_PUD_MOD_DIV) * PIN_CONFIG_PUD_MUL));
+    const uint32_t clearValue = ~(PIN_CONFIG_PUD_MASK
+            << ((pin->cNumber % PIN_CONFIG_PUD_MOD_DIV) * PIN_CONFIG_PUD_MUL));
     const uint32_t setValue = (pin->cPullUpDown << ((pin->cNumber % PIN_CONFIG_PUD_MOD_DIV) * PIN_CONFIG_PUD_MUL));
     registers.GPPUD[registerSelector] &= clearValue;
     registers.GPPUD[registerSelector] |= setValue;
@@ -179,8 +158,8 @@ uint8_t getPinEvent(pin_t *const pin) {
 
 int initOutputPin(pin_t *const pin) {
 
-    setPinFunction(pin);
-    const uint8_t pinFunction = getPinFunction(pin);
+    setPinFunction(registers.GPFSEL, pin->cNumber, pin->cFunction);
+    const uint8_t pinFunction = getPinFunction(registers.GPFSEL, pin->cNumber);
     if (pinFunction != pin->cFunction) {
         return PIN_CONFIG_EXCEPTION_FUNCTION_ERROR;
     }
@@ -197,7 +176,7 @@ void destroyOutputPin(pin_t *const pin) {
     pin->cFunction = PIN_CONFIG_FUNCTION_INPUT;
     pin->cPullUpDown = PIN_CONFIG_PUD_PULL_UP;
 
-    setPinFunction(pin);
+    setPinFunction(registers.GPFSEL, pin->cNumber, pin->cFunction);
     setPinPullUpDown(pin);
 
     pin->sState = PIN_STATE_INELIGIBLE;
@@ -206,8 +185,8 @@ void destroyOutputPin(pin_t *const pin) {
 
 int initInputPin(pin_t *const pin) {
 
-    setPinFunction(pin);
-    const uint8_t pinFunction = getPinFunction(pin);
+    setPinFunction(registers.GPFSEL, pin->cNumber, pin->cFunction);
+    const uint8_t pinFunction = getPinFunction(registers.GPFSEL, pin->cNumber);
     if (pinFunction != pin->cFunction) {
         return PIN_CONFIG_EXCEPTION_FUNCTION_ERROR;
     }
@@ -265,7 +244,7 @@ void destroyListenerPin(pin_t *const pin) {
     pin->cFunction = PIN_CONFIG_FUNCTION_INPUT;
     pin->cPullUpDown = PIN_CONFIG_PUD_PULL_UP;
 
-    setPinFunction(pin);
+    setPinFunction(registers.GPFSEL, pin->cNumber, pin->cFunction);
     setPinPullUpDown(pin);
 
     pin->sState = PIN_STATE_INELIGIBLE;

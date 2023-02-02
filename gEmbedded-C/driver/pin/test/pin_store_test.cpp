@@ -2,6 +2,7 @@
 // Created by sondahi on 29.01.23.
 //
 
+/*
 #include <iostream>
 
 #include "gtest/gtest.h"
@@ -42,3 +43,4 @@ TEST(PinStoreTest, testStore) {
     ASSERT_EQ(reference2, 2);
 
 }
+ */

@@ -6,7 +6,8 @@
 #define GEMBEDDED_C_PIN_STORE_H
 
 #include "pin.h"
-#include "pin_status.h"
+
+#define PIN_STORE_EXCEPTION_NO_ERROR                (0)
 
 int addPin(pin_t pin, int *storeReference);
 
