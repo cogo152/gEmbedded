@@ -160,6 +160,41 @@ int setPinEvent(pin_t *const pin, uint32_t *const ioReference) {
 
 }
 
+void updatePinEvent(pin_t *const pin) {
+
+    const uint8_t registerSelector = pin->cNumber / PIN_CONFIG_EVENT_MOD_DIV;
+    const uint32_t clearValue = ~(PIN_CONFIG_EVENT_MASK << ((pin->cNumber % PIN_CONFIG_EVENT_MOD_DIV) * PIN_CONFIG_EVENT_MUL));
+    const uint32_t setValue = (PIN_CONFIG_EVENT_SET << ((pin->cNumber % PIN_CONFIG_EVENT_MOD_DIV) * PIN_CONFIG_EVENT_MUL));
+
+    registers.GPREN[registerSelector] &= clearValue;
+    registers.GPFEN[registerSelector] &= clearValue;
+    registers.GPHEN[registerSelector] &= clearValue;
+    registers.GPLEN[registerSelector] &= clearValue;
+    registers.GPAREN[registerSelector] &= clearValue;
+    registers.GPAFEN[registerSelector] &= clearValue;
+    registers.GPEDS[registerSelector] |= setValue;
+
+    switch (pin->cEvent) {
+        case PIN_CONFIG_EVENT_RISING: {
+            registers.GPREN[registerSelector] |= setValue;
+            registers.GPEDS[registerSelector] |= setValue;
+            return;
+        }
+        case PIN_CONFIG_EVENT_FALLING: {
+            registers.GPFEN[registerSelector] |= setValue;
+            registers.GPEDS[registerSelector] |= setValue;
+            return;
+        }
+        default: {
+            registers.GPREN[registerSelector] |= setValue;
+            registers.GPFEN[registerSelector] |= setValue;
+            registers.GPEDS[registerSelector] |= setValue;
+            return;
+        }
+    }
+
+}
+
 uint8_t getPinEvent(pin_t *const pin) {
 
     const uint8_t registerSelector = pin->cNumber / PIN_CONFIG_EVENT_MOD_DIV;
@@ -278,9 +313,17 @@ int initListenerPin(pin_t *const pin) {
 
 int updateListenerPin(pin_t *const pin) {
 
-    destroyListenerPin(pin);
+    //destroyListenerPin(pin);
+    //return initListenerPin(pin);
 
-    return initListenerPin(pin);
+    updatePinEvent(pin);
+
+    const uint8_t pinEvent = getPinEvent(pin);
+    if (pinEvent != pin->cEvent) {
+        return PIN_CONFIG_EXCEPTION_EVENT_ERROR;
+    }
+
+    return PIN_CONFIG_EXCEPTION_NO_ERROR;
 
 }
 
