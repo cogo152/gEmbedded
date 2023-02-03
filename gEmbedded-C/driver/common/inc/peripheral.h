@@ -189,10 +189,6 @@ extern const uint8_t i2cPins[MAX_I2C_PIN_SIZE];
 extern const uint8_t spiPins[MAX_SPI_PIN_SIZE];
 extern const uint8_t uartPins[MAX_UART_PIN_SIZE];
 
-void setPinFunction(uintptr_t *GPFSEL, uint8_t pinNumber, uint8_t pinFunction);
-
-uint8_t getPinFunction(uintptr_t *GPFSEL, uint8_t pinNumber);
-
 int isElementInArray(const uint8_t *array, int arraySize, uint8_t elementToValidate);
 
 #endif //GEMBEDDED_C_PERIPHERAL_H

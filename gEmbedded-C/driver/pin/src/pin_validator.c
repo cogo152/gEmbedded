@@ -53,15 +53,6 @@ int validateListenerPin(pin_t *const pin) {
         return PIN_VALIDATOR_EXCEPTION_FUNCTION_ERROR;
     }
 
-    switch (pin->cPullUpDown) {
-        case PIN_CONFIG_PUD_NO_RESISTOR:
-        case PIN_CONFIG_PUD_PULL_UP:
-        case PIN_CONFIG_PUD_PULL_DOWN:
-            break;
-        default:
-            return PIN_VALIDATOR_EXCEPTION_PUD_ERROR;
-    }
-
     switch (pin->cEvent) {
         case PIN_CONFIG_EVENT_RISING:
         case PIN_CONFIG_EVENT_FALLING:

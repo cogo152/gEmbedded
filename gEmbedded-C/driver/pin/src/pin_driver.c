@@ -75,6 +75,31 @@ int destroyPinDriver(void) {
 
 }
 
+void setPinFunction(pin_t *const pin) {
+
+    const uint8_t registerSelector = pin->cNumber / PIN_CONFIG_FUNCTION_MOD_DIV;
+    const uint32_t clearValue = ~(PIN_CONFIG_FUNCTION_MASK
+            << ((pin->cNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL));
+    const uint32_t setValue =
+            pin->cFunction << ((pin->cNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL);
+    registers.GPFSEL[registerSelector] &= clearValue;
+    registers.GPFSEL[registerSelector] |= setValue;
+
+}
+
+uint8_t getPinFunction(pin_t *const pin) {
+
+    const uint8_t registerSelector = pin->cNumber / PIN_CONFIG_FUNCTION_MOD_DIV;
+    const uint32_t registerLine = registers.GPFSEL[registerSelector];
+    const uint32_t maskValue =
+            PIN_CONFIG_FUNCTION_MASK << ((pin->cNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL);
+    uint32_t pinFunction = registerLine & maskValue;
+    pinFunction >>= ((pin->cNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL);
+
+    return pinFunction;
+
+}
+
 void setPinPullUpDown(pin_t *const pin) {
 
     const uint8_t registerSelector = pin->cNumber / PIN_CONFIG_PUD_MOD_DIV;
@@ -98,7 +123,7 @@ uint8_t getPinPullUpDown(pin_t *const pin) {
 
 }
 
-int setPinEvent(pin_t *const pin) {
+int setPinEvent(pin_t *const pin, uint32_t *const ioReference) {
 
     const int fd = open(PIN_CONFIG_GPIO_CHIP, O_RDONLY);
     if (fd < 0) {
@@ -129,8 +154,7 @@ int setPinEvent(pin_t *const pin) {
         return PIN_CONFIG_EXCEPTION_IOCTL_ERROR;
     }
 
-    pin->ioReference = rq.fd;
-    pin->sState = PIN_STATE_ELIGIBLE;
+    *ioReference = rq.fd;
 
     return PIN_CONFIG_EXCEPTION_NO_ERROR;
 
@@ -158,8 +182,8 @@ uint8_t getPinEvent(pin_t *const pin) {
 
 int initOutputPin(pin_t *const pin) {
 
-    setPinFunction(registers.GPFSEL, pin->cNumber, pin->cFunction);
-    const uint8_t pinFunction = getPinFunction(registers.GPFSEL, pin->cNumber);
+    setPinFunction(pin);
+    const uint8_t pinFunction = getPinFunction(pin);
     if (pinFunction != pin->cFunction) {
         return PIN_CONFIG_EXCEPTION_FUNCTION_ERROR;
     }
@@ -176,7 +200,7 @@ void destroyOutputPin(pin_t *const pin) {
     pin->cFunction = PIN_CONFIG_FUNCTION_INPUT;
     pin->cPullUpDown = PIN_CONFIG_PUD_PULL_UP;
 
-    setPinFunction(registers.GPFSEL, pin->cNumber, pin->cFunction);
+    setPinFunction(pin);
     setPinPullUpDown(pin);
 
     pin->sState = PIN_STATE_INELIGIBLE;
@@ -185,8 +209,8 @@ void destroyOutputPin(pin_t *const pin) {
 
 int initInputPin(pin_t *const pin) {
 
-    setPinFunction(registers.GPFSEL, pin->cNumber, pin->cFunction);
-    const uint8_t pinFunction = getPinFunction(registers.GPFSEL, pin->cNumber);
+    setPinFunction(pin);
+    const uint8_t pinFunction = getPinFunction(pin);
     if (pinFunction != pin->cFunction) {
         return PIN_CONFIG_EXCEPTION_FUNCTION_ERROR;
     }
@@ -206,9 +230,13 @@ int initInputPin(pin_t *const pin) {
 
 int updateInputPin(pin_t *const pin) {
 
-    destroyInputPin(pin);
+    setPinPullUpDown(pin);
+    const uint8_t pinPullUpDown = getPinPullUpDown(pin);
+    if (pinPullUpDown != pin->cPullUpDown) {
+        return PIN_CONFIG_EXCEPTION_PULLUPDOWN_ERROR;
+    }
 
-    return initInputPin(pin);
+    return PIN_CONFIG_EXCEPTION_NO_ERROR;
 
 }
 
@@ -224,7 +252,27 @@ void destroyInputPin(pin_t *const pin) {
 
 int initListenerPin(pin_t *const pin) {
 
-    return setPinEvent(pin);
+    uint32_t ioReference;
+
+    const int status = setPinEvent(pin, &ioReference);
+    if (status != PIN_CONFIG_EXCEPTION_NO_ERROR) {
+        return status;
+    }
+
+    const uint8_t pinFunction = getPinFunction(pin);
+    if (pinFunction != pin->cFunction) {
+        return PIN_CONFIG_EXCEPTION_FUNCTION_ERROR;
+    }
+
+    const uint8_t pinEvent = getPinEvent(pin);
+    if (pinEvent != pin->cEvent) {
+        return PIN_CONFIG_EXCEPTION_EVENT_ERROR;
+    }
+
+    pin->ioReference = ioReference;
+    pin->sState = PIN_STATE_ELIGIBLE;
+
+    return PIN_CONFIG_EXCEPTION_NO_ERROR;
 
 }
 
@@ -241,10 +289,8 @@ void destroyListenerPin(pin_t *const pin) {
 
     close((int) pin->ioReference);
 
-    pin->cFunction = PIN_CONFIG_FUNCTION_INPUT;
     pin->cPullUpDown = PIN_CONFIG_PUD_PULL_UP;
 
-    setPinFunction(registers.GPFSEL, pin->cNumber, pin->cFunction);
     setPinPullUpDown(pin);
 
     pin->sState = PIN_STATE_INELIGIBLE;
@@ -267,7 +313,12 @@ void readPin(pin_t *const pin) {
 
     uint32_t registerLine = registers.GPLEV[0];
     registerLine &= pin->ioReference;
-    pin->ioLevel = registerLine;
+
+    if (registerLine > 0) {
+        pin->ioLevel = PIN_IO_LEVEL_HIGH;
+    } else {
+        pin->ioLevel = PIN_IO_LEVEL_LOW;
+    }
 
 }
 

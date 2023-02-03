@@ -51,30 +51,6 @@ const uint8_t uartPins[MAX_UART_PIN_SIZE] = {
         UART_PIN_RXD
 };
 
-void setPinFunction(uintptr_t *const GPFSEL, const uint8_t pinNumber, const uint8_t pinFunction) {
-
-    const uint8_t registerSelector = pinNumber / PIN_CONFIG_FUNCTION_MOD_DIV;
-    const uint32_t clearValue = ~(PIN_CONFIG_FUNCTION_MASK
-            << ((pinNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL));
-    const uint32_t setValue = pinFunction << ((pinNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL);
-    GPFSEL[registerSelector] &= clearValue;
-    GPFSEL[registerSelector] |= setValue;
-
-}
-
-uint8_t getPinFunction(uintptr_t *const GPFSEL, const uint8_t pinNumber) {
-
-    const uint8_t registerSelector = pinNumber / PIN_CONFIG_FUNCTION_MOD_DIV;
-    const uint32_t registerLine = GPFSEL[registerSelector];
-    const uint32_t maskValue =
-            PIN_CONFIG_FUNCTION_MASK << ((pinNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL);
-    uint32_t pinFunction = registerLine & maskValue;
-    pinFunction >>= ((pinNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL);
-
-    return pinFunction;
-
-}
-
 int isElementInArray(const uint8_t *const array, const int arraySize, const uint8_t elementToValidate) {
 
     for (int i = 0; i < arraySize; ++i) {
