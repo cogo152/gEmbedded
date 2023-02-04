@@ -16,6 +16,12 @@ TEST(PinStoreTest, testInitDestroyPinStore) {
     status = initPinStore();
     ASSERT_EQ(status, PIN_STORE_EXCEPTION_NO_ERROR);
 
+    pin_t *const pinStore = getPinStore();
+    ASSERT_NE(pinStore, nullptr);
+
+    const int size = getPinStoreSize();
+    ASSERT_EQ(size, PIN_STORE_INCREMENT_SIZE);
+
     pin_t *pin = getPin(0);
     ASSERT_EQ(pin->cNumber, PIN_STORE_INITIAL_PIN_NUMBER);
 

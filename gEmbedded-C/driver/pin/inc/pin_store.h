@@ -23,6 +23,10 @@ int initPinStore();
 
 void destroyPinStore();
 
+int getPinStoreSize();
+
+pin_t *getPinStore();
+
 int isPinAdded(pin_t *pin);
 
 int addPin(pin_t pin, int *storeReference);

@@ -9,17 +9,19 @@ extern "C" {
 #include "peripheral.h"
 }
 
-#define PIN_INVALID               (45)
-#define PIN_VALID                 (PIN_FUNCTION_SELF)
-
 TEST(PinValidatorTest, testOutputPin) {
 
     int status;
     pin_t pin;
 
+    pin.type = PIN_TYPE_INPUT;
     pin.cNumber = PIN_INVALID;
     pin.cFunction=PIN_CONFIG_FUNCTION_INPUT;
 
+    status = validateOutputPin(&pin);
+    ASSERT_EQ(status, PIN_VALIDATOR_EXCEPTION_TYPE_ERROR);
+
+    pin.type = PIN_TYPE_OUTPUT;
     status = validateOutputPin(&pin);
     ASSERT_EQ(status, PIN_VALIDATOR_EXCEPTION_NUMBER_ERROR);
 
@@ -38,10 +40,15 @@ TEST(PinValidatorTest, testInputPin) {
     int status;
     pin_t pin;
 
+    pin.type = PIN_TYPE_OUTPUT;
     pin.cNumber = PIN_INVALID;
     pin.cFunction=PIN_CONFIG_FUNCTION_OUTPUT;
     pin.cPullUpDown = 0b11;
 
+    status = validateInputPin(&pin);
+    ASSERT_EQ(status, PIN_VALIDATOR_EXCEPTION_TYPE_ERROR);
+
+    pin.type = PIN_TYPE_INPUT;
     status = validateInputPin(&pin);
     ASSERT_EQ(status, PIN_VALIDATOR_EXCEPTION_NUMBER_ERROR);
 
@@ -64,11 +71,16 @@ TEST(PinValidatorTest, testListenerPin) {
     int status;
     pin_t pin;
 
+    pin.type = PIN_TYPE_OUTPUT;
     pin.cNumber = PIN_INVALID;
     pin.cFunction=PIN_CONFIG_FUNCTION_OUTPUT;
     pin.cEvent = 0b11;
     pin.cEventTimeout = 0;
 
+    status = validateListenerPin(&pin);
+    ASSERT_EQ(status, PIN_VALIDATOR_EXCEPTION_TYPE_ERROR);
+
+    pin.type = PIN_TYPE_LISTENER;
     status = validateListenerPin(&pin);
     ASSERT_EQ(status, PIN_VALIDATOR_EXCEPTION_NUMBER_ERROR);
 

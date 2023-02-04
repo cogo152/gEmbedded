@@ -14,4 +14,7 @@
 #define PIN_INPUT_PULLUP                   (24)
 #define PIN_LISTENER                       (6)
 
+#define PIN_INVALID                        (45)
+#define PIN_VALID                          (PIN_FUNCTION_SELF)
+
 #endif //GEMBEDDED_C_PIN_NUMBERS_TEST_H

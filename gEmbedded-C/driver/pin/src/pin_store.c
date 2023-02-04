@@ -6,7 +6,7 @@
 
 #include "pin_store.h"
 
-static pin_t *pinStore;
+static pin_t *pinStore = NULL;
 static volatile int storeSize = 0;
 static volatile int storeIndex = -1;
 
@@ -34,6 +34,18 @@ void destroyPinStore() {
     free(pinStore);
     storeSize = 0;
     storeIndex = -1;
+
+}
+
+int getPinStoreSize() {
+
+    return storeSize;
+
+}
+
+pin_t *getPinStore() {
+
+    return pinStore;
 
 }
 
@@ -83,7 +95,7 @@ pin_t *getPin(const int storeReference) {
 
 }
 
-void removePin(int storeReference) {
+void removePin(const int storeReference) {
 
     pin_t *const pin = &pinStore[storeReference];
     pin->cNumber = PIN_STORE_REUSABLE_PIN_NUMBER;

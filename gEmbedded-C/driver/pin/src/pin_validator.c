@@ -7,6 +7,10 @@
 
 int validateOutputPin(pin_t *const pin) {
 
+    if(pin->type !=PIN_TYPE_OUTPUT){
+        return PIN_VALIDATOR_EXCEPTION_TYPE_ERROR;
+    }
+
     const int result = isElementInArray(gpioPins, MAX_GPIO_PIN_SIZE, pin->cNumber);
     if (result != 0) {
         return PIN_VALIDATOR_EXCEPTION_NUMBER_ERROR;
@@ -20,6 +24,10 @@ int validateOutputPin(pin_t *const pin) {
 }
 
 int validateInputPin(pin_t *const pin) {
+
+    if(pin->type !=PIN_TYPE_INPUT){
+        return PIN_VALIDATOR_EXCEPTION_TYPE_ERROR;
+    }
 
     const int result = isElementInArray(gpioPins, MAX_GPIO_PIN_SIZE, pin->cNumber);
     if (result != 0) {
@@ -43,6 +51,10 @@ int validateInputPin(pin_t *const pin) {
 }
 
 int validateListenerPin(pin_t *const pin) {
+
+    if(pin->type !=PIN_TYPE_LISTENER){
+        return PIN_VALIDATOR_EXCEPTION_TYPE_ERROR;
+    }
 
     const int result = isElementInArray(gpioPins, MAX_GPIO_PIN_SIZE, pin->cNumber);
     if (result != 0) {
