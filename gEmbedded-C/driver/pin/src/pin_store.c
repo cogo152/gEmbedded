@@ -31,21 +31,9 @@ int initPinStore() {
 
 void destroyPinStore() {
 
-    free(pinStore);
+    free((void *) pinStore);
     storeSize = 0;
     storeIndex = -1;
-
-}
-
-int getPinStoreSize() {
-
-    return storeSize;
-
-}
-
-pin_t *getPinStore() {
-
-    return pinStore;
 
 }
 
@@ -99,5 +87,46 @@ void removePin(const int storeReference) {
 
     pin_t *const pin = &pinStore[storeReference];
     pin->cNumber = PIN_STORE_REUSABLE_PIN_NUMBER;
+
+}
+
+const int *getUsablePins(int *const size) {
+
+    int eligiblePinSize = 0;
+
+    for (int i = 0; i < storeSize; ++i) {
+        pin_t *pin = &pinStore[i];
+        if ((pin->cNumber != PIN_STORE_INITIAL_PIN_NUMBER) && (pin->cNumber != PIN_STORE_REUSABLE_PIN_NUMBER)) {
+            ++eligiblePinSize;
+        }
+    }
+
+    if (eligiblePinSize == 0) {
+        return NULL;
+    }
+
+    int *eligiblePins = (int *) malloc(eligiblePinSize * sizeof(int));
+    if (eligiblePins == NULL) {
+        return NULL;
+    }
+
+    int eligibleIndex = 0;
+
+    for (int i = 0; i < storeSize; ++i) {
+        pin_t *pin = &pinStore[i];
+        if ((pin->cNumber != PIN_STORE_INITIAL_PIN_NUMBER) && (pin->cNumber != PIN_STORE_REUSABLE_PIN_NUMBER)) {
+            eligiblePins[eligibleIndex] = i;
+            ++eligibleIndex;
+        }
+    }
+
+    *size = eligiblePinSize;
+    return eligiblePins;
+
+}
+
+void releaseUsablePins(const int *const eligiblePins) {
+
+    free((void *) eligiblePins);
 
 }

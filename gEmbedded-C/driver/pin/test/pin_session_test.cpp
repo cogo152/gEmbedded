@@ -30,7 +30,7 @@ static void changeSessionValue(pin_t *const pin) {
 
 }
 
-TEST(PinSessionTest, testConfigLockUnlock) {
+TEST(PinSessionTest, testLockUnlockConfigSession) {
 
     int status;
 
@@ -47,7 +47,7 @@ TEST(PinSessionTest, testConfigLockUnlock) {
 
 }
 
-TEST(PinSessionTest, testInitLockUnlockDestroySession) {
+TEST(PinSessionTest, testInitLockUnlockDestroyIOSession) {
 
     int status;
     pin_t pin;
