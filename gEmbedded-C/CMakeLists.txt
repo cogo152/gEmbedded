@@ -18,10 +18,6 @@ set(CMAKE_C_STANDARD 23)
 enable_language(CXX)
 set(CMAKE_CXX_STANDARD 23)
 
-include_directories(
-        ${CMAKE_CURRENT_SOURCE_DIR}/common
-)
-
 # static library
 set(LIB ${CMAKE_PROJECT_NAME})
 add_library(
@@ -38,11 +34,6 @@ add_custom_command(
 set(LIB_TEST "${LIB}_test")
 add_executable(
         ${LIB_TEST}
-)
-target_include_directories(
-        ${LIB_TEST}
-        PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/commontest
 )
 enable_testing()
 include(FetchContent)
@@ -67,5 +58,6 @@ add_custom_command(
 )
 
 # order is important for test
-add_subdirectory(driver)
-#add_subdirectory(controller)
+add_subdirectory(common)
+add_subdirectory(pin)
+#add_subdirectory(i2c)

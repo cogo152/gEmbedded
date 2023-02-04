@@ -35,6 +35,8 @@ void destroyPinStore() {
     storeSize = 0;
     storeIndex = -1;
 
+    pinStore = NULL;
+
 }
 
 int isPinAdded(pin_t *const pin) {
@@ -106,9 +108,6 @@ const int *getUsablePins(int *const size) {
     }
 
     int *eligiblePins = (int *) malloc(eligiblePinSize * sizeof(int));
-    if (eligiblePins == NULL) {
-        return NULL;
-    }
 
     int eligibleIndex = 0;
 
@@ -121,6 +120,7 @@ const int *getUsablePins(int *const size) {
     }
 
     *size = eligiblePinSize;
+
     return eligiblePins;
 
 }

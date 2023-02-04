@@ -1,13 +1,11 @@
 #!/bin/bash
 
-TARGET_API="../library/gEmbedded-C/inc"
-TARGET_LIBRARY="../library/gEmbedded-C/lib"
+TARGET_DIRECTORY="../library/gEmbedded-C"
 
-rm -rf ${TARGET_API}
-mkdir ${TARGET_API}
-rm -rf ${TARGET_LIBRARY}
-mkdir ${TARGET_LIBRARY}
+rm -rf ${TARGET_DIRECTORY}
+mkdir ${TARGET_DIRECTORY}
+mkdir ${TARGET_DIRECTORY}/inc
 
-cp ./common/*.h ${TARGET_API}
-cp ./controller/inc/*.h ${TARGET_API}
-cp ./build/libgEmbedded-C.a  ${TARGET_LIBRARY}
+cp ./common/inc/*.h ${TARGET_DIRECTORY}/inc
+cp ./pin/inc/*.h ${TARGET_DIRECTORY}/inc
+cp ./build/libgEmbedded-C.a ${TARGET_DIRECTORY}
