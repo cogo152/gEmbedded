@@ -5,7 +5,6 @@
 #include "gtest/gtest.h"
 #include "pin_numbers_test.h"
 extern "C" {
-#include "pin.h"
 #include "pin_validator.h"
 #include "peripheral.h"
 }

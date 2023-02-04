@@ -5,7 +5,6 @@
 #include "gtest/gtest.h"
 
 extern "C" {
-#include "pin.h"
 #include "pin_session.h"
 }
 
@@ -17,17 +16,17 @@ static volatile int sessionValue = 0;
 
 static void changeConfigValue() {
 
-    lockConfig();
+    lockPinConfigSession();
     configValue = 1;
-    unlockConfig();
+    unlockPinConfigSession();
 
 }
 
 static void changeSessionValue(pin_t *const pin) {
 
-    lockSession(pin);
+    lockPinIOSession(pin);
     sessionValue = 1;
-    unlockSession(pin);
+    unlockPinIOSession(pin);
 
 }
 
@@ -35,13 +34,13 @@ TEST(PinSessionTest, testConfigLockUnlock) {
 
     int status;
 
-    status = lockConfig();
+    status = lockPinConfigSession();
     ASSERT_EQ(status, PIN_SESSION_EXCEPTION_NO_ERROR);
     std::thread configValueChanger(changeConfigValue);
     std::this_thread::sleep_for(std::chrono::milliseconds(LOCKER_SLEEP_IN_MILSEC));
     ASSERT_EQ(configValue, 0);
 
-    status = unlockConfig();
+    status = unlockPinConfigSession();
     ASSERT_EQ(status, PIN_SESSION_EXCEPTION_NO_ERROR);
     configValueChanger.join();
     ASSERT_EQ(configValue, 1);
@@ -53,27 +52,27 @@ TEST(PinSessionTest, testInitLockUnlockDestroySession) {
     int status;
     pin_t pin;
 
-    status = initSession(&pin);
+    status = initPinIOSession(&pin);
     ASSERT_EQ(status, PIN_SESSION_EXCEPTION_NO_ERROR);
 
-    status = lockSession(&pin);
+    status = lockPinIOSession(&pin);
     ASSERT_EQ(status, PIN_SESSION_EXCEPTION_NO_ERROR);
     std::thread sessionValueChanger(changeSessionValue, &pin);
     std::this_thread::sleep_for(std::chrono::milliseconds(LOCKER_SLEEP_IN_MILSEC));
     ASSERT_EQ(sessionValue, 0);
 
-    status = unlockSession(&pin);
+    status = unlockPinIOSession(&pin);
     ASSERT_EQ(status, PIN_SESSION_EXCEPTION_NO_ERROR);
     sessionValueChanger.join();
     ASSERT_EQ(sessionValue, 1);
 
-    status = destroySession(&pin);
+    status = destroyPinIOSession(&pin);
     ASSERT_EQ(status, PIN_SESSION_EXCEPTION_NO_ERROR);
 
-    status = lockSession(&pin);
+    status = lockPinIOSession(&pin);
     ASSERT_EQ(status, PIN_SESSION_EXCEPTION_LOCK_ERROR);
 
-    status = unlockSession(&pin);
+    status = unlockPinIOSession(&pin);
     ASSERT_EQ(status, PIN_SESSION_EXCEPTION_UNLOCK_ERROR);
 
 }

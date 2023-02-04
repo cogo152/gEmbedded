@@ -8,7 +8,7 @@
 
 static pthread_mutex_t cLock = PTHREAD_MUTEX_INITIALIZER;
 
-int lockConfig(void ){
+int lockPinConfigSession(void ){
 
     const int status = pthread_mutex_lock(&cLock);
     if (status != 0) {
@@ -19,7 +19,7 @@ int lockConfig(void ){
 
 }
 
-int unlockConfig(void ){
+int unlockPinConfigSession(void ){
 
     const int status = pthread_mutex_unlock(&cLock);
     if (status != 0) {
@@ -30,7 +30,7 @@ int unlockConfig(void ){
 
 }
 
-int initSession(pin_t *const pin) {
+int initPinIOSession(pin_t *const pin) {
 
     const int status = pthread_mutex_init(&pin->sLock, NULL);
     if (status != 0) {
@@ -41,7 +41,7 @@ int initSession(pin_t *const pin) {
 
 }
 
-int lockSession(pin_t *const pin) {
+int lockPinIOSession(pin_t *const pin) {
 
     const int status = pthread_mutex_lock(&pin->sLock);
     if (status != 0) {
@@ -52,7 +52,7 @@ int lockSession(pin_t *const pin) {
 
 }
 
-int unlockSession(pin_t *const pin) {
+int unlockPinIOSession(pin_t *const pin) {
 
     const int status = pthread_mutex_unlock(&pin->sLock);
     if (status != 0) {
@@ -63,7 +63,7 @@ int unlockSession(pin_t *const pin) {
 
 }
 
-int destroySession(pin_t *const pin) {
+int destroyPinIOSession(pin_t *const pin) {
 
     const int status = pthread_mutex_destroy(&pin->sLock);
     if (status != 0) {

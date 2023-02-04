@@ -9,7 +9,6 @@
 #include "pin_numbers_test.h"
 
 extern "C" {
-#include "pin.h"
 #include "pin_driver.h"
 #include "peripheral.h"
 extern void setPinFunction(pin_t *pin);
@@ -20,7 +19,7 @@ extern int setPinEvent(pin_t *pin);
 extern uint8_t getPinEvent(pin_t *pin);
 }
 
-#define PIN_SLEEP_IN_MILSEC                (10)
+#define PIN_SLEEP_IN_MILSEC                (100)
 
 static int testInitPinDriver() {
 

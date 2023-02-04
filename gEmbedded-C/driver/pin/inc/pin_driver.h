@@ -8,8 +8,8 @@
 #include "pin.h"
 
 #define PIN_DRIVER_EXCEPTION_NO_ERROR               (0)
-#define PIN_DRIVER_EXCEPTION_SETUP_ERROR            (-1)
-#define PIN_DRIVER_EXCEPTION_SHUTDOWN_ERROR         (-2)
+#define PIN_DRIVER_EXCEPTION_INIT_ERROR             (-1)
+#define PIN_DRIVER_EXCEPTION_DESTROY_ERROR          (-2)
 
 #define PIN_CONFIG_EXCEPTION_NO_ERROR               (0)
 #define PIN_CONFIG_EXCEPTION_FUNCTION_ERROR         (-1)
