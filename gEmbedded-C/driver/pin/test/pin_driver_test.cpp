@@ -220,6 +220,8 @@ TEST(PinDriverTest, testListenerPin) {
     status = initListenerPin(&listenerPin);
     ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_ERROR);
     ASSERT_GT(listenerPin.ioReference, 0);
+    ASSERT_EQ(listenerPin.sState, PIN_STATE_ELIGIBLE);
+
 
     // no trigger timeout
     status = pollPin(&listenerPin);

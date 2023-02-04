@@ -163,8 +163,10 @@ int setPinEvent(pin_t *const pin, uint32_t *const ioReference) {
 void updatePinEvent(pin_t *const pin) {
 
     const uint8_t registerSelector = pin->cNumber / PIN_CONFIG_EVENT_MOD_DIV;
-    const uint32_t clearValue = ~(PIN_CONFIG_EVENT_MASK << ((pin->cNumber % PIN_CONFIG_EVENT_MOD_DIV) * PIN_CONFIG_EVENT_MUL));
-    const uint32_t setValue = (PIN_CONFIG_EVENT_SET << ((pin->cNumber % PIN_CONFIG_EVENT_MOD_DIV) * PIN_CONFIG_EVENT_MUL));
+    const uint32_t clearValue = ~(PIN_CONFIG_EVENT_MASK
+            << ((pin->cNumber % PIN_CONFIG_EVENT_MOD_DIV) * PIN_CONFIG_EVENT_MUL));
+    const uint32_t setValue = (PIN_CONFIG_EVENT_SET
+            << ((pin->cNumber % PIN_CONFIG_EVENT_MOD_DIV) * PIN_CONFIG_EVENT_MUL));
 
     registers.GPREN[registerSelector] &= clearValue;
     registers.GPFEN[registerSelector] &= clearValue;
