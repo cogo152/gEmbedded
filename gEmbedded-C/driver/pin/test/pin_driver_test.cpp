@@ -67,7 +67,7 @@ TEST(PinDriverTest, testOutputPin) {
     status = initOutputPin(&outputPin_SELF);
     ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_ERROR);
     ASSERT_EQ(outputPin_SELF.ioReference, 1 << ((outputPin_SELF.cNumber % 32) * 1));
-    ASSERT_EQ(outputPin_SELF.sState, PIN_STATE_ELIGIBLE);
+    ASSERT_EQ(outputPin_SELF.ioState, PIN_IO_STATE_ELIGIBLE);
 
     setPin(&outputPin_SELF);
     readPin(&outputPin_SELF);
@@ -80,7 +80,7 @@ TEST(PinDriverTest, testOutputPin) {
     destroyOutputPin(&outputPin_SELF);
     ASSERT_EQ(getPinFunction(&outputPin_SELF), PIN_CONFIG_FUNCTION_INPUT);
     ASSERT_EQ(getPinPullUpDown(&outputPin_SELF), PIN_CONFIG_PUD_PULL_UP);
-    ASSERT_EQ(outputPin_SELF.sState, PIN_STATE_INELIGIBLE);
+    ASSERT_EQ(outputPin_SELF.ioState, PIN_IO_STATE_INELIGIBLE);
 
     destroyPinDriver();
 
@@ -121,7 +121,7 @@ TEST(PinDriverTest, testInputPin) {
     status = initInputPin(&inputPin_PULLDOWN);
     ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_ERROR);
     ASSERT_EQ(inputPin_PULLDOWN.ioReference, 1 << ((inputPin_PULLDOWN.cNumber % 32) * 1));
-    ASSERT_EQ(inputPin_PULLDOWN.sState, PIN_STATE_ELIGIBLE);
+    ASSERT_EQ(inputPin_PULLDOWN.ioState, PIN_IO_STATE_ELIGIBLE);
 
     setPin(&outputPin_PULLDOWN);
     std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
@@ -148,7 +148,7 @@ TEST(PinDriverTest, testInputPin) {
     status = initInputPin(&inputPin_PULLUP);
     ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_ERROR);
     ASSERT_EQ(inputPin_PULLUP.ioReference, 1 << ((inputPin_PULLUP.cNumber % 32) * 1));
-    ASSERT_EQ(inputPin_PULLUP.sState, PIN_STATE_ELIGIBLE);
+    ASSERT_EQ(inputPin_PULLUP.ioState, PIN_IO_STATE_ELIGIBLE);
 
     setPin(&outputPin_PULLUP);
     std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
@@ -178,11 +178,11 @@ TEST(PinDriverTest, testInputPin) {
     destroyInputPin(&inputPin_PULLDOWN);
     ASSERT_EQ(getPinFunction(&inputPin_PULLDOWN), PIN_CONFIG_FUNCTION_INPUT);
     ASSERT_EQ(getPinPullUpDown(&inputPin_PULLDOWN), PIN_CONFIG_PUD_PULL_UP);
-    ASSERT_EQ(inputPin_PULLDOWN.sState, PIN_STATE_INELIGIBLE);
+    ASSERT_EQ(inputPin_PULLDOWN.ioState, PIN_IO_STATE_INELIGIBLE);
     destroyInputPin(&inputPin_PULLUP);
     ASSERT_EQ(getPinFunction(&inputPin_PULLUP), PIN_CONFIG_FUNCTION_INPUT);
     ASSERT_EQ(getPinPullUpDown(&inputPin_PULLUP), PIN_CONFIG_PUD_PULL_UP);
-    ASSERT_EQ(inputPin_PULLUP.sState, PIN_STATE_INELIGIBLE);
+    ASSERT_EQ(inputPin_PULLUP.ioState, PIN_IO_STATE_INELIGIBLE);
 
     destroyPinDriver();
 
@@ -220,7 +220,7 @@ TEST(PinDriverTest, testListenerPin) {
     status = initListenerPin(&listenerPin);
     ASSERT_EQ(status, PIN_CONFIG_EXCEPTION_NO_ERROR);
     ASSERT_GT(listenerPin.ioReference, 0);
-    ASSERT_EQ(listenerPin.sState, PIN_STATE_ELIGIBLE);
+    ASSERT_EQ(listenerPin.ioState, PIN_IO_STATE_ELIGIBLE);
 
 
     // no trigger timeout
@@ -300,7 +300,7 @@ TEST(PinDriverTest, testListenerPin) {
     destroyListenerPin(&listenerPin);
     ASSERT_EQ(getPinFunction(&listenerPin), PIN_CONFIG_FUNCTION_INPUT);
     ASSERT_EQ(getPinPullUpDown(&listenerPin), PIN_CONFIG_PUD_PULL_UP);
-    ASSERT_EQ(listenerPin.sState, PIN_STATE_INELIGIBLE);
+    ASSERT_EQ(listenerPin.ioState, PIN_IO_STATE_INELIGIBLE);
 
     destroyPinDriver();
 

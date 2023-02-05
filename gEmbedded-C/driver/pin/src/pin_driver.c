@@ -228,7 +228,7 @@ int initOutputPin(pin_t *const pin) {
     }
 
     pin->ioReference = 1 << ((pin->cNumber % 32) * 1);
-    pin->sState = PIN_STATE_ELIGIBLE;
+    pin->ioState = PIN_IO_STATE_ELIGIBLE;
 
     return PIN_CONFIG_EXCEPTION_NO_ERROR;
 
@@ -242,7 +242,7 @@ void destroyOutputPin(pin_t *const pin) {
     setPinFunction(pin);
     setPinPullUpDown(pin);
 
-    pin->sState = PIN_STATE_INELIGIBLE;
+    pin->ioState = PIN_IO_STATE_INELIGIBLE;
 
 }
 
@@ -261,7 +261,7 @@ int initInputPin(pin_t *const pin) {
     }
 
     pin->ioReference = 1 << ((pin->cNumber % 32) * 1);
-    pin->sState = PIN_STATE_ELIGIBLE;
+    pin->ioState = PIN_IO_STATE_ELIGIBLE;
 
     return PIN_CONFIG_EXCEPTION_NO_ERROR;
 
@@ -285,7 +285,7 @@ void destroyInputPin(pin_t *const pin) {
 
     setPinPullUpDown(pin);
 
-    pin->sState = PIN_STATE_INELIGIBLE;
+    pin->ioState = PIN_IO_STATE_INELIGIBLE;
 
 }
 
@@ -309,7 +309,7 @@ int initListenerPin(pin_t *const pin) {
     }
 
     pin->ioReference = ioReference;
-    pin->sState = PIN_STATE_ELIGIBLE;
+    pin->ioState = PIN_IO_STATE_ELIGIBLE;
 
     return PIN_CONFIG_EXCEPTION_NO_ERROR;
 
@@ -340,7 +340,7 @@ void destroyListenerPin(pin_t *const pin) {
 
     setPinPullUpDown(pin);
 
-    pin->sState = PIN_STATE_INELIGIBLE;
+    pin->ioState = PIN_IO_STATE_INELIGIBLE;
 
 }
 
