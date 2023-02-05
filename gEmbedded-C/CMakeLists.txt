@@ -40,11 +40,6 @@ set(LIB_TEST "${LIB}_test")
 add_executable(
         ${LIB_TEST}
 )
-target_include_directories(
-        ${LIB_TEST}
-        PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/commontest
-)
 enable_testing()
 include(FetchContent)
 FetchContent_Declare(
@@ -68,5 +63,6 @@ add_custom_command(
 )
 
 # order is important for test
-add_subdirectory(driver)
-#add_subdirectory(controller)
+add_subdirectory(common)
+add_subdirectory(pin)
+#add_subdirectory(i2c)

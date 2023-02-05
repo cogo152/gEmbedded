@@ -71,6 +71,8 @@ int destroyPinDriver(void) {
     registers.GPAFEN = NULL;
     registers.GPPUD = NULL;
 
+    base = NULL;
+
     return PIN_DRIVER_EXCEPTION_NO_ERROR;
 
 }
