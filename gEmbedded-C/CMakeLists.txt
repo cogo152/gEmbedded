@@ -18,15 +18,16 @@ set(CMAKE_C_STANDARD 23)
 enable_language(CXX)
 set(CMAKE_CXX_STANDARD 23)
 
-include_directories(
-        ${CMAKE_CURRENT_SOURCE_DIR}/common
-)
-
 # static library
 set(LIB ${CMAKE_PROJECT_NAME})
 add_library(
         ${LIB}
         STATIC
+)
+target_include_directories(
+        ${LIB}
+        PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/common
 )
 add_custom_command(
         TARGET ${LIB}
