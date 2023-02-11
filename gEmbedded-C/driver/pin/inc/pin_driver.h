@@ -15,8 +15,9 @@
 #define PIN_DRIVER_ERROR_PIN_EVENT          (-5)
 #define PIN_DRIVER_ERROR_FILE               (-6)
 #define PIN_DRIVER_ERROR_IOCTL              (-7)
-#define PIN_DRIVER_ERROR_IO_POLL            (-8)
-#define PIN_DRIVER_ERROR_IO_POLL_TIMEOUT    (-9)
+#define PIN_DRIVER_ERROR_IO_STATE           (-8)
+#define PIN_DRIVER_ERROR_IO_POLL            (-9)
+#define PIN_DRIVER_ERROR_IO_POLL_TIMEOUT    (-10)
 
 #define PIN_DRIVER_STATE_PIN_ELIGIBLE       (1)
 #define PIN_DRIVER_STATE_PIN_INELIGIBLE     (0)
@@ -32,25 +33,25 @@ int destroyPinDriver(void);
 
 int initOutputPin(pin_t *pin);
 
-void destroyOutputPin(pin_t *pin);
+int destroyOutputPin(pin_t *pin);
 
 int initInputPin(pin_t *pin);
 
 int updateInputPin(pin_t *pin);
 
-void destroyInputPin(pin_t *pin);
+int destroyInputPin(pin_t *pin);
 
 int initListenerPin(pin_t *pin);
 
 int updateListenerPin(pin_t *pin);
 
-void destroyListenerPin(pin_t *pin);
+int destroyListenerPin(pin_t *pin);
 
-void setPin(pin_t *pin);
+int setPin(pin_t *pin);
 
-void clearPin(pin_t *pin);
+int clearPin(pin_t *pin);
 
-void readPin(pin_t *pin);
+int readPin(pin_t *pin);
 
 int pollPin(pin_t *pin);
 

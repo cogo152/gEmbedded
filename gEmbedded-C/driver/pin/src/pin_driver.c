@@ -234,15 +234,26 @@ int initOutputPin(pin_t *const pin) {
 
 }
 
-void destroyOutputPin(pin_t *const pin) {
+int destroyOutputPin(pin_t *const pin) {
 
     pin->cFunction = PIN_CONFIG_FUNCTION_INPUT;
     pin->cPullUpDown = PIN_CONFIG_PUD_PULL_UP;
 
     setPinFunction(pin);
+    const uint8_t pinFunction = getPinFunction(pin);
+    if (pinFunction != PIN_CONFIG_FUNCTION_INPUT) {
+        return PIN_DRIVER_ERROR_PIN_FUNCTION;
+    }
+
     setPinPullUpDown(pin);
+    const uint8_t pinPullUpDown = getPinPullUpDown(pin);
+    if (pinPullUpDown != PIN_CONFIG_PUD_PULL_UP) {
+        return PIN_DRIVER_ERROR_PIN_PULLUPDOWN;
+    }
 
     pin->ioState = PIN_DRIVER_STATE_PIN_INELIGIBLE;
+
+    return PIN_DRIVER_ERROR_NO;
 
 }
 
@@ -279,13 +290,19 @@ int updateInputPin(pin_t *const pin) {
 
 }
 
-void destroyInputPin(pin_t *const pin) {
+int destroyInputPin(pin_t *const pin) {
 
     pin->cPullUpDown = PIN_CONFIG_PUD_PULL_UP;
 
     setPinPullUpDown(pin);
+    const uint8_t pinPullUpDown = getPinPullUpDown(pin);
+    if (pinPullUpDown != PIN_CONFIG_PUD_PULL_UP) {
+        return PIN_DRIVER_ERROR_PIN_PULLUPDOWN;
+    }
 
     pin->ioState = PIN_DRIVER_STATE_PIN_INELIGIBLE;
+
+    return PIN_DRIVER_ERROR_NO;
 
 }
 
@@ -332,31 +349,54 @@ int updateListenerPin(pin_t *const pin) {
 }
 
 
-void destroyListenerPin(pin_t *const pin) {
+int destroyListenerPin(pin_t *const pin) {
 
     close((int) pin->ioReference);
 
     pin->cPullUpDown = PIN_CONFIG_PUD_PULL_UP;
 
     setPinPullUpDown(pin);
+    const uint8_t pinPullUpDown = getPinPullUpDown(pin);
+    if (pinPullUpDown != PIN_CONFIG_PUD_PULL_UP) {
+        return PIN_DRIVER_ERROR_PIN_PULLUPDOWN;
+    }
 
     pin->ioState = PIN_DRIVER_STATE_PIN_INELIGIBLE;
 
+    return PIN_DRIVER_ERROR_NO;
+
 }
 
-void setPin(pin_t *const pin) {
+int setPin(pin_t *const pin) {
+
+    if (pin->ioState == PIN_DRIVER_STATE_PIN_INELIGIBLE) {
+        return PIN_DRIVER_ERROR_IO_STATE;
+    }
 
     registers.GPSET[0] = pin->ioReference;
 
+    return PIN_DRIVER_ERROR_NO;
+
 }
 
-void clearPin(pin_t *const pin) {
+int clearPin(pin_t *const pin) {
+
+    if (pin->ioState == PIN_DRIVER_STATE_PIN_INELIGIBLE) {
+        return PIN_DRIVER_ERROR_IO_STATE;
+    }
 
     registers.GPCLR[0] = pin->ioReference;
+
+    return PIN_DRIVER_ERROR_NO;
+
 }
 
 
-void readPin(pin_t *const pin) {
+int readPin(pin_t *const pin) {
+
+    if (pin->ioState == PIN_DRIVER_STATE_PIN_INELIGIBLE) {
+        return PIN_DRIVER_ERROR_IO_STATE;
+    }
 
     uint32_t registerLine = registers.GPLEV[0];
     registerLine &= pin->ioReference;
@@ -367,9 +407,15 @@ void readPin(pin_t *const pin) {
         pin->ioLevel = PIN_DRIVER_IO_LEVEL_LOW;
     }
 
+    return PIN_DRIVER_ERROR_NO;
+
 }
 
 int pollPin(pin_t *const pin) {
+
+    if (pin->ioState == PIN_DRIVER_STATE_PIN_INELIGIBLE) {
+        return PIN_DRIVER_ERROR_IO_STATE;
+    }
 
     struct gpioevent_data data;
     struct pollfd pfd;
