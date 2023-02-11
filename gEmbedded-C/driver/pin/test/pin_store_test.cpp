@@ -11,15 +11,10 @@ extern "C" {
 
 TEST(PinStoreTest, testInitDestroyPinStore) {
 
-    int status;
+    volatile int status;
 
     status = initPinStore();
-    ASSERT_EQ(status, PIN_STORE_EXCEPTION_NO_ERROR);
-
-    for (int i = 0; i < PIN_STORE_INCREMENT_SIZE; ++i) {
-        pin_t *pin = getPin(i);
-        ASSERT_EQ(pin->cNumber, PIN_STORE_INITIAL_PIN_NUMBER);
-    }
+    ASSERT_EQ(status, PIN_STORE_ERROR_NO);
 
     destroyPinStore();
 
@@ -27,7 +22,7 @@ TEST(PinStoreTest, testInitDestroyPinStore) {
 
 TEST(PinStoreTest, testAddCheckGetRemovePin) {
 
-    int status;
+    volatile int status;
 
     initPinStore();
 
@@ -35,49 +30,50 @@ TEST(PinStoreTest, testAddCheckGetRemovePin) {
     int storeReference;
 
     pin.cNumber = 0;
-    status = isPinAdded(&pin);
+    status = isPinAdded(pin.cNumber);
     ASSERT_EQ(status, PIN_STORE_PIN_NOT_ADDED);
     status = addPin(pin, &storeReference);
-    ASSERT_EQ(status, PIN_STORE_EXCEPTION_NO_ERROR);
+    ASSERT_EQ(status, PIN_STORE_ERROR_NO);
     ASSERT_EQ(storeReference, 0);
-    status = isPinAdded(&pin);
+    status = isPinAdded(pin.cNumber);
     ASSERT_EQ(status, PIN_STORE_PIN_ADDED);
 
     pin.cNumber = 1;
     status = addPin(pin, &storeReference);
-    ASSERT_EQ(status, PIN_STORE_EXCEPTION_NO_ERROR);
+    ASSERT_EQ(status, PIN_STORE_ERROR_NO);
     ASSERT_EQ(storeReference, 1);
 
     pin.cNumber = 2;
     status = addPin(pin, &storeReference);
-    ASSERT_EQ(status, PIN_STORE_EXCEPTION_NO_ERROR);
+    ASSERT_EQ(status, PIN_STORE_ERROR_NO);
     ASSERT_EQ(storeReference, 2);
 
     pin.cNumber = 3;
     status = addPin(pin, &storeReference);
-    ASSERT_EQ(status, PIN_STORE_EXCEPTION_NO_ERROR);
+    ASSERT_EQ(status, PIN_STORE_ERROR_NO);
     ASSERT_EQ(storeReference, 3);
 
     pin.cNumber = 4;
     status = addPin(pin, &storeReference);
-    ASSERT_EQ(status, PIN_STORE_EXCEPTION_NO_ERROR);
+    ASSERT_EQ(status, PIN_STORE_ERROR_NO);
     ASSERT_EQ(storeReference, 4);
 
     pin_t *pinValidator = getPin(2);
     ASSERT_EQ(pinValidator->cNumber, 2);
-
+    ASSERT_EQ(pinValidator->sState , PIN_STORE_PIN_STATE_INELIGIBLE);
     removePin(2);
-
     pinValidator = getPin(2);
-    ASSERT_EQ(pinValidator->cNumber, PIN_STORE_REUSABLE_PIN_NUMBER);
+    ASSERT_EQ(pinValidator->sState , PIN_STORE_PIN_STATE_ELIGIBLE);
 
     pin.cNumber = 5;
     status = addPin(pin, &storeReference);
-    ASSERT_EQ(status, PIN_STORE_EXCEPTION_NO_ERROR);
-    ASSERT_EQ(storeReference, 2);
+    ASSERT_EQ(status, PIN_STORE_ERROR_NO);
+    ASSERT_EQ(storeReference, 5);
 
-    pinValidator = getPin(2);
-    ASSERT_EQ(pinValidator->cNumber, 5);
+    pin.cNumber = 2;
+    status = addPin(pin, &storeReference);
+    ASSERT_EQ(status, PIN_STORE_ERROR_NO);
+    ASSERT_EQ(storeReference, 2);
 
     destroyPinStore();
 

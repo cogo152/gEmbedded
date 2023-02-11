@@ -19,8 +19,8 @@
 #define PIN_DRIVER_ERROR_IO_POLL            (-9)
 #define PIN_DRIVER_ERROR_IO_POLL_TIMEOUT    (-10)
 
-#define PIN_DRIVER_STATE_PIN_ELIGIBLE       (1)
-#define PIN_DRIVER_STATE_PIN_INELIGIBLE     (0)
+#define PIN_DRIVER_PIN_STATE_ELIGIBLE       (1)
+#define PIN_DRIVER_PIN_STATE_INELIGIBLE     (0)
 
 #define PIN_DRIVER_IO_LEVEL_HIGH            (1)
 #define PIN_DRIVER_IO_LEVEL_LOW             (0)

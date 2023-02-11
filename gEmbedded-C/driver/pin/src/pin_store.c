@@ -16,17 +16,18 @@ int initPinStore() {
 
     pinStore = (pin_t *) malloc(storeSize * sizeof(pin_t));
     if (pinStore == NULL) {
-        return PIN_STORE_EXCEPTION_INIT_ERROR;
+        return PIN_STORE_ERROR_MALLOC;
     }
 
     for (int i = 0; i < storeSize; ++i) {
         pin_t *pin = &pinStore[i];
-        pin->cNumber = PIN_STORE_INITIAL_PIN_NUMBER;
+        pin->cNumber = 99;
+        pin->sState = PIN_STORE_PIN_STATE_ELIGIBLE;
     }
 
     storeIndex = 0;
 
-    return PIN_STORE_EXCEPTION_NO_ERROR;
+    return PIN_STORE_ERROR_NO;
 }
 
 void destroyPinStore() {
@@ -39,12 +40,16 @@ void destroyPinStore() {
 
 }
 
-int isPinAdded(pin_t *const pin) {
+int isPinAdded(const uint8_t pinNumber) {
 
     for (int i = 0; i < storeSize; ++i) {
-        pin_t *_pin = &pinStore[i];
-        if (_pin->cNumber == pin->cNumber) {
-            return PIN_STORE_PIN_ADDED;
+        pin_t *const _pin = &pinStore[i];
+        if (_pin->cNumber == pinNumber) {
+            if (_pin->sState == PIN_STORE_PIN_STATE_INELIGIBLE) {
+                return PIN_STORE_PIN_ADDED;
+            } else {
+                return PIN_STORE_PIN_NOT_ADDED;
+            }
         }
     }
 
@@ -52,14 +57,15 @@ int isPinAdded(pin_t *const pin) {
 
 }
 
-int addPin(const pin_t pin, int *const storeReference) {
+int addPin(pin_t pin, int *const storeReference) {
 
     for (int i = 0; i < storeSize; ++i) {
         pin_t *const _pin = &pinStore[i];
-        if (_pin->cNumber == PIN_STORE_REUSABLE_PIN_NUMBER) {
+        if (_pin->cNumber == pin.cNumber) {
+            pin.sState = PIN_STORE_PIN_STATE_INELIGIBLE;
             pinStore[i] = pin;
             *storeReference = i;
-            return PIN_STORE_EXCEPTION_NO_ERROR;
+            return PIN_STORE_ERROR_NO;
         }
     }
 
@@ -67,15 +73,21 @@ int addPin(const pin_t pin, int *const storeReference) {
         storeSize += PIN_STORE_INCREMENT_SIZE;
         pinStore = (pin_t *) realloc(pinStore, storeSize * sizeof(pin_t));
         if (pinStore == NULL) {
-            return PIN_STORE_EXCEPTION_ADD_ERROR;
+            return PIN_STORE_ERROR_MALLOC;
+        }
+        for (int i = storeIndex; i < storeSize; ++i) {
+            pin_t *_pin = &pinStore[i];
+            _pin->cNumber = 99;
+            _pin->sState = PIN_STORE_PIN_STATE_ELIGIBLE;
         }
     }
 
+    pin.sState = PIN_STORE_PIN_STATE_INELIGIBLE;
     pinStore[storeIndex] = pin;
     *storeReference = storeIndex;
     ++storeIndex;
 
-    return PIN_STORE_EXCEPTION_NO_ERROR;
+    return PIN_STORE_ERROR_NO;
 
 }
 
@@ -88,7 +100,7 @@ pin_t *getPin(const int storeReference) {
 void removePin(const int storeReference) {
 
     pin_t *const pin = &pinStore[storeReference];
-    pin->cNumber = PIN_STORE_REUSABLE_PIN_NUMBER;
+    pin->sState = PIN_STORE_PIN_STATE_ELIGIBLE;
 
 }
 
@@ -97,8 +109,8 @@ const int *getUsablePins(int *const size) {
     int eligiblePinSize = 0;
 
     for (int i = 0; i < storeSize; ++i) {
-        pin_t *pin = &pinStore[i];
-        if ((pin->cNumber != PIN_STORE_INITIAL_PIN_NUMBER) && (pin->cNumber != PIN_STORE_REUSABLE_PIN_NUMBER)) {
+        pin_t *const pin = &pinStore[i];
+        if (pin->sState == PIN_STORE_PIN_STATE_INELIGIBLE) {
             ++eligiblePinSize;
         }
     }
@@ -113,7 +125,7 @@ const int *getUsablePins(int *const size) {
 
     for (int i = 0; i < storeSize; ++i) {
         pin_t *pin = &pinStore[i];
-        if ((pin->cNumber != PIN_STORE_INITIAL_PIN_NUMBER) && (pin->cNumber != PIN_STORE_REUSABLE_PIN_NUMBER)) {
+        if (pin->sState == PIN_STORE_PIN_STATE_INELIGIBLE) {
             eligiblePins[eligibleIndex] = i;
             ++eligibleIndex;
         }

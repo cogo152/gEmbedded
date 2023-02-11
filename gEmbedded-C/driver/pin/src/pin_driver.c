@@ -228,7 +228,7 @@ int initOutputPin(pin_t *const pin) {
     }
 
     pin->ioReference = 1 << ((pin->cNumber % 32) * 1);
-    pin->ioState = PIN_DRIVER_STATE_PIN_ELIGIBLE;
+    pin->ioState = PIN_DRIVER_PIN_STATE_ELIGIBLE;
 
     return PIN_DRIVER_ERROR_NO;
 
@@ -251,7 +251,7 @@ int destroyOutputPin(pin_t *const pin) {
         return PIN_DRIVER_ERROR_PIN_PULLUPDOWN;
     }
 
-    pin->ioState = PIN_DRIVER_STATE_PIN_INELIGIBLE;
+    pin->ioState = PIN_DRIVER_PIN_STATE_INELIGIBLE;
 
     return PIN_DRIVER_ERROR_NO;
 
@@ -272,7 +272,7 @@ int initInputPin(pin_t *const pin) {
     }
 
     pin->ioReference = 1 << ((pin->cNumber % 32) * 1);
-    pin->ioState = PIN_DRIVER_STATE_PIN_ELIGIBLE;
+    pin->ioState = PIN_DRIVER_PIN_STATE_ELIGIBLE;
 
     return PIN_DRIVER_ERROR_NO;
 
@@ -283,6 +283,7 @@ int updateInputPin(pin_t *const pin) {
     setPinPullUpDown(pin);
     const uint8_t pinPullUpDown = getPinPullUpDown(pin);
     if (pinPullUpDown != pin->cPullUpDown) {
+        pin->ioState = PIN_DRIVER_PIN_STATE_INELIGIBLE;
         return PIN_DRIVER_ERROR_PIN_PULLUPDOWN;
     }
 
@@ -300,7 +301,7 @@ int destroyInputPin(pin_t *const pin) {
         return PIN_DRIVER_ERROR_PIN_PULLUPDOWN;
     }
 
-    pin->ioState = PIN_DRIVER_STATE_PIN_INELIGIBLE;
+    pin->ioState = PIN_DRIVER_PIN_STATE_INELIGIBLE;
 
     return PIN_DRIVER_ERROR_NO;
 
@@ -326,7 +327,7 @@ int initListenerPin(pin_t *const pin) {
     }
 
     pin->ioReference = ioReference;
-    pin->ioState = PIN_DRIVER_STATE_PIN_ELIGIBLE;
+    pin->ioState = PIN_DRIVER_PIN_STATE_ELIGIBLE;
 
     return PIN_DRIVER_ERROR_NO;
 
@@ -341,6 +342,7 @@ int updateListenerPin(pin_t *const pin) {
 
     const uint8_t pinEvent = getPinEvent(pin);
     if (pinEvent != pin->cEvent) {
+        pin->ioState = PIN_DRIVER_PIN_STATE_INELIGIBLE;
         return PIN_DRIVER_ERROR_PIN_EVENT;
     }
 
@@ -361,7 +363,7 @@ int destroyListenerPin(pin_t *const pin) {
         return PIN_DRIVER_ERROR_PIN_PULLUPDOWN;
     }
 
-    pin->ioState = PIN_DRIVER_STATE_PIN_INELIGIBLE;
+    pin->ioState = PIN_DRIVER_PIN_STATE_INELIGIBLE;
 
     return PIN_DRIVER_ERROR_NO;
 
@@ -369,7 +371,7 @@ int destroyListenerPin(pin_t *const pin) {
 
 int setPin(pin_t *const pin) {
 
-    if (pin->ioState == PIN_DRIVER_STATE_PIN_INELIGIBLE) {
+    if (pin->ioState == PIN_DRIVER_PIN_STATE_INELIGIBLE) {
         return PIN_DRIVER_ERROR_IO_STATE;
     }
 
@@ -381,7 +383,7 @@ int setPin(pin_t *const pin) {
 
 int clearPin(pin_t *const pin) {
 
-    if (pin->ioState == PIN_DRIVER_STATE_PIN_INELIGIBLE) {
+    if (pin->ioState == PIN_DRIVER_PIN_STATE_INELIGIBLE) {
         return PIN_DRIVER_ERROR_IO_STATE;
     }
 
@@ -394,7 +396,7 @@ int clearPin(pin_t *const pin) {
 
 int readPin(pin_t *const pin) {
 
-    if (pin->ioState == PIN_DRIVER_STATE_PIN_INELIGIBLE) {
+    if (pin->ioState == PIN_DRIVER_PIN_STATE_INELIGIBLE) {
         return PIN_DRIVER_ERROR_IO_STATE;
     }
 
@@ -413,7 +415,7 @@ int readPin(pin_t *const pin) {
 
 int pollPin(pin_t *const pin) {
 
-    if (pin->ioState == PIN_DRIVER_STATE_PIN_INELIGIBLE) {
+    if (pin->ioState == PIN_DRIVER_PIN_STATE_INELIGIBLE) {
         return PIN_DRIVER_ERROR_IO_STATE;
     }
 
