@@ -7,13 +7,13 @@
 
 #include "pin.h"
 
-#define PIN_VALIDATOR_EXCEPTION_NO_ERROR            (0)
-#define PIN_VALIDATOR_EXCEPTION_TYPE_ERROR          (-1)
-#define PIN_VALIDATOR_EXCEPTION_NUMBER_ERROR        (-2)
-#define PIN_VALIDATOR_EXCEPTION_FUNCTION_ERROR      (-3)
-#define PIN_VALIDATOR_EXCEPTION_PUD_ERROR           (-4)
-#define PIN_VALIDATOR_EXCEPTION_EVENT_ERROR         (-5)
-#define PIN_VALIDATOR_EXCEPTION_EVENT_TIMEOUT_ERROR (-6)
+#define PIN_VALIDATOR_ERROR_NO                  (0)
+#define PIN_VALIDATOR_ERROR_PIN_TYPE            (-1)
+#define PIN_VALIDATOR_ERROR_PIN_NUMBER          (-2)
+#define PIN_VALIDATOR_ERROR_PIN_FUNCTION        (-3)
+#define PIN_VALIDATOR_ERROR_PIN_PULLUPDOWN      (-4)
+#define PIN_VALIDATOR_ERROR_PIN_EVENT           (-5)
+#define PIN_VALIDATOR_ERROR_PIN_EVENT_TIMEOUT   (-6)
 
 int validateOutputPin(pin_t *pin);
 

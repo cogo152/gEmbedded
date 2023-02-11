@@ -30,7 +30,7 @@ int initPinDriver(void) {
 
     const int status = mapBaseRegister(MEMORY_FILE_NAME, BLOCK_SIZE, GPIO_BASE_ADDRESS, &base);
     if (status != MAPPER_EXCEPTION_NO_ERROR) {
-        return PIN_DRIVER_EXCEPTION_INIT_ERROR;
+        return PIN_DRIVER_ERROR_INIT;
     }
 
     const volatile uintptr_t offset = (uintptr_t) base;
@@ -47,7 +47,7 @@ int initPinDriver(void) {
     registers.GPAFEN = (uintptr_t *) (offset + GPIO_GPAFEN_OFFSET);
     registers.GPPUD = (uintptr_t *) (offset + GPIO_GPPUD_OFFSET);
 
-    return PIN_DRIVER_EXCEPTION_NO_ERROR;
+    return PIN_DRIVER_ERROR_NO;
 
 }
 
@@ -55,7 +55,7 @@ int destroyPinDriver(void) {
 
     const int status = unmapBaseRegister(&base, BLOCK_SIZE);
     if (status != MAPPER_EXCEPTION_NO_ERROR) {
-        return PIN_DRIVER_EXCEPTION_DESTROY_ERROR;
+        return PIN_DRIVER_ERROR_DESTROY;
     }
 
     registers.GPFSEL = NULL;
@@ -73,7 +73,7 @@ int destroyPinDriver(void) {
 
     base = NULL;
 
-    return PIN_DRIVER_EXCEPTION_NO_ERROR;
+    return PIN_DRIVER_ERROR_NO;
 
 }
 
@@ -129,7 +129,7 @@ int setPinEvent(pin_t *const pin, uint32_t *const ioReference) {
 
     const int fd = open(PIN_CONFIG_GPIO_CHIP, O_RDONLY);
     if (fd < 0) {
-        return PIN_CONFIG_EXCEPTION_FILE_ERROR;
+        return PIN_DRIVER_ERROR_FILE;
     }
 
     struct gpioevent_request rq;
@@ -153,12 +153,12 @@ int setPinEvent(pin_t *const pin, uint32_t *const ioReference) {
     const int ic = ioctl(fd, GPIO_GET_LINEEVENT_IOCTL, &rq);
     close(fd);
     if (ic < 0) {
-        return PIN_CONFIG_EXCEPTION_IOCTL_ERROR;
+        return PIN_DRIVER_ERROR_IOCTL;
     }
 
     *ioReference = rq.fd;
 
-    return PIN_CONFIG_EXCEPTION_NO_ERROR;
+    return PIN_DRIVER_ERROR_NO;
 
 }
 
@@ -224,13 +224,13 @@ int initOutputPin(pin_t *const pin) {
     setPinFunction(pin);
     const uint8_t pinFunction = getPinFunction(pin);
     if (pinFunction != pin->cFunction) {
-        return PIN_CONFIG_EXCEPTION_FUNCTION_ERROR;
+        return PIN_DRIVER_ERROR_PIN_FUNCTION;
     }
 
     pin->ioReference = 1 << ((pin->cNumber % 32) * 1);
-    pin->ioState = PIN_IO_STATE_ELIGIBLE;
+    pin->ioState = PIN_DRIVER_STATE_PIN_ELIGIBLE;
 
-    return PIN_CONFIG_EXCEPTION_NO_ERROR;
+    return PIN_DRIVER_ERROR_NO;
 
 }
 
@@ -242,7 +242,7 @@ void destroyOutputPin(pin_t *const pin) {
     setPinFunction(pin);
     setPinPullUpDown(pin);
 
-    pin->ioState = PIN_IO_STATE_INELIGIBLE;
+    pin->ioState = PIN_DRIVER_STATE_PIN_INELIGIBLE;
 
 }
 
@@ -251,19 +251,19 @@ int initInputPin(pin_t *const pin) {
     setPinFunction(pin);
     const uint8_t pinFunction = getPinFunction(pin);
     if (pinFunction != pin->cFunction) {
-        return PIN_CONFIG_EXCEPTION_FUNCTION_ERROR;
+        return PIN_DRIVER_ERROR_NO;
     }
 
     setPinPullUpDown(pin);
     const uint8_t pinPullUpDown = getPinPullUpDown(pin);
     if (pinPullUpDown != pin->cPullUpDown) {
-        return PIN_CONFIG_EXCEPTION_PULLUPDOWN_ERROR;
+        return PIN_DRIVER_ERROR_PIN_PULLUPDOWN;
     }
 
     pin->ioReference = 1 << ((pin->cNumber % 32) * 1);
-    pin->ioState = PIN_IO_STATE_ELIGIBLE;
+    pin->ioState = PIN_DRIVER_STATE_PIN_ELIGIBLE;
 
-    return PIN_CONFIG_EXCEPTION_NO_ERROR;
+    return PIN_DRIVER_ERROR_NO;
 
 }
 
@@ -272,10 +272,10 @@ int updateInputPin(pin_t *const pin) {
     setPinPullUpDown(pin);
     const uint8_t pinPullUpDown = getPinPullUpDown(pin);
     if (pinPullUpDown != pin->cPullUpDown) {
-        return PIN_CONFIG_EXCEPTION_PULLUPDOWN_ERROR;
+        return PIN_DRIVER_ERROR_PIN_PULLUPDOWN;
     }
 
-    return PIN_CONFIG_EXCEPTION_NO_ERROR;
+    return PIN_DRIVER_ERROR_NO;
 
 }
 
@@ -285,7 +285,7 @@ void destroyInputPin(pin_t *const pin) {
 
     setPinPullUpDown(pin);
 
-    pin->ioState = PIN_IO_STATE_INELIGIBLE;
+    pin->ioState = PIN_DRIVER_STATE_PIN_INELIGIBLE;
 
 }
 
@@ -294,24 +294,24 @@ int initListenerPin(pin_t *const pin) {
     uint32_t ioReference;
 
     const int status = setPinEvent(pin, &ioReference);
-    if (status != PIN_CONFIG_EXCEPTION_NO_ERROR) {
+    if (status != PIN_DRIVER_ERROR_NO) {
         return status;
     }
 
     const uint8_t pinFunction = getPinFunction(pin);
     if (pinFunction != pin->cFunction) {
-        return PIN_CONFIG_EXCEPTION_FUNCTION_ERROR;
+        return PIN_DRIVER_ERROR_PIN_FUNCTION;
     }
 
     const uint8_t pinEvent = getPinEvent(pin);
     if (pinEvent != pin->cEvent) {
-        return PIN_CONFIG_EXCEPTION_EVENT_ERROR;
+        return PIN_DRIVER_ERROR_PIN_EVENT;
     }
 
     pin->ioReference = ioReference;
-    pin->ioState = PIN_IO_STATE_ELIGIBLE;
+    pin->ioState = PIN_DRIVER_STATE_PIN_ELIGIBLE;
 
-    return PIN_CONFIG_EXCEPTION_NO_ERROR;
+    return PIN_DRIVER_ERROR_NO;
 
 }
 
@@ -324,10 +324,10 @@ int updateListenerPin(pin_t *const pin) {
 
     const uint8_t pinEvent = getPinEvent(pin);
     if (pinEvent != pin->cEvent) {
-        return PIN_CONFIG_EXCEPTION_EVENT_ERROR;
+        return PIN_DRIVER_ERROR_PIN_EVENT;
     }
 
-    return PIN_CONFIG_EXCEPTION_NO_ERROR;
+    return PIN_DRIVER_ERROR_NO;
 
 }
 
@@ -340,7 +340,7 @@ void destroyListenerPin(pin_t *const pin) {
 
     setPinPullUpDown(pin);
 
-    pin->ioState = PIN_IO_STATE_INELIGIBLE;
+    pin->ioState = PIN_DRIVER_STATE_PIN_INELIGIBLE;
 
 }
 
@@ -362,9 +362,9 @@ void readPin(pin_t *const pin) {
     registerLine &= pin->ioReference;
 
     if (registerLine > 0) {
-        pin->ioLevel = PIN_IO_LEVEL_HIGH;
+        pin->ioLevel = PIN_DRIVER_IO_LEVEL_HIGH;
     } else {
-        pin->ioLevel = PIN_IO_LEVEL_LOW;
+        pin->ioLevel = PIN_DRIVER_IO_LEVEL_LOW;
     }
 
 }
@@ -380,23 +380,23 @@ int pollPin(pin_t *const pin) {
     const int rv = poll(&pfd, 1, pin->cEventTimeout);
     switch (rv) {
         case -1: {
-            return PIN_IO_EXCEPTION_POLL_IO_ERROR;
+            return PIN_DRIVER_ERROR_IO_POLL;
         }
         case 0: {
-            return PIN_IO_EXCEPTION_POLL_TIMEOUT_ERROR;
+            return PIN_DRIVER_ERROR_IO_POLL_TIMEOUT;
         }
         default: {
             const ssize_t rd = read(pfd.fd, &data, sizeof(data));
             if (rd <= 0) {
-                return PIN_IO_EXCEPTION_FILE_ERROR;
+                return PIN_DRIVER_ERROR_FILE;
             } else {
                 if (data.id == GPIOEVENT_REQUEST_RISING_EDGE) {
-                    pin->ioEvent = PIN_IO_EVENT_RISING;
+                    pin->ioEvent = PIN_DRIVER_IO_EVENT_RISING;
                 } else {
-                    pin->ioEvent = PIN_IO_EVENT_FALLING;
+                    pin->ioEvent = PIN_DRIVER_IO_EVENT_FALLING;
                 }
                 pin->ioTimeStamp = data.timestamp;
-                return PIN_IO_EXCEPTION_NO_ERROR;
+                return PIN_DRIVER_ERROR_NO;
             }
         }
     }

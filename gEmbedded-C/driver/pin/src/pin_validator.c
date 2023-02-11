@@ -8,34 +8,34 @@
 int validateOutputPin(pin_t *const pin) {
 
     if(pin->type !=PIN_TYPE_OUTPUT){
-        return PIN_VALIDATOR_EXCEPTION_TYPE_ERROR;
+        return PIN_VALIDATOR_ERROR_PIN_TYPE;
     }
 
     const int result = isElementInArray(gpioPins, MAX_GPIO_PIN_SIZE, pin->cNumber);
     if (result != 0) {
-        return PIN_VALIDATOR_EXCEPTION_NUMBER_ERROR;
+        return PIN_VALIDATOR_ERROR_PIN_NUMBER;
     }
 
     if (pin->cFunction != PIN_CONFIG_FUNCTION_OUTPUT) {
-        return PIN_VALIDATOR_EXCEPTION_FUNCTION_ERROR;
+        return PIN_VALIDATOR_ERROR_PIN_FUNCTION;
     }
 
-    return PIN_VALIDATOR_EXCEPTION_NO_ERROR;
+    return PIN_VALIDATOR_ERROR_NO;
 }
 
 int validateInputPin(pin_t *const pin) {
 
     if(pin->type !=PIN_TYPE_INPUT){
-        return PIN_VALIDATOR_EXCEPTION_TYPE_ERROR;
+        return PIN_VALIDATOR_ERROR_PIN_TYPE;
     }
 
     const int result = isElementInArray(gpioPins, MAX_GPIO_PIN_SIZE, pin->cNumber);
     if (result != 0) {
-        return PIN_VALIDATOR_EXCEPTION_NUMBER_ERROR;
+        return PIN_VALIDATOR_ERROR_PIN_NUMBER;
     }
 
     if (pin->cFunction != PIN_CONFIG_FUNCTION_INPUT) {
-        return PIN_VALIDATOR_EXCEPTION_FUNCTION_ERROR;
+        return PIN_VALIDATOR_ERROR_PIN_FUNCTION;
     }
 
     switch (pin->cPullUpDown) {
@@ -44,25 +44,25 @@ int validateInputPin(pin_t *const pin) {
         case PIN_CONFIG_PUD_PULL_DOWN:
             break;
         default:
-            return PIN_VALIDATOR_EXCEPTION_PUD_ERROR;
+            return PIN_VALIDATOR_ERROR_PIN_PULLUPDOWN;
     }
 
-    return PIN_VALIDATOR_EXCEPTION_NO_ERROR;
+    return PIN_VALIDATOR_ERROR_NO;
 }
 
 int validateListenerPin(pin_t *const pin) {
 
     if(pin->type !=PIN_TYPE_LISTENER){
-        return PIN_VALIDATOR_EXCEPTION_TYPE_ERROR;
+        return PIN_VALIDATOR_ERROR_PIN_TYPE;
     }
 
     const int result = isElementInArray(gpioPins, MAX_GPIO_PIN_SIZE, pin->cNumber);
     if (result != 0) {
-        return PIN_VALIDATOR_EXCEPTION_NUMBER_ERROR;
+        return PIN_VALIDATOR_ERROR_PIN_NUMBER;
     }
 
     if (pin->cFunction != PIN_CONFIG_FUNCTION_INPUT) {
-        return PIN_VALIDATOR_EXCEPTION_FUNCTION_ERROR;
+        return PIN_VALIDATOR_ERROR_PIN_FUNCTION;
     }
 
     switch (pin->cEvent) {
@@ -71,13 +71,13 @@ int validateListenerPin(pin_t *const pin) {
         case PIN_CONFIG_EVENT_BOTH:
             break;
         default:
-            return PIN_VALIDATOR_EXCEPTION_EVENT_ERROR;
+            return PIN_VALIDATOR_ERROR_PIN_EVENT;
     }
 
     if (pin->cEventTimeout <= 0) {
-        return PIN_VALIDATOR_EXCEPTION_EVENT_TIMEOUT_ERROR;
+        return PIN_VALIDATOR_ERROR_PIN_EVENT_TIMEOUT;
     }
 
-    return PIN_VALIDATOR_EXCEPTION_NO_ERROR;
+    return PIN_VALIDATOR_ERROR_NO;
 
 }

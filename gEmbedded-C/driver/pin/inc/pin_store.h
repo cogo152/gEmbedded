@@ -19,6 +19,9 @@
 #define PIN_STORE_PIN_ADDED                 (1U)
 #define PIN_STORE_PIN_NOT_ADDED             (0U)
 
+#define PIN_STORE_STATE_STORED              (1)
+#define PIN_STORE_STATE_NOT_STORED          (0)
+
 int initPinStore();
 
 void destroyPinStore();

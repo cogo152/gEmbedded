@@ -7,26 +7,24 @@
 
 #include "pin.h"
 
-#define PIN_DRIVER_EXCEPTION_NO_ERROR               (0)
-#define PIN_DRIVER_EXCEPTION_INIT_ERROR             (-1)
-#define PIN_DRIVER_EXCEPTION_DESTROY_ERROR          (-2)
+#define PIN_DRIVER_ERROR_NO                 (0)
+#define PIN_DRIVER_ERROR_INIT               (-1)
+#define PIN_DRIVER_ERROR_DESTROY            (-2)
+#define PIN_DRIVER_ERROR_PIN_FUNCTION       (-3)
+#define PIN_DRIVER_ERROR_PIN_PULLUPDOWN     (-4)
+#define PIN_DRIVER_ERROR_PIN_EVENT          (-5)
+#define PIN_DRIVER_ERROR_FILE               (-6)
+#define PIN_DRIVER_ERROR_IOCTL              (-7)
+#define PIN_DRIVER_ERROR_IO_POLL            (-8)
+#define PIN_DRIVER_ERROR_IO_POLL_TIMEOUT    (-9)
 
-#define PIN_CONFIG_EXCEPTION_NO_ERROR               (0)
-#define PIN_CONFIG_EXCEPTION_FUNCTION_ERROR         (-1)
-#define PIN_CONFIG_EXCEPTION_PULLUPDOWN_ERROR       (-2)
-#define PIN_CONFIG_EXCEPTION_FILE_ERROR             (-3)
-#define PIN_CONFIG_EXCEPTION_IOCTL_ERROR            (-4)
-#define PIN_CONFIG_EXCEPTION_EVENT_ERROR            (-5)
+#define PIN_DRIVER_STATE_PIN_ELIGIBLE       (1)
+#define PIN_DRIVER_STATE_PIN_INELIGIBLE     (0)
 
-#define PIN_IO_EXCEPTION_NO_ERROR                   (0)
-#define PIN_IO_EXCEPTION_POLL_IO_ERROR              (-1)
-#define PIN_IO_EXCEPTION_POLL_TIMEOUT_ERROR         (-2)
-#define PIN_IO_EXCEPTION_FILE_ERROR                 (-3)
-
-#define PIN_IO_LEVEL_HIGH                           (1)
-#define PIN_IO_LEVEL_LOW                            (0)
-#define PIN_IO_EVENT_RISING                         (1)
-#define PIN_IO_EVENT_FALLING                        (0)
+#define PIN_DRIVER_IO_LEVEL_HIGH            (1)
+#define PIN_DRIVER_IO_LEVEL_LOW             (0)
+#define PIN_DRIVER_IO_EVENT_RISING          (1)
+#define PIN_DRIVER_IO_EVENT_FALLING         (0)
 
 int initPinDriver(void);
 

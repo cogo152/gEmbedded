@@ -35,13 +35,13 @@ TEST(PinSessionTest, testLockUnlockConfigSession) {
     int status;
 
     status = lockPinConfigSession();
-    ASSERT_EQ(status, PIN_SESSION_EXCEPTION_NO_ERROR);
+    ASSERT_EQ(status, PIN_SESSION_ERROR_NO);
     std::thread configValueChanger(changeConfigValue);
     std::this_thread::sleep_for(std::chrono::milliseconds(LOCKER_SLEEP_IN_MILSEC));
     ASSERT_EQ(configValue, 0);
 
     status = unlockPinConfigSession();
-    ASSERT_EQ(status, PIN_SESSION_EXCEPTION_NO_ERROR);
+    ASSERT_EQ(status, PIN_SESSION_ERROR_NO);
     configValueChanger.join();
     ASSERT_EQ(configValue, 1);
 
@@ -53,26 +53,26 @@ TEST(PinSessionTest, testInitLockUnlockDestroyIOSession) {
     pin_t pin;
 
     status = initPinIOSession(&pin);
-    ASSERT_EQ(status, PIN_SESSION_EXCEPTION_NO_ERROR);
+    ASSERT_EQ(status, PIN_SESSION_ERROR_NO);
 
     status = lockPinIOSession(&pin);
-    ASSERT_EQ(status, PIN_SESSION_EXCEPTION_NO_ERROR);
+    ASSERT_EQ(status, PIN_SESSION_ERROR_NO);
     std::thread sessionValueChanger(changeSessionValue, &pin);
     std::this_thread::sleep_for(std::chrono::milliseconds(LOCKER_SLEEP_IN_MILSEC));
     ASSERT_EQ(sessionValue, 0);
 
     status = unlockPinIOSession(&pin);
-    ASSERT_EQ(status, PIN_SESSION_EXCEPTION_NO_ERROR);
+    ASSERT_EQ(status, PIN_SESSION_ERROR_NO);
     sessionValueChanger.join();
     ASSERT_EQ(sessionValue, 1);
 
     status = destroyPinIOSession(&pin);
-    ASSERT_EQ(status, PIN_SESSION_EXCEPTION_NO_ERROR);
+    ASSERT_EQ(status, PIN_SESSION_ERROR_NO);
 
     status = lockPinIOSession(&pin);
-    ASSERT_EQ(status, PIN_SESSION_EXCEPTION_LOCK_ERROR);
+    ASSERT_EQ(status, PIN_SESSION_ERROR_LOCK);
 
     status = unlockPinIOSession(&pin);
-    ASSERT_EQ(status, PIN_SESSION_EXCEPTION_UNLOCK_ERROR);
+    ASSERT_EQ(status, PIN_SESSION_ERROR_UNLOCK);
 
 }

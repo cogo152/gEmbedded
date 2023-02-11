@@ -8,68 +8,68 @@
 
 static pthread_mutex_t cLock = PTHREAD_MUTEX_INITIALIZER;
 
-int lockPinConfigSession(void ){
+int lockPinConfigSession(void) {
 
     const int status = pthread_mutex_lock(&cLock);
     if (status != 0) {
-        return PIN_SESSION_EXCEPTION_LOCK_ERROR;
+        return PIN_SESSION_ERROR_LOCK;
     }
 
-    return PIN_SESSION_EXCEPTION_NO_ERROR;
+    return PIN_SESSION_ERROR_NO;
 
 }
 
-int unlockPinConfigSession(void ){
+int unlockPinConfigSession(void) {
 
     const int status = pthread_mutex_unlock(&cLock);
     if (status != 0) {
-        return PIN_SESSION_EXCEPTION_UNLOCK_ERROR;
+        return PIN_SESSION_ERROR_UNLOCK;
     }
 
-    return PIN_SESSION_EXCEPTION_NO_ERROR;
+    return PIN_SESSION_ERROR_NO;
 
 }
 
 int initPinIOSession(pin_t *const pin) {
 
-    const int status = pthread_mutex_init(&pin->sLock, NULL);
+    const int status = pthread_mutex_init(&pin->ioLock, NULL);
     if (status != 0) {
-        return PIN_SESSION_EXCEPTION_INIT_ERROR;
+        return PIN_SESSION_ERROR_INIT;
     }
 
-    return PIN_SESSION_EXCEPTION_NO_ERROR;
-
-}
-
-int lockPinIOSession(pin_t *const pin) {
-
-    const int status = pthread_mutex_lock(&pin->sLock);
-    if (status != 0) {
-        return PIN_SESSION_EXCEPTION_LOCK_ERROR;
-    }
-
-    return PIN_SESSION_EXCEPTION_NO_ERROR;
-
-}
-
-int unlockPinIOSession(pin_t *const pin) {
-
-    const int status = pthread_mutex_unlock(&pin->sLock);
-    if (status != 0) {
-        return PIN_SESSION_EXCEPTION_UNLOCK_ERROR;
-    }
-
-    return PIN_SESSION_EXCEPTION_NO_ERROR;
+    return PIN_SESSION_ERROR_NO;
 
 }
 
 int destroyPinIOSession(pin_t *const pin) {
 
-    const int status = pthread_mutex_destroy(&pin->sLock);
+    const int status = pthread_mutex_destroy(&pin->ioLock);
     if (status != 0) {
-        return PIN_SESSION_EXCEPTION_DESTROY_ERROR;
+        return PIN_SESSION_ERROR_DESTROY;
     }
 
-    return PIN_SESSION_EXCEPTION_NO_ERROR;
+    return PIN_SESSION_ERROR_NO;
+
+}
+
+int lockPinIOSession(pin_t *const pin) {
+
+    const int status = pthread_mutex_lock(&pin->ioLock);
+    if (status != 0) {
+        return PIN_SESSION_ERROR_LOCK;
+    }
+
+    return PIN_SESSION_ERROR_NO;
+
+}
+
+int unlockPinIOSession(pin_t *const pin) {
+
+    const int status = pthread_mutex_unlock(&pin->ioLock);
+    if (status != 0) {
+        return PIN_SESSION_ERROR_UNLOCK;
+    }
+
+    return PIN_SESSION_ERROR_NO;
 
 }
