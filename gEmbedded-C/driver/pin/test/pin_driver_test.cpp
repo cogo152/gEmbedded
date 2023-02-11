@@ -19,7 +19,7 @@ extern int setPinEvent(pin_t *pin);
 extern uint8_t getPinEvent(pin_t *pin);
 }
 
-#define PIN_SLEEP_IN_MILSEC                (100)
+#define PIN_SLEEP_IN_MILSEC                (200)
 
 static int testInitPinDriver() {
 

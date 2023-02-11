@@ -71,6 +71,8 @@ TEST(PinStoreTest, testAddCheckGetRemovePin) {
     ASSERT_EQ(storeReference, 5);
 
     pin.cNumber = 2;
+    status = isPinAdded(pin.cNumber);
+    ASSERT_EQ(status, PIN_STORE_PIN_NOT_ADDED);
     status = addPin(pin, &storeReference);
     ASSERT_EQ(status, PIN_STORE_ERROR_NO);
     ASSERT_EQ(storeReference, 2);
