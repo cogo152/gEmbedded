@@ -30,7 +30,7 @@ int initPinDriver(void) {
 
     const int status = mapBaseRegister(MEMORY_FILE_NAME, BLOCK_SIZE, GPIO_BASE_ADDRESS, &base);
     if (status != MAPPER_EXCEPTION_NO_ERROR) {
-        return PIN_DRIVER_ERROR_INIT;
+        return PIN_DRIVER_ERROR_MAP;
     }
 
     const volatile uintptr_t offset = (uintptr_t) base;
@@ -55,7 +55,7 @@ int destroyPinDriver(void) {
 
     const int status = unmapBaseRegister(&base, BLOCK_SIZE);
     if (status != MAPPER_EXCEPTION_NO_ERROR) {
-        return PIN_DRIVER_ERROR_DESTROY;
+        return PIN_DRIVER_ERROR_UNMAP;
     }
 
     registers.GPFSEL = NULL;
@@ -355,7 +355,14 @@ int destroyListenerPin(pin_t *const pin) {
 
     close((int) pin->ioReference);
 
+    pin->cFunction = PIN_CONFIG_FUNCTION_INPUT;
     pin->cPullUpDown = PIN_CONFIG_PUD_PULL_UP;
+
+    setPinFunction(pin);
+    const uint8_t pinFunction = getPinFunction(pin);
+    if (pinFunction != PIN_CONFIG_FUNCTION_INPUT) {
+        return PIN_DRIVER_ERROR_PIN_FUNCTION;
+    }
 
     setPinPullUpDown(pin);
     const uint8_t pinPullUpDown = getPinPullUpDown(pin);

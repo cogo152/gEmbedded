@@ -8,8 +8,8 @@
 #include "pin.h"
 
 #define PIN_DRIVER_ERROR_NO                 (0)
-#define PIN_DRIVER_ERROR_INIT               (-1)
-#define PIN_DRIVER_ERROR_DESTROY            (-2)
+#define PIN_DRIVER_ERROR_MAP                (-1)
+#define PIN_DRIVER_ERROR_UNMAP              (-2)
 #define PIN_DRIVER_ERROR_PIN_FUNCTION       (-3)
 #define PIN_DRIVER_ERROR_PIN_PULLUPDOWN     (-4)
 #define PIN_DRIVER_ERROR_PIN_EVENT          (-5)
@@ -18,10 +18,8 @@
 #define PIN_DRIVER_ERROR_IO_STATE           (-8)
 #define PIN_DRIVER_ERROR_IO_POLL            (-9)
 #define PIN_DRIVER_ERROR_IO_POLL_TIMEOUT    (-10)
-
 #define PIN_DRIVER_PIN_STATE_ELIGIBLE       (1)
 #define PIN_DRIVER_PIN_STATE_INELIGIBLE     (0)
-
 #define PIN_DRIVER_IO_LEVEL_HIGH            (1)
 #define PIN_DRIVER_IO_LEVEL_LOW             (0)
 #define PIN_DRIVER_IO_EVENT_RISING          (1)

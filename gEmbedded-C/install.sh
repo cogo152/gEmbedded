@@ -9,4 +9,4 @@ mkdir ${TARGET_DIRECTORY}/inc
 cp ./common/*.h ${TARGET_DIRECTORY}/inc
 cp ./commontest/*.h ${TARGET_DIRECTORY}/inc
 cp ./controller/inc/*.h ${TARGET_DIRECTORY}/inc
-#cp ./build/libgEmbedded-C.a ${TARGET_DIRECTORY}
+cp ./build/libgEmbedded-C.a ${TARGET_DIRECTORY}
