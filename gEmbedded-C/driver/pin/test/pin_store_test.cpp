@@ -16,6 +16,12 @@ TEST(PinStoreTest, testInitDestroyPinStore) {
     status = initPinStore();
     ASSERT_EQ(status, PIN_STORE_ERROR_NO);
 
+    for (int i = 0; i < PIN_STORE_INCREMENT_SIZE; ++i) {
+        pin_t *const validator = getPin(i);
+        ASSERT_EQ(validator->cNumber, PIN_STORE_PIN_INITIAL_NUMBER);
+        ASSERT_EQ(validator->sState, PIN_STORE_PIN_STATE_ELIGIBLE);
+    }
+
     destroyPinStore();
 
 }
@@ -23,6 +29,7 @@ TEST(PinStoreTest, testInitDestroyPinStore) {
 TEST(PinStoreTest, testAddCheckGetRemovePin) {
 
     volatile int status;
+    volatile pin_t *pinValidator;
 
     initPinStore();
 
@@ -31,12 +38,14 @@ TEST(PinStoreTest, testAddCheckGetRemovePin) {
 
     pin.cNumber = 0;
     status = isPinAdded(pin.cNumber);
-    ASSERT_EQ(status, PIN_STORE_PIN_NOT_ADDED);
+    ASSERT_EQ(status, PIN_STORE_FALSE);
     status = addPin(pin, &storeReference);
     ASSERT_EQ(status, PIN_STORE_ERROR_NO);
     ASSERT_EQ(storeReference, 0);
     status = isPinAdded(pin.cNumber);
-    ASSERT_EQ(status, PIN_STORE_PIN_ADDED);
+    ASSERT_EQ(status, PIN_STORE_TRUE);
+    pinValidator = getPin(storeReference);
+    ASSERT_EQ(pinValidator->sState, PIN_STORE_PIN_STATE_INELIGIBLE);
 
     pin.cNumber = 1;
     status = addPin(pin, &storeReference);
@@ -58,7 +67,7 @@ TEST(PinStoreTest, testAddCheckGetRemovePin) {
     ASSERT_EQ(status, PIN_STORE_ERROR_NO);
     ASSERT_EQ(storeReference, 4);
 
-    pin_t *pinValidator = getPin(2);
+    pinValidator = getPin(2);
     ASSERT_EQ(pinValidator->cNumber, 2);
     ASSERT_EQ(pinValidator->sState , PIN_STORE_PIN_STATE_INELIGIBLE);
     removePin(2);
@@ -72,7 +81,7 @@ TEST(PinStoreTest, testAddCheckGetRemovePin) {
 
     pin.cNumber = 2;
     status = isPinAdded(pin.cNumber);
-    ASSERT_EQ(status, PIN_STORE_PIN_NOT_ADDED);
+    ASSERT_EQ(status, PIN_STORE_FALSE);
     status = addPin(pin, &storeReference);
     ASSERT_EQ(status, PIN_STORE_ERROR_NO);
     ASSERT_EQ(storeReference, 2);
@@ -81,12 +90,18 @@ TEST(PinStoreTest, testAddCheckGetRemovePin) {
 
 }
 
-TEST(PinStoreTest, testGetReleaseUsablePins) {
+TEST(PinStoreTest, testGetReleaseClosablePinReferences) {
 
     pin_t pin;
     int storeReference;
+    int closablePinReferencesLength;
+    const int *closablePinReferences;
 
     initPinStore();
+
+    closablePinReferences = getClosablePinReferences(&closablePinReferencesLength);
+    ASSERT_EQ(closablePinReferences, nullptr);
+    ASSERT_EQ(closablePinReferencesLength, 0);
 
     pin.cNumber = 0;
     addPin(pin, &storeReference);
@@ -109,16 +124,15 @@ TEST(PinStoreTest, testGetReleaseUsablePins) {
     removePin(2);
     removePin(4);
 
-    int usablePinSize;
-    const int *usablePins = getUsablePins(&usablePinSize);
-    ASSERT_NE(usablePins, nullptr);
-    ASSERT_EQ(usablePinSize, 4);
-    ASSERT_EQ(usablePins[0], 0);
-    ASSERT_EQ(usablePins[1], 1);
-    ASSERT_EQ(usablePins[2], 3);
-    ASSERT_EQ(usablePins[3], 5);
+    closablePinReferences = getClosablePinReferences(&closablePinReferencesLength);
+    ASSERT_NE(closablePinReferences, nullptr);
+    ASSERT_EQ(closablePinReferencesLength, 4);
+    ASSERT_EQ(closablePinReferences[0], 0);
+    ASSERT_EQ(closablePinReferences[1], 1);
+    ASSERT_EQ(closablePinReferences[2], 3);
+    ASSERT_EQ(closablePinReferences[3], 5);
 
-    releaseUsablePins(usablePins);
+    releaseClosablePinReferences(closablePinReferences);
 
     destroyPinStore();
 

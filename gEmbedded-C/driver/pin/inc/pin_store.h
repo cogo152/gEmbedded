@@ -8,14 +8,15 @@
 #include "pin.h"
 
 #define PIN_STORE_INCREMENT_SIZE            (2)
+#define PIN_STORE_PIN_INITIAL_NUMBER        (32)
 
 #define PIN_STORE_ERROR_NO                  (0)
 #define PIN_STORE_ERROR_INIT                (-1)
 #define PIN_STORE_ERROR_DESTROY             (-2)
 #define PIN_STORE_ERROR_MALLOC              (-3)
 
-#define PIN_STORE_PIN_ADDED                 (1U)
-#define PIN_STORE_PIN_NOT_ADDED             (0U)
+#define PIN_STORE_TRUE                      (1)
+#define PIN_STORE_FALSE                     (0)
 
 #define PIN_STORE_PIN_STATE_ELIGIBLE        (1)
 #define PIN_STORE_PIN_STATE_INELIGIBLE      (0)
@@ -32,8 +33,8 @@ pin_t *getPin(int storeReference);
 
 void removePin(int storeReference);
 
-const int *getUsablePins(int *size);
+const int *getClosablePinReferences(int *length);
 
-void releaseUsablePins(const int *eligiblePins);
+void releaseClosablePinReferences(const int *closablePinReferences);
 
 #endif //GEMBEDDED_C_PIN_STORE_H

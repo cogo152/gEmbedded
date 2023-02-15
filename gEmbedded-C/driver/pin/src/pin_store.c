@@ -20,8 +20,8 @@ int initPinStore() {
     }
 
     for (int i = 0; i < storeSize; ++i) {
-        pin_t *pin = &pinStore[i];
-        pin->cNumber = 99;
+        pin_t *const pin = &pinStore[i];
+        pin->cNumber = PIN_STORE_PIN_INITIAL_NUMBER;
         pin->sState = PIN_STORE_PIN_STATE_ELIGIBLE;
     }
 
@@ -43,17 +43,17 @@ void destroyPinStore() {
 int isPinAdded(const uint8_t pinNumber) {
 
     for (int i = 0; i < storeSize; ++i) {
-        pin_t *const _pin = &pinStore[i];
-        if (_pin->cNumber == pinNumber) {
-            if (_pin->sState == PIN_STORE_PIN_STATE_INELIGIBLE) {
-                return PIN_STORE_PIN_ADDED;
+        pin_t *const pin = &pinStore[i];
+        if (pin->cNumber == pinNumber) {
+            if (pin->sState == PIN_STORE_PIN_STATE_INELIGIBLE) {
+                return PIN_STORE_TRUE;
             } else {
-                return PIN_STORE_PIN_NOT_ADDED;
+                return PIN_STORE_FALSE;
             }
         }
     }
 
-    return PIN_STORE_PIN_NOT_ADDED;
+    return PIN_STORE_FALSE;
 
 }
 
@@ -77,7 +77,7 @@ int addPin(pin_t pin, int *const storeReference) {
         }
         for (int i = storeIndex; i < storeSize; ++i) {
             pin_t *_pin = &pinStore[i];
-            _pin->cNumber = 99;
+            _pin->cNumber = PIN_STORE_PIN_INITIAL_NUMBER;
             _pin->sState = PIN_STORE_PIN_STATE_ELIGIBLE;
         }
     }
@@ -104,41 +104,42 @@ void removePin(const int storeReference) {
 
 }
 
-const int *getUsablePins(int *const size) {
+const int *getClosablePinReferences(int *const length) {
 
-    int eligiblePinSize = 0;
+    int closablePinReferencesLength = 0;
 
     for (int i = 0; i < storeSize; ++i) {
         pin_t *const pin = &pinStore[i];
         if (pin->sState == PIN_STORE_PIN_STATE_INELIGIBLE) {
-            ++eligiblePinSize;
+            ++closablePinReferencesLength;
         }
     }
 
-    if (eligiblePinSize == 0) {
+    if (closablePinReferencesLength == 0) {
+        *length = 0;
         return NULL;
     }
 
-    int *eligiblePins = (int *) malloc(eligiblePinSize * sizeof(int));
+    int *closablePinReferences = (int *) malloc(closablePinReferencesLength * sizeof(int));
 
-    int eligibleIndex = 0;
+    int index = 0;
 
     for (int i = 0; i < storeSize; ++i) {
         pin_t *pin = &pinStore[i];
         if (pin->sState == PIN_STORE_PIN_STATE_INELIGIBLE) {
-            eligiblePins[eligibleIndex] = i;
-            ++eligibleIndex;
+            closablePinReferences[index] = i;
+            ++index;
         }
     }
 
-    *size = eligiblePinSize;
+    *length = closablePinReferencesLength;
 
-    return eligiblePins;
+    return closablePinReferences;
 
 }
 
-void releaseUsablePins(const int *const eligiblePins) {
+void releaseClosablePinReferences(const int *const closablePinReferences) {
 
-    free((void *) eligiblePins);
+    free((void *) closablePinReferences);
 
 }
