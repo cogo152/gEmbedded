@@ -10,6 +10,7 @@
 #include "peripheral.h"
 #include "memory_mapper.h"
 
+static volatile int initialized = PIN_DRIVER_FALSE;
 static void *base = NULL;
 static gpio_registers_t registers = {
         .GPFSEL = NULL,
@@ -47,7 +48,15 @@ int initPinDriver(void) {
     registers.GPAFEN = (uintptr_t *) (offset + GPIO_GPAFEN_OFFSET);
     registers.GPPUD = (uintptr_t *) (offset + GPIO_GPPUD_OFFSET);
 
+    initialized = PIN_DRIVER_TRUE;
+
     return PIN_DRIVER_ERROR_NO;
+
+}
+
+void isPinDriverInitialized(int *const pinDriverInitialized){
+
+    *pinDriverInitialized = initialized;
 
 }
 
@@ -72,6 +81,8 @@ int destroyPinDriver(void) {
     registers.GPPUD = NULL;
 
     base = NULL;
+
+    initialized = PIN_DRIVER_FALSE;
 
     return PIN_DRIVER_ERROR_NO;
 

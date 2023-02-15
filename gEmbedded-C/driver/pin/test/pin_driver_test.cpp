@@ -46,11 +46,17 @@ static int testDestroyPinDriver() {
 TEST(PinDriverTest, testInitDestroyPinDriver) {
 
     volatile int status;
+    int pinDriverInitialized;
+
     status = testInitPinDriver();
     ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
+    isPinDriverInitialized(&pinDriverInitialized);
+    ASSERT_EQ(pinDriverInitialized, PIN_DRIVER_TRUE);
 
     status = testDestroyPinDriver();
     ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
+    isPinDriverInitialized(&pinDriverInitialized);
+    ASSERT_EQ(pinDriverInitialized, PIN_DRIVER_FALSE);
 
 }
 

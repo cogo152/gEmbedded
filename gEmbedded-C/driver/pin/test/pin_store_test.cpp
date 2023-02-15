@@ -12,9 +12,12 @@ extern "C" {
 TEST(PinStoreTest, testInitDestroyPinStore) {
 
     volatile int status;
+    int pinStoreInitialized;
 
     status = initPinStore();
     ASSERT_EQ(status, PIN_STORE_ERROR_NO);
+    isPinStoreInitialized(&pinStoreInitialized);
+    ASSERT_EQ(pinStoreInitialized, PIN_STORE_TRUE);
 
     for (int i = 0; i < PIN_STORE_INCREMENT_SIZE; ++i) {
         pin_t *const validator = getPin(i);
@@ -23,6 +26,8 @@ TEST(PinStoreTest, testInitDestroyPinStore) {
     }
 
     destroyPinStore();
+    isPinStoreInitialized(&pinStoreInitialized);
+    ASSERT_EQ(pinStoreInitialized, PIN_STORE_FALSE);
 
 }
 
@@ -30,6 +35,7 @@ TEST(PinStoreTest, testAddCheckGetRemovePin) {
 
     volatile int status;
     volatile pin_t *pinValidator;
+    int pinAdded;
 
     initPinStore();
 
@@ -37,13 +43,13 @@ TEST(PinStoreTest, testAddCheckGetRemovePin) {
     int storeReference;
 
     pin.cNumber = 0;
-    status = isPinAdded(pin.cNumber);
-    ASSERT_EQ(status, PIN_STORE_FALSE);
+    isPinAdded(pin.cNumber, &pinAdded);
+    ASSERT_EQ(pinAdded, PIN_STORE_FALSE);
     status = addPin(pin, &storeReference);
     ASSERT_EQ(status, PIN_STORE_ERROR_NO);
     ASSERT_EQ(storeReference, 0);
-    status = isPinAdded(pin.cNumber);
-    ASSERT_EQ(status, PIN_STORE_TRUE);
+    isPinAdded(pin.cNumber, &pinAdded);
+    ASSERT_EQ(pinAdded, PIN_STORE_TRUE);
     pinValidator = getPin(storeReference);
     ASSERT_EQ(pinValidator->sState, PIN_STORE_PIN_STATE_INELIGIBLE);
 
@@ -69,10 +75,10 @@ TEST(PinStoreTest, testAddCheckGetRemovePin) {
 
     pinValidator = getPin(2);
     ASSERT_EQ(pinValidator->cNumber, 2);
-    ASSERT_EQ(pinValidator->sState , PIN_STORE_PIN_STATE_INELIGIBLE);
+    ASSERT_EQ(pinValidator->sState, PIN_STORE_PIN_STATE_INELIGIBLE);
     removePin(2);
     pinValidator = getPin(2);
-    ASSERT_EQ(pinValidator->sState , PIN_STORE_PIN_STATE_ELIGIBLE);
+    ASSERT_EQ(pinValidator->sState, PIN_STORE_PIN_STATE_ELIGIBLE);
 
     pin.cNumber = 5;
     status = addPin(pin, &storeReference);
@@ -80,8 +86,8 @@ TEST(PinStoreTest, testAddCheckGetRemovePin) {
     ASSERT_EQ(storeReference, 5);
 
     pin.cNumber = 2;
-    status = isPinAdded(pin.cNumber);
-    ASSERT_EQ(status, PIN_STORE_FALSE);
+    isPinAdded(pin.cNumber, &pinAdded);
+    ASSERT_EQ(pinAdded, PIN_STORE_FALSE);
     status = addPin(pin, &storeReference);
     ASSERT_EQ(status, PIN_STORE_ERROR_NO);
     ASSERT_EQ(storeReference, 2);

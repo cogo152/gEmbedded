@@ -6,6 +6,7 @@
 
 #include "pin_store.h"
 
+static volatile int initialized = PIN_STORE_FALSE;
 static pin_t *pinStore = NULL;
 static volatile int storeSize = 0;
 static volatile int storeIndex = -1;
@@ -27,7 +28,15 @@ int initPinStore() {
 
     storeIndex = 0;
 
+    initialized = PIN_STORE_TRUE;
+
     return PIN_STORE_ERROR_NO;
+}
+
+void isPinStoreInitialized(int *pinStoreInitialized){
+
+    *pinStoreInitialized = initialized;
+
 }
 
 void destroyPinStore() {
@@ -38,22 +47,26 @@ void destroyPinStore() {
 
     pinStore = NULL;
 
+    initialized = PIN_STORE_FALSE;
+
 }
 
-int isPinAdded(const uint8_t pinNumber) {
+void isPinAdded(const uint8_t pinNumber, int *const pinAdded) {
 
     for (int i = 0; i < storeSize; ++i) {
         pin_t *const pin = &pinStore[i];
         if (pin->cNumber == pinNumber) {
             if (pin->sState == PIN_STORE_PIN_STATE_INELIGIBLE) {
-                return PIN_STORE_TRUE;
+                *pinAdded = PIN_STORE_TRUE;
+                return;
             } else {
-                return PIN_STORE_FALSE;
+                *pinAdded = PIN_STORE_FALSE;
+                return;
             }
         }
     }
 
-    return PIN_STORE_FALSE;
+    *pinAdded = PIN_STORE_FALSE;
 
 }
 

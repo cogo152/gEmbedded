@@ -24,8 +24,12 @@
 #define PIN_DRIVER_IO_LEVEL_LOW             (0)
 #define PIN_DRIVER_IO_EVENT_RISING          (1)
 #define PIN_DRIVER_IO_EVENT_FALLING         (0)
+#define PIN_DRIVER_TRUE                     (1)
+#define PIN_DRIVER_FALSE                    (0)
 
 int initPinDriver(void);
+
+void isPinDriverInitialized(int *pinDriverInitialized);
 
 int destroyPinDriver(void);
 
