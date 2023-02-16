@@ -69,3 +69,4 @@ add_custom_command(
 
 # order is important for test
 add_subdirectory(driver)
+add_subdirectory(controller)

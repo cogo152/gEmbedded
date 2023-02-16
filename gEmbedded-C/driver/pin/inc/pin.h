@@ -23,7 +23,7 @@ typedef struct {
     pthread_mutex_t ioLock;
     int ioState;
     uint32_t ioReference;
-    uint32_t ioLevel;
+    int ioLevel;
     int ioEvent;
     uint64_t ioTimeStamp;
 } pin_t;
