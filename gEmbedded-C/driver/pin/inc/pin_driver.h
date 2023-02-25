@@ -39,13 +39,9 @@ int destroyOutputPin(pin_t *pin);
 
 int initInputPin(pin_t *pin);
 
-int updateInputPin(pin_t *pin);
-
 int destroyInputPin(pin_t *pin);
 
 int initListenerPin(pin_t *pin);
-
-int updateListenerPin(pin_t *pin);
 
 int destroyListenerPin(pin_t *pin);
 

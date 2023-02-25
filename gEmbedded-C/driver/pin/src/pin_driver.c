@@ -173,43 +173,6 @@ int setPinEvent(pin_t *const pin, uint32_t *const ioReference) {
 
 }
 
-void updatePinEvent(pin_t *const pin) {
-
-    const uint8_t registerSelector = pin->cNumber / PIN_CONFIG_EVENT_MOD_DIV;
-    const uint32_t clearValue = ~(PIN_CONFIG_EVENT_MASK
-            << ((pin->cNumber % PIN_CONFIG_EVENT_MOD_DIV) * PIN_CONFIG_EVENT_MUL));
-    const uint32_t setValue = (PIN_CONFIG_EVENT_SET
-            << ((pin->cNumber % PIN_CONFIG_EVENT_MOD_DIV) * PIN_CONFIG_EVENT_MUL));
-
-    registers.GPREN[registerSelector] &= clearValue;
-    registers.GPFEN[registerSelector] &= clearValue;
-    registers.GPHEN[registerSelector] &= clearValue;
-    registers.GPLEN[registerSelector] &= clearValue;
-    registers.GPAREN[registerSelector] &= clearValue;
-    registers.GPAFEN[registerSelector] &= clearValue;
-    registers.GPEDS[registerSelector] |= setValue;
-
-    switch (pin->cEvent) {
-        case PIN_CONFIG_EVENT_RISING: {
-            registers.GPREN[registerSelector] |= setValue;
-            registers.GPEDS[registerSelector] |= setValue;
-            return;
-        }
-        case PIN_CONFIG_EVENT_FALLING: {
-            registers.GPFEN[registerSelector] |= setValue;
-            registers.GPEDS[registerSelector] |= setValue;
-            return;
-        }
-        default: {
-            registers.GPREN[registerSelector] |= setValue;
-            registers.GPFEN[registerSelector] |= setValue;
-            registers.GPEDS[registerSelector] |= setValue;
-            return;
-        }
-    }
-
-}
-
 uint8_t getPinEvent(pin_t *const pin) {
 
     const uint8_t registerSelector = pin->cNumber / PIN_CONFIG_EVENT_MOD_DIV;
@@ -289,19 +252,6 @@ int initInputPin(pin_t *const pin) {
 
 }
 
-int updateInputPin(pin_t *const pin) {
-
-    setPinPullUpDown(pin);
-    const uint8_t pinPullUpDown = getPinPullUpDown(pin);
-    if (pinPullUpDown != pin->cPullUpDown) {
-        pin->ioState = PIN_DRIVER_PIN_STATE_INELIGIBLE;
-        return PIN_DRIVER_ERROR_PIN_PULLUPDOWN;
-    }
-
-    return PIN_DRIVER_ERROR_NO;
-
-}
-
 int destroyInputPin(pin_t *const pin) {
 
     pin->cPullUpDown = PIN_CONFIG_PUD_PULL_UP;
@@ -340,27 +290,14 @@ int initListenerPin(pin_t *const pin) {
     pin->ioReference = ioReference;
     pin->ioState = PIN_DRIVER_PIN_STATE_ELIGIBLE;
 
-    return PIN_DRIVER_ERROR_NO;
-
-}
-
-int updateListenerPin(pin_t *const pin) {
-
-    //destroyListenerPin(pin);
-    //return initListenerPin(pin);
-
-    updatePinEvent(pin);
-
-    const uint8_t pinEvent = getPinEvent(pin);
-    if (pinEvent != pin->cEvent) {
-        pin->ioState = PIN_DRIVER_PIN_STATE_INELIGIBLE;
-        return PIN_DRIVER_ERROR_PIN_EVENT;
-    }
+    int const timeout = pin->cEventTimeout;
+    pin->cEventTimeout=1;
+    pollPin(pin);
+    pin->cEventTimeout=timeout;
 
     return PIN_DRIVER_ERROR_NO;
 
 }
-
 
 int destroyListenerPin(pin_t *const pin) {
 

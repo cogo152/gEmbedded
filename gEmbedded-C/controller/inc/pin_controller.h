@@ -52,7 +52,6 @@ int outputPinClear(int reference);
 
 int outputPinRead(int reference, int *pinLevel);
 
-
 #ifdef __cplusplus
 }
 #endif
