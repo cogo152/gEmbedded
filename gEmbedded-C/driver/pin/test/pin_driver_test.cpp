@@ -1,333 +1,238 @@
 //
-// Created by sondahi on 15.01.23.
+// Created by sondahi on 25.02.23.
 //
 
 #include <chrono>
 #include <thread>
 
 #include "gtest/gtest.h"
-#include "pin_numbers_test.h"
+#include "pin_test.h"
 
 extern "C" {
 #include "pin_driver.h"
 #include "peripheral.h"
-extern void setPinFunction(pin_t *pin);
-extern uint8_t getPinFunction(pin_t *pin);
-extern void setPinPullUpDown(pin_t *pin);
-extern uint8_t getPinPullUpDown(pin_t *pin);
-extern int setPinEvent(pin_t *pin, uint32_t *ioReference);
-extern uint8_t getPinEvent(pin_t *pin);
-}
-
-#define PIN_SLEEP_IN_MILSEC                (200)
-
-static int testInitPinDriver() {
-
-    const volatile int status = initPinDriver();
-    if (status != PIN_DRIVER_ERROR_NO) {
-        return status;
-    }
-
-    return PIN_DRIVER_ERROR_NO;
-
-}
-
-static int testDestroyPinDriver() {
-
-    const volatile int status = destroyPinDriver();
-    if (status != PIN_DRIVER_ERROR_NO) {
-        return status;
-    }
-
-    return PIN_DRIVER_ERROR_NO;
-
 }
 
 TEST(PinDriverTest, testInitDestroyPinDriver) {
 
-    volatile int status;
-    int pinDriverInitialized;
+    volatile PIN_DRIVER_ERROR status;
 
-    status = testInitPinDriver();
+    status = initPinDriver();
     ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    isPinDriverInitialized(&pinDriverInitialized);
-    ASSERT_EQ(pinDriverInitialized, PIN_DRIVER_TRUE);
+    ASSERT_EQ(isPinDriverInitialized(), PIN_DRIVER_TRUE);
 
-    status = testDestroyPinDriver();
+    status = destroyPinDriver();
     ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    isPinDriverInitialized(&pinDriverInitialized);
-    ASSERT_EQ(pinDriverInitialized, PIN_DRIVER_FALSE);
+    ASSERT_EQ(isPinDriverInitialized(), PIN_DRIVER_FALSE);
 
 }
 
-TEST(PinDriverTest, testOutputPin) {
+TEST(PinDriverTest, testPinFunction) {
 
-    volatile int status;
-    pin_t outputPin_SELF = {
-            .cNumber = PIN_OUTPUT_SELF,
-            .cFunction = PIN_CONFIG_FUNCTION_OUTPUT
-    };
+    const uint8_t pinNumber = PIN_NUMBER_SELF;
+    uint8_t pinFunctionToSet, pinFunctionToRead;
 
     initPinDriver();
 
-    status = initOutputPin(&outputPin_SELF);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(outputPin_SELF.ioReference, 1 << ((outputPin_SELF.cNumber % 32) * 1));
-    ASSERT_EQ(outputPin_SELF.ioState, PIN_DRIVER_PIN_STATE_ELIGIBLE);
+    pinFunctionToSet = PIN_CONFIG_FUNCTION_OUTPUT;
+    setPinFunction(pinNumber, pinFunctionToSet);
+    pinFunctionToRead = readPinFunction(pinNumber);
+    ASSERT_EQ(pinFunctionToRead, pinFunctionToSet);
 
-    status = setPin(&outputPin_SELF);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    status = readPin(&outputPin_SELF);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(outputPin_SELF.ioLevel, PIN_DRIVER_IO_LEVEL_HIGH);
+    pinFunctionToSet = PIN_CONFIG_FUNCTION_ALT0;
+    setPinFunction(pinNumber, pinFunctionToSet);
+    pinFunctionToRead = readPinFunction(pinNumber);
+    ASSERT_EQ(pinFunctionToRead, pinFunctionToSet);
 
-    status = clearPin(&outputPin_SELF);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    status = readPin(&outputPin_SELF);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(outputPin_SELF.ioLevel, PIN_DRIVER_IO_LEVEL_LOW);
+    pinFunctionToSet = PIN_CONFIG_FUNCTION_ALT1;
+    setPinFunction(pinNumber, pinFunctionToSet);
+    pinFunctionToRead = readPinFunction(pinNumber);
+    ASSERT_EQ(pinFunctionToRead, pinFunctionToSet);
 
-    status = destroyOutputPin(&outputPin_SELF);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(outputPin_SELF.ioState, PIN_DRIVER_PIN_STATE_INELIGIBLE);
+    pinFunctionToSet = PIN_CONFIG_FUNCTION_ALT2;
+    setPinFunction(pinNumber, pinFunctionToSet);
+    pinFunctionToRead = readPinFunction(pinNumber);
+    ASSERT_EQ(pinFunctionToRead, pinFunctionToSet);
 
-    status = setPin(&outputPin_SELF);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_IO_STATE);
-    status = clearPin(&outputPin_SELF);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_IO_STATE);
-    status = readPin(&outputPin_SELF);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_IO_STATE);
+    pinFunctionToSet = PIN_CONFIG_FUNCTION_ALT3;
+    setPinFunction(pinNumber, pinFunctionToSet);
+    pinFunctionToRead = readPinFunction(pinNumber);
+    ASSERT_EQ(pinFunctionToRead, pinFunctionToSet);
+
+    pinFunctionToSet = PIN_CONFIG_FUNCTION_ALT4;
+    setPinFunction(pinNumber, pinFunctionToSet);
+    pinFunctionToRead = readPinFunction(pinNumber);
+    ASSERT_EQ(pinFunctionToRead, pinFunctionToSet);
+
+    pinFunctionToSet = PIN_CONFIG_FUNCTION_ALT5;
+    setPinFunction(pinNumber, pinFunctionToSet);
+    pinFunctionToRead = readPinFunction(pinNumber);
+    ASSERT_EQ(pinFunctionToRead, pinFunctionToSet);
+
+    pinFunctionToSet = PIN_CONFIG_FUNCTION_INPUT;
+    setPinFunction(pinNumber, pinFunctionToSet);
+    pinFunctionToRead = readPinFunction(pinNumber);
+    ASSERT_EQ(pinFunctionToRead, pinFunctionToSet);
 
     destroyPinDriver();
 
 }
 
-TEST(PinDriverTest, testInputPin) {
+TEST(PinDriverTest, testPinPullUpdown) {
 
-    volatile int status;
-    pin_t outputPin_PULLDOWN = {
-            .cNumber = PIN_OUTPUT_PULLDOWN,
-            .cFunction = PIN_CONFIG_FUNCTION_OUTPUT
-    };
-    pin_t outputPin_PULLUP = {
-            .cNumber = PIN_OUTPUT_PULLUP,
-            .cFunction = PIN_CONFIG_FUNCTION_OUTPUT
-
-    };
-    pin_t inputPin_PULLDOWN = {
-            .cNumber = PIN_INPUT_PULLDOWN,
-            .cFunction = PIN_CONFIG_FUNCTION_INPUT,
-            .cPullUpDown = PIN_CONFIG_PUD_NO_RESISTOR
-
-    };
-    pin_t inputPin_PULLUP = {
-            .cNumber = PIN_INPUT_PULLUP,
-            .cFunction = PIN_CONFIG_FUNCTION_INPUT,
-            .cPullUpDown = PIN_CONFIG_PUD_NO_RESISTOR
-    };
+    const uint8_t pinNumber = PIN_NUMBER_SELF;
+    uint8_t pinPullUpDownToSet, pinPullUpDownToRead;
 
     initPinDriver();
 
-    initOutputPin(&outputPin_PULLDOWN);
-    clearPin(&outputPin_PULLDOWN);
+    setPinFunction(pinNumber, PIN_CONFIG_FUNCTION_INPUT);
 
-    status = initInputPin(&inputPin_PULLDOWN);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(inputPin_PULLDOWN.ioReference, 1 << ((inputPin_PULLDOWN.cNumber % 32) * 1));
-    ASSERT_EQ(inputPin_PULLDOWN.ioState, PIN_DRIVER_PIN_STATE_ELIGIBLE);
+    pinPullUpDownToSet = PIN_CONFIG_PUD_PULL_UP;
+    setPinPullUpDown(pinNumber, pinPullUpDownToSet);
+    pinPullUpDownToRead = readPinPullUpDown(pinNumber);
+    ASSERT_EQ(pinPullUpDownToRead, pinPullUpDownToSet);
 
-    setPin(&outputPin_PULLDOWN);
-    std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
-    status = readPin(&inputPin_PULLDOWN);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(inputPin_PULLDOWN.ioLevel, PIN_DRIVER_IO_LEVEL_HIGH);
-    clearPin(&outputPin_PULLDOWN);
-    std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
-    status = readPin(&inputPin_PULLDOWN);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(inputPin_PULLDOWN.ioLevel, PIN_DRIVER_IO_LEVEL_LOW);
+    pinPullUpDownToSet = PIN_CONFIG_PUD_PULL_DOWN;
+    setPinPullUpDown(pinNumber, pinPullUpDownToSet);
+    pinPullUpDownToRead = readPinPullUpDown(pinNumber);
+    ASSERT_EQ(pinPullUpDownToRead, pinPullUpDownToSet);
 
-    status = destroyInputPin(&inputPin_PULLDOWN);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(inputPin_PULLDOWN.ioState, PIN_DRIVER_PIN_STATE_INELIGIBLE);
-    status = readPin(&inputPin_PULLDOWN);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_IO_STATE);
-
-    inputPin_PULLDOWN.cPullUpDown = PIN_CONFIG_PUD_PULL_DOWN;
-    initInputPin(&inputPin_PULLDOWN);
-
-    setPin(&outputPin_PULLDOWN);
-    std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
-    status = readPin(&inputPin_PULLDOWN);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(inputPin_PULLDOWN.ioLevel, PIN_DRIVER_IO_LEVEL_HIGH);
-    clearPin(&outputPin_PULLDOWN);
-    std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
-    status = readPin(&inputPin_PULLDOWN);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(inputPin_PULLDOWN.ioLevel, PIN_DRIVER_IO_LEVEL_LOW);
-
-    destroyOutputPin(&outputPin_PULLDOWN);
-    destroyInputPin(&inputPin_PULLDOWN);
-
-    initOutputPin(&outputPin_PULLUP);
-    clearPin(&outputPin_PULLUP);
-
-    status = initInputPin(&inputPin_PULLUP);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(inputPin_PULLUP.ioReference, 1 << ((inputPin_PULLUP.cNumber % 32) * 1));
-    ASSERT_EQ(inputPin_PULLUP.ioState, PIN_DRIVER_PIN_STATE_ELIGIBLE);
-
-    setPin(&outputPin_PULLUP);
-    std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
-    status = readPin(&inputPin_PULLUP);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(inputPin_PULLUP.ioLevel, PIN_DRIVER_IO_LEVEL_LOW);
-    clearPin(&outputPin_PULLUP);
-    std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
-    status = readPin(&inputPin_PULLUP);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(inputPin_PULLUP.ioLevel, PIN_DRIVER_IO_LEVEL_HIGH);
-
-    status = destroyInputPin(&inputPin_PULLUP);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(inputPin_PULLUP.ioState, PIN_DRIVER_PIN_STATE_INELIGIBLE);
-    status = readPin(&inputPin_PULLUP);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_IO_STATE);
-
-    inputPin_PULLUP.cPullUpDown = PIN_CONFIG_PUD_PULL_UP;
-    initInputPin(&inputPin_PULLUP);
-
-    setPin(&outputPin_PULLUP);
-    std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
-    status = readPin(&inputPin_PULLUP);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(inputPin_PULLUP.ioLevel, PIN_DRIVER_IO_LEVEL_LOW);
-    clearPin(&outputPin_PULLUP);
-    std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
-    status = readPin(&inputPin_PULLUP);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(inputPin_PULLUP.ioLevel, PIN_DRIVER_IO_LEVEL_HIGH);
-
-    destroyOutputPin(&outputPin_PULLUP);
-    destroyInputPin(&inputPin_PULLUP);
+    pinPullUpDownToSet = PIN_CONFIG_PUD_NO_RESISTOR;
+    setPinPullUpDown(pinNumber, pinPullUpDownToSet);
+    pinPullUpDownToRead = readPinPullUpDown(pinNumber);
+    ASSERT_EQ(pinPullUpDownToRead, pinPullUpDownToSet);
 
     destroyPinDriver();
 
 }
 
-static void invokeRising(pin_t *const outputPin) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC / 2));
-    setPin(outputPin);
-}
+TEST(PinDriverTest, testPinEvent) {
 
-static void invokeFalling(pin_t *const outputPin) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC / 2));
-    clearPin(outputPin);
-}
-
-TEST(PinDriverTest, testListenerPin) {
-
-    volatile int status;
-    pin_t outputPin_LISTENER = {
-            .cNumber = PIN_OUTPUT_LISTENER,
-            .cFunction = PIN_CONFIG_FUNCTION_OUTPUT
-    };
-    pin_t listenerPin = {
-            .cNumber = PIN_LISTENER,
-            .cFunction = PIN_CONFIG_FUNCTION_INPUT,
-            .cEvent = PIN_CONFIG_EVENT_BOTH,
-            .cEventTimeout = PIN_SLEEP_IN_MILSEC
-    };
+    const uint8_t pinNumber = PIN_NUMBER_SELF;
+    uint8_t pinEventToSet, pinEventToRead;
+    int fd = -1;
 
     initPinDriver();
-    initOutputPin(&outputPin_LISTENER);
-    clearPin(&outputPin_LISTENER);
 
-    // event both
-    status = initListenerPin(&listenerPin);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_GT(listenerPin.ioReference, 0);
-    ASSERT_EQ(listenerPin.ioState, PIN_DRIVER_PIN_STATE_ELIGIBLE);
+    pinEventToSet = PIN_CONFIG_EVENT_RISING;
+    setPinEvent(pinNumber, pinEventToSet, &fd);
+    ASSERT_GT(fd, 0);
+    pinEventToRead = readPinEvent(pinNumber);
+    ASSERT_EQ(pinEventToRead, pinEventToSet);
+    closePinEvent(fd);
+    fd = -1;
 
-    // no trigger timeout
-    status = pollPin(&listenerPin);
+    pinEventToSet = PIN_CONFIG_EVENT_FALLING;
+    setPinEvent(pinNumber, pinEventToSet, &fd);
+    ASSERT_GT(fd, 0);
+    pinEventToRead = readPinEvent(pinNumber);
+    ASSERT_EQ(pinEventToRead, pinEventToSet);
+    closePinEvent(fd);
+    fd = -1;
+
+    pinEventToSet = PIN_CONFIG_EVENT_BOTH;
+    setPinEvent(pinNumber, pinEventToSet, &fd);
+    ASSERT_GT(fd, 0);
+    pinEventToRead = readPinEvent(pinNumber);
+    ASSERT_EQ(pinEventToRead, pinEventToSet);
+    closePinEvent(fd);
+    fd = -1;
+
+    destroyPinDriver();
+
+}
+
+TEST(PinDriverTest, testGetBitField) {
+
+    const uint8_t pinNumber = PIN_NUMBER_SELF;
+    const uint32_t bitField = 1 << ((pinNumber % 32) * 1);
+
+    ASSERT_EQ(getPinBitField(pinNumber), bitField);
+
+}
+
+TEST(PinDriverTest, testSetReadClearPin) {
+
+    const uint8_t pinNumber = PIN_NUMBER_SELF;
+    uint32_t bitField;
+    uint32_t pinLevel;
+
+    initPinDriver();
+
+    setPinFunction(pinNumber, PIN_CONFIG_FUNCTION_OUTPUT);
+    bitField = getPinBitField(pinNumber);
+
+    setPin(bitField);
+    pinLevel = readPin(bitField);
+    ASSERT_GT(pinLevel, 0);
+
+    clearPin(bitField);
+    pinLevel = readPin(bitField);
+    ASSERT_EQ(pinLevel, 0);
+
+    setPinFunction(pinNumber, PIN_CONFIG_FUNCTION_INPUT);
+
+    destroyPinDriver();
+
+}
+
+static void invokeRising(const uint32_t pinBitField) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC / 2));
+    setPin(pinBitField);
+}
+
+static void invokeFalling(const uint32_t pinBitField) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC / 2));
+    clearPin(pinBitField);
+}
+
+TEST(PinDriverTest, testPollPin) {
+
+    const uint8_t outputPin = PIN_NUMBER_OUTPUT_LISTENER;
+    const uint8_t outputPinFunction = PIN_CONFIG_FUNCTION_OUTPUT;
+    uint32_t outputPinBitField;
+
+    const uint8_t listenerPin = PIN_NUMBER_LISTENER;
+    const uint8_t listenerPinConfigEvent = PIN_CONFIG_EVENT_BOTH;
+    int listenerPinFd;
+    const int listenerPinTimeout = PIN_SLEEP_IN_MILSEC;
+    struct gpioevent_data listenerPinEventData = {
+            .timestamp = 0,
+            .id = 0
+    };
+
+    PIN_DRIVER_ERROR status;
+
+    initPinDriver();
+
+    setPinFunction(outputPin, outputPinFunction);
+    outputPinBitField = getPinBitField(outputPin);
+    clearPin(outputPinBitField);
+
+    setPinEvent(listenerPin, listenerPinConfigEvent, &listenerPinFd);
+
+    status = pollPin(listenerPinFd, listenerPinTimeout, &listenerPinEventData);
     ASSERT_EQ(status, PIN_DRIVER_ERROR_IO_POLL_TIMEOUT);
+    ASSERT_EQ(listenerPinEventData.timestamp, 0);
+    ASSERT_EQ(listenerPinEventData.id, 0);
 
-    // trig rising and success
-    listenerPin.ioTimeStamp = 0;
-    listenerPin.ioEvent = PIN_DRIVER_IO_EVENT_FALLING;
-    std::thread risingSuccessOnBoth(invokeRising, &outputPin_LISTENER);
-    status = pollPin(&listenerPin);
+    std::thread risingSuccessOnBoth(invokeRising, outputPinBitField);
+    status = pollPin(listenerPinFd, listenerPinTimeout, &listenerPinEventData);
     risingSuccessOnBoth.join();
     ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(listenerPin.ioEvent, PIN_DRIVER_IO_EVENT_RISING);
-    ASSERT_GT(listenerPin.ioTimeStamp, 0);
+    ASSERT_GT(listenerPinEventData.timestamp, 0);
+    ASSERT_EQ(listenerPinEventData.id, GPIOEVENT_EVENT_RISING_EDGE);
+    listenerPinEventData.timestamp = 0;
+    listenerPinEventData.id = 0;
 
-    // trig falling and success
-    listenerPin.ioTimeStamp = 0;
-    listenerPin.ioEvent = PIN_DRIVER_IO_EVENT_RISING;
-    std::thread fallingSuccessOnBoth(invokeFalling, &outputPin_LISTENER);
-    status = pollPin(&listenerPin);
+    std::thread fallingSuccessOnBoth(invokeFalling, outputPinBitField);
+    status = pollPin(listenerPinFd, listenerPinTimeout, &listenerPinEventData);
     fallingSuccessOnBoth.join();
     ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(listenerPin.ioEvent, PIN_DRIVER_IO_EVENT_FALLING);
-    ASSERT_GT(listenerPin.ioTimeStamp, 0);
+    ASSERT_GT(listenerPinEventData.timestamp, 0);
+    ASSERT_EQ(listenerPinEventData.id, GPIOEVENT_EVENT_FALLING_EDGE);
 
-    status = destroyListenerPin(&listenerPin);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(listenerPin.ioState, PIN_DRIVER_PIN_STATE_INELIGIBLE);
-    status = pollPin(&listenerPin);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_IO_STATE);
-
-    // prepare falling fails on rising
-    setPin(&outputPin_LISTENER);
-
-    listenerPin.cEvent = PIN_CONFIG_EVENT_RISING;
-    initListenerPin(&listenerPin);
-
-    // trig falling fail timeout on rising
-    std::thread fallingFailOnRising(invokeFalling, &outputPin_LISTENER);
-    status = pollPin(&listenerPin);
-    fallingFailOnRising.join();
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_IO_POLL_TIMEOUT);
-
-    // trig rising success on rising
-    listenerPin.ioTimeStamp = 0;
-    listenerPin.ioEvent = PIN_DRIVER_IO_EVENT_FALLING;
-    std::thread risingSuccessOnRising(invokeRising, &outputPin_LISTENER);
-    status = pollPin(&listenerPin);
-    risingSuccessOnRising.join();
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(listenerPin.ioEvent, PIN_DRIVER_IO_EVENT_RISING);
-    ASSERT_GT(listenerPin.ioTimeStamp, 0);
-
-    destroyListenerPin(&listenerPin);
-
-    // prepare rising fails on falling
-    clearPin(&outputPin_LISTENER);
-
-    listenerPin.cEvent = PIN_CONFIG_EVENT_FALLING;
-    initListenerPin(&listenerPin);
-
-    // trig rising fail timeout on falling
-    std::thread risingFailOnFalling(invokeRising, &outputPin_LISTENER);
-    status = pollPin(&listenerPin);
-    risingFailOnFalling.join();
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_IO_POLL_TIMEOUT);
-
-    // trig falling success on falling
-    listenerPin.ioTimeStamp = 0;
-    listenerPin.ioEvent = PIN_DRIVER_IO_EVENT_RISING;
-    std::thread fallingSuccessOnFalling(invokeFalling, &outputPin_LISTENER);
-    status = pollPin(&listenerPin);
-    fallingSuccessOnFalling.join();
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(listenerPin.ioEvent, PIN_DRIVER_IO_EVENT_FALLING);
-    ASSERT_GT(listenerPin.ioTimeStamp, 0);
-
-    destroyOutputPin(&outputPin_LISTENER);
-    destroyListenerPin(&listenerPin);
+    closePinEvent(listenerPinFd);
 
     destroyPinDriver();
 

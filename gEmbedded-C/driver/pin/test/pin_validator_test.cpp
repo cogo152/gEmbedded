@@ -3,7 +3,8 @@
 //
 
 #include "gtest/gtest.h"
-#include "pin_numbers_test.h"
+#include "pin_test.h"
+
 extern "C" {
 #include "pin_validator.h"
 #include "peripheral.h"
@@ -12,25 +13,15 @@ extern "C" {
 TEST(PinValidatorTest, testOutputPin) {
 
     int status;
-    pin_t pin;
 
-    pin.type = PIN_TYPE_INPUT;
-    pin.cNumber = PIN_INVALID;
-    pin.cFunction=PIN_CONFIG_FUNCTION_INPUT;
+    uint8_t pinNumber = PIN_NUMBER_INVALID;
 
-    status = validateOutputPin(&pin);
-    ASSERT_EQ(status, PIN_VALIDATOR_ERROR_PIN_TYPE);
-
-    pin.type = PIN_TYPE_OUTPUT;
-    status = validateOutputPin(&pin);
+    status = validateOutputPin(pinNumber);
     ASSERT_EQ(status, PIN_VALIDATOR_ERROR_PIN_NUMBER);
 
-    pin.cNumber = PIN_VALID;
-    status = validateOutputPin(&pin);
-    ASSERT_EQ(status, PIN_VALIDATOR_ERROR_PIN_FUNCTION);
+    pinNumber = PIN_NUMBER_VALID;
 
-    pin.cFunction = PIN_CONFIG_FUNCTION_OUTPUT;
-    status = validateOutputPin(&pin);
+    status = validateOutputPin(pinNumber);
     ASSERT_EQ(status, PIN_VALIDATOR_ERROR_NO);
 
 }
@@ -38,30 +29,28 @@ TEST(PinValidatorTest, testOutputPin) {
 TEST(PinValidatorTest, testInputPin) {
 
     int status;
-    pin_t pin;
 
-    pin.type = PIN_TYPE_OUTPUT;
-    pin.cNumber = PIN_INVALID;
-    pin.cFunction=PIN_CONFIG_FUNCTION_OUTPUT;
-    pin.cPullUpDown = 0b11;
+    uint8_t pinNumber = PIN_NUMBER_INVALID;
+    uint8_t pinPullUpDown = PIN_PULLUPDOWN_INVALID;
 
-    status = validateInputPin(&pin);
-    ASSERT_EQ(status, PIN_VALIDATOR_ERROR_PIN_TYPE);
-
-    pin.type = PIN_TYPE_INPUT;
-    status = validateInputPin(&pin);
+    status = validateInputPin(pinNumber, pinPullUpDown);
     ASSERT_EQ(status, PIN_VALIDATOR_ERROR_PIN_NUMBER);
 
-    pin.cNumber = PIN_VALID;
-    status = validateInputPin(&pin);
-    ASSERT_EQ(status, PIN_VALIDATOR_ERROR_PIN_FUNCTION);
+    pinNumber = PIN_NUMBER_VALID;
 
-    pin.cFunction = PIN_CONFIG_FUNCTION_INPUT;
-    status = validateInputPin(&pin);
+    status = validateInputPin(pinNumber, pinPullUpDown);
     ASSERT_EQ(status, PIN_VALIDATOR_ERROR_PIN_PULLUPDOWN);
 
-    pin.cPullUpDown = PIN_CONFIG_PUD_PULL_UP;
-    status = validateInputPin(&pin);
+    pinPullUpDown = PIN_CONFIG_PUD_NO_RESISTOR;
+    status = validateInputPin(pinNumber, pinPullUpDown);
+    ASSERT_EQ(status, PIN_VALIDATOR_ERROR_NO);
+
+    pinPullUpDown = PIN_CONFIG_PUD_PULL_UP;
+    status = validateInputPin(pinNumber, pinPullUpDown);
+    ASSERT_EQ(status, PIN_VALIDATOR_ERROR_NO);
+
+    pinPullUpDown = PIN_CONFIG_PUD_PULL_DOWN;
+    status = validateInputPin(pinNumber, pinPullUpDown);
     ASSERT_EQ(status, PIN_VALIDATOR_ERROR_NO);
 
 }
@@ -69,35 +58,32 @@ TEST(PinValidatorTest, testInputPin) {
 TEST(PinValidatorTest, testListenerPin) {
 
     int status;
-    pin_t pin;
 
-    pin.type = PIN_TYPE_OUTPUT;
-    pin.cNumber = PIN_INVALID;
-    pin.cFunction=PIN_CONFIG_FUNCTION_OUTPUT;
-    pin.cEvent = 0b11;
-    pin.cEventTimeout = 0;
+    uint8_t pinNumber = PIN_NUMBER_INVALID;
+    uint8_t pinEvent = PIN_EVENT_INVALID;
+    uint8_t pinEventTimeOutInMilSec = PIN_EVENT_TIMEOUT_INVALID;
 
-    status = validateListenerPin(&pin);
-    ASSERT_EQ(status, PIN_VALIDATOR_ERROR_PIN_TYPE);
-
-    pin.type = PIN_TYPE_LISTENER;
-    status = validateListenerPin(&pin);
+    status = validateListenerPin(pinNumber, pinEvent, pinEventTimeOutInMilSec);
     ASSERT_EQ(status, PIN_VALIDATOR_ERROR_PIN_NUMBER);
 
-    pin.cNumber = PIN_VALID;
-    status = validateListenerPin(&pin);
-    ASSERT_EQ(status, PIN_VALIDATOR_ERROR_PIN_FUNCTION);
-
-    pin.cFunction = PIN_CONFIG_FUNCTION_INPUT;
-    status = validateListenerPin(&pin);
+    pinNumber = PIN_NUMBER_VALID;
+    status = validateListenerPin(pinNumber, pinEvent, pinEventTimeOutInMilSec);
     ASSERT_EQ(status, PIN_VALIDATOR_ERROR_PIN_EVENT);
 
-    pin.cEvent = PIN_CONFIG_EVENT_BOTH;
-    status = validateListenerPin(&pin);
+    pinEvent = PIN_CONFIG_EVENT_RISING;
+    status = validateListenerPin(pinNumber, pinEvent, pinEventTimeOutInMilSec);
     ASSERT_EQ(status, PIN_VALIDATOR_ERROR_PIN_EVENT_TIMEOUT);
 
-    pin.cEventTimeout = 1;
-    status = validateListenerPin(&pin);
+    pinEvent = PIN_CONFIG_EVENT_FALLING;
+    status = validateListenerPin(pinNumber, pinEvent, pinEventTimeOutInMilSec);
+    ASSERT_EQ(status, PIN_VALIDATOR_ERROR_PIN_EVENT_TIMEOUT);
+
+    pinEvent = PIN_CONFIG_EVENT_BOTH;
+    status = validateListenerPin(pinNumber, pinEvent, pinEventTimeOutInMilSec);
+    ASSERT_EQ(status, PIN_VALIDATOR_ERROR_PIN_EVENT_TIMEOUT);
+
+    pinEventTimeOutInMilSec = PIN_EVENT_TIMEOUT_VALID;
+    status = validateListenerPin(pinNumber, pinEvent, pinEventTimeOutInMilSec);
     ASSERT_EQ(status, PIN_VALIDATOR_ERROR_NO);
 
 }

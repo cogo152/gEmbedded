@@ -5,52 +5,51 @@
 #ifndef GEMBEDDED_C_PIN_DRIVER_H
 #define GEMBEDDED_C_PIN_DRIVER_H
 
-#include "pin.h"
+#include <linux/gpio.h>
 
-#define PIN_DRIVER_ERROR_NO                 (0)
-#define PIN_DRIVER_ERROR_MAP                (-1)
-#define PIN_DRIVER_ERROR_UNMAP              (-2)
-#define PIN_DRIVER_ERROR_PIN_FUNCTION       (-3)
-#define PIN_DRIVER_ERROR_PIN_PULLUPDOWN     (-4)
-#define PIN_DRIVER_ERROR_PIN_EVENT          (-5)
-#define PIN_DRIVER_ERROR_FILE               (-6)
-#define PIN_DRIVER_ERROR_IOCTL              (-7)
-#define PIN_DRIVER_ERROR_IO_STATE           (-8)
-#define PIN_DRIVER_ERROR_IO_POLL            (-9)
-#define PIN_DRIVER_ERROR_IO_POLL_TIMEOUT    (-10)
-#define PIN_DRIVER_PIN_STATE_ELIGIBLE       (1)
-#define PIN_DRIVER_PIN_STATE_INELIGIBLE     (0)
-#define PIN_DRIVER_IO_LEVEL_HIGH            (1)
-#define PIN_DRIVER_IO_LEVEL_LOW             (0)
-#define PIN_DRIVER_IO_EVENT_RISING          (1)
-#define PIN_DRIVER_IO_EVENT_FALLING         (0)
+#include "common.h"
+
+typedef enum{
+    PIN_DRIVER_ERROR_NO = 0,
+    PIN_DRIVER_ERROR_MAP = -1,
+    PIN_DRIVER_ERROR_UNMAP = -2,
+    PIN_DRIVER_ERROR_FILE = -3,
+    PIN_DRIVER_ERROR_IOCTL = -4,
+    PIN_DRIVER_ERROR_IO_POLL = -5,
+    PIN_DRIVER_ERROR_IO_POLL_TIMEOUT = -6
+} PIN_DRIVER_ERROR;
+
 #define PIN_DRIVER_TRUE                     (1)
 #define PIN_DRIVER_FALSE                    (0)
 
-int initPinDriver(void);
+PIN_DRIVER_ERROR initPinDriver(void);
 
-void isPinDriverInitialized(int *pinDriverInitialized);
+int isPinDriverInitialized(void);
 
-int destroyPinDriver(void);
+PIN_DRIVER_ERROR destroyPinDriver(void);
 
-int initOutputPin(pin_t *pin);
+void setPinFunction(uint8_t pinNumber, uint8_t pinFunction);
 
-int destroyOutputPin(pin_t *pin);
+uint8_t readPinFunction(uint8_t pinNumber);
 
-int initInputPin(pin_t *pin);
+void setPinPullUpDown(uint8_t pinNumber, uint8_t pullUpDown);
 
-int destroyInputPin(pin_t *pin);
+uint8_t readPinPullUpDown(uint8_t pinNumber);
 
-int initListenerPin(pin_t *pin);
+PIN_DRIVER_ERROR setPinEvent(uint8_t pinNumber, uint8_t pinEvent, int* fileDescriptor);
 
-int destroyListenerPin(pin_t *pin);
+uint8_t readPinEvent(uint8_t pinNumber);
 
-int setPin(pin_t *pin);
+void closePinEvent(int fileDescriptor);
 
-int clearPin(pin_t *pin);
+uint32_t getPinBitField(uint8_t pinNumber);
 
-int readPin(pin_t *pin);
+void setPin(uint32_t pinBitField);
 
-int pollPin(pin_t *pin);
+void clearPin(uint32_t pinBitField);
+
+uint32_t readPin(uint32_t pinBitField);
+
+PIN_DRIVER_ERROR pollPin(int fileDescriptor, int timeoutInMilSec, struct gpioevent_data* eventData);
 
 #endif //GEMBEDDED_C_PIN_DRIVER_H

@@ -17,51 +17,51 @@ static void *pointer = nullptr;
 
 TEST(MapperTest, testMapBaseRegister) {
 
-    int status;
+    MAPPER_ERROR status;
 
     status = mapBaseRegister(nullptr, MAPPER_BLOCK_SIZE, MAPPER_OFFSET, &pointer);
-    EXPECT_EQ(status, MAPPER_EXCEPTION_MAPPING_ERROR);
+    EXPECT_EQ(status, MAPPER_ERROR_MAP);
 
     status = mapBaseRegister(MAPPER_FILE_NAME, MAPPER_INVALID_BLOCK_SIZE, MAPPER_OFFSET, &pointer);
-    EXPECT_EQ(status, MAPPER_EXCEPTION_MAPPING_ERROR);
+    EXPECT_EQ(status, MAPPER_ERROR_MAP);
 
     status = mapBaseRegister(MAPPER_FILE_NAME, MAPPER_BLOCK_SIZE, MAPPER_OFFSET, nullptr);
-    EXPECT_EQ(status, MAPPER_EXCEPTION_MAPPING_ERROR);
+    EXPECT_EQ(status, MAPPER_ERROR_MAP);
 
     status = mapBaseRegister(MAPPER_INVALID_FILE_NAME, MAPPER_BLOCK_SIZE, MAPPER_OFFSET, &pointer);
-    EXPECT_EQ(status, MAPPER_EXCEPTION_MAPPING_ERROR);
+    EXPECT_EQ(status, MAPPER_ERROR_MAP);
 
     status = mapBaseRegister(MAPPER_FILE_NAME, MAPPER_BLOCK_SIZE, 1, &pointer);
-    EXPECT_EQ(status, MAPPER_EXCEPTION_MAPPING_ERROR);
+    EXPECT_EQ(status, MAPPER_ERROR_MAP);
 
     status = mapBaseRegister(MAPPER_FILE_NAME, MAPPER_BLOCK_SIZE, MAPPER_OFFSET, &pointer);
-    EXPECT_EQ(status, MAPPER_EXCEPTION_NO_ERROR);
+    EXPECT_EQ(status, MAPPER_ERROR_NO);
     EXPECT_NE(pointer, nullptr);
 
 }
 
 TEST(MapperTest, testUnmapBaseRegister) {
 
-    int status;
+    MAPPER_ERROR status;
 
     void *nullPointer = nullptr;
 
     void *invalidPointer = (void *) 1;
 
     status = unmapBaseRegister(nullptr, MAPPER_BLOCK_SIZE);
-    EXPECT_EQ(status, MAPPER_EXCEPTION_UNMAPPING_ERROR);
+    EXPECT_EQ(status, MAPPER_ERROR_UNMAP);
 
     status = unmapBaseRegister(&nullPointer, MAPPER_BLOCK_SIZE);
-    EXPECT_EQ(status, MAPPER_EXCEPTION_UNMAPPING_ERROR);
+    EXPECT_EQ(status, MAPPER_ERROR_UNMAP);
 
     status = unmapBaseRegister(&pointer, MAPPER_INVALID_BLOCK_SIZE);
-    EXPECT_EQ(status, MAPPER_EXCEPTION_UNMAPPING_ERROR);
+    EXPECT_EQ(status, MAPPER_ERROR_UNMAP);
 
     status = unmapBaseRegister(&invalidPointer, MAPPER_BLOCK_SIZE);
-    EXPECT_EQ(status, MAPPER_EXCEPTION_UNMAPPING_ERROR);
+    EXPECT_EQ(status, MAPPER_ERROR_UNMAP);
 
     status = unmapBaseRegister(&pointer, MAPPER_BLOCK_SIZE);
-    EXPECT_EQ(status, MAPPER_EXCEPTION_NO_ERROR);
+    EXPECT_EQ(status, MAPPER_ERROR_NO);
     EXPECT_EQ(pointer, nullptr);
 
 }

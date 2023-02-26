@@ -1,5 +1,5 @@
 //
-// Created by sondahi on 05.02.23.
+// Created by sondahi on 26.02.23.
 //
 
 #ifndef GEMBEDDED_C_PIN_CONTROLLER_H
@@ -11,46 +11,32 @@
 extern "C" {
 #endif
 
-#define PIN_CONTROLLER_ERROR_NO                     (0)
-#define PIN_CONTROLLER_ERROR_LOCK                   (-1)
-#define PIN_CONTROLLER_ERROR_UNLOCK                 (-2)
-#define PIN_CONTROLLER_ERROR_STATE                  (-3)
-#define PIN_CONTROLLER_ERROR_DRIVER                 (-4)
-#define PIN_CONTROLLER_ERROR_STORE                  (-5)
-#define PIN_CONTROLLER_ERROR_PIN_CLOSE              (-6)
-#define PIN_CONTROLLER_ERROR_CONFIG_LOCK            (-7)
-#define PIN_CONTROLLER_ERROR_CONFIG_UNLOCK          (-8)
-#define PIN_CONTROLLER_ERROR_PIN_OPENED             (-9)
-#define PIN_CONTROLLER_ERROR_PIN_CLOSED             (-10)
-#define PIN_CONTROLLER_ERROR_PIN_VALIDATION         (-11)
-#define PIN_CONTROLLER_ERROR_PIN_INIT               (-12)
-#define PIN_CONTROLLER_ERROR_PIN_DESTROY            (-13)
-#define PIN_CONTROLLER_ERROR_PIN_SESSION_INIT       (-14)
-#define PIN_CONTROLLER_ERROR_PIN_SESSION_DESTROY    (-15)
-#define PIN_CONTROLLER_ERROR_PIN_ADD                (-16)
-#define PIN_CONTROLLER_ERROR_IO_LOCK                (-17)
-#define PIN_CONTROLLER_ERROR_IO_UNLOCK              (-18)
+typedef enum {
+    PIN_CONTROLLER_ERROR_NO = 0,
+    PIN_CONTROLLER_ERROR_INIT = -1,
+    PIN_CONTROLLER_ERROR_DESTROY = -2,
+    PIN_CONTROLLER_ERROR_PIN_NUMBER = -3,
+    PIN_CONTROLLER_ERROR_PIN_FUNCTION = -4,
+
+
+} PIN_CONTROLLER_ERROR;
+
+PIN_CONTROLLER_ERROR pinControllerInit();
+
+PIN_CONTROLLER_ERROR pinControllerDestroy();
+
+PIN_CONTROLLER_ERROR outputPinOpen(uint8_t pinNumber, uint32_t *ioReference);
+
+PIN_CONTROLLER_ERROR outputPinClose(uint8_t pinNumber);
+
+void outputPinWrite(uint32_t ioReference);
+
+void outputPinClear(uint32_t ioReference);
+
+int outputPinRead(uint32_t ioReference);
 
 #define PIN_CONTROLLER_PIN_LEVEL_HIGH               (1)
 #define PIN_CONTROLLER_PIN_LEVEL_LOW                (0)
-
-
-#define PIN_CONTROLLER_TRUE     (1)
-#define PIN_CONTROLLER_FALSE    (0)
-
-int pinControllerInit();
-
-int pinControllerDestroy();
-
-int outputPinOpen(uint8_t pinNumber, int *reference);
-
-int outputPinClose(int reference);
-
-int outputPinWrite(int reference);
-
-int outputPinClear(int reference);
-
-int outputPinRead(int reference, int *pinLevel);
 
 #ifdef __cplusplus
 }

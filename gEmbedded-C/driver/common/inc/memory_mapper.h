@@ -17,12 +17,15 @@
 #define PROT_FLAG           (PROT_READ | PROT_WRITE)
 #define MAP_FLAG            (MAP_SHARED)
 
-#define MAPPER_EXCEPTION_NO_ERROR           (0)
-#define MAPPER_EXCEPTION_MAPPING_ERROR      (-1)
-#define MAPPER_EXCEPTION_UNMAPPING_ERROR    (-2)
+typedef enum{
+    MAPPER_ERROR_NO = 0,
+    MAPPER_ERROR_MAP = -1,
+    MAPPER_ERROR_UNMAP = -2
+} MAPPER_ERROR;
 
-int mapBaseRegister(const char *fileName, size_t length, off_t offset, void **pointer);
 
-int unmapBaseRegister(void **pointer, size_t length);
+MAPPER_ERROR mapBaseRegister(const char* pFileName, size_t length, off_t offset, void** pBase);
+
+MAPPER_ERROR unmapBaseRegister(void** pBase, size_t length);
 
 #endif //GEMBEDDED_C_MEMORY_MAPPER_H

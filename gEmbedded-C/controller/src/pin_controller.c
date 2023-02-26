@@ -1,452 +1,98 @@
 //
-// Created by sondahi on 15.02.23.
+// Created by sondahi on 26.02.23.
 //
 
-#include <pthread.h>
-
 #include "pin_controller.h"
-#include "pin.h"
-#include "pin_store.h"
 #include "pin_validator.h"
-#include "pin_session.h"
 #include "pin_driver.h"
 #include "peripheral.h"
 
+PIN_CONTROLLER_ERROR pinControllerInit() {
 
-static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-static volatile int state = PIN_CONTROLLER_FALSE;
-
-int pinControllerInit() {
-
-    volatile int status = PIN_CONTROLLER_ERROR_NO;
-
-    const int lockStatus = pthread_mutex_lock(&mutex);
-    if (lockStatus != 0) {
-        status = PIN_CONTROLLER_ERROR_LOCK;
-        goto Return;
+    if (isPinDriverInitialized()) {
+        return PIN_CONTROLLER_ERROR_NO;
     }
 
-    if (state == PIN_CONTROLLER_TRUE) {
-        status = PIN_CONTROLLER_ERROR_STATE;
-        goto Unlock;
+    const PIN_DRIVER_ERROR error = initPinDriver();
+    if (error != PIN_DRIVER_ERROR_NO) {
+        return PIN_CONTROLLER_ERROR_INIT;
     }
 
-    int pinDriverInitialized;
-    isPinDriverInitialized(&pinDriverInitialized);
-    if (pinDriverInitialized == PIN_DRIVER_FALSE) {
-        const int pinDriverStatus = initPinDriver();
-        if (pinDriverStatus != PIN_DRIVER_ERROR_NO) {
-            status = PIN_CONTROLLER_ERROR_DRIVER;
-        }
-    }
-
-    int pinStoreInitialized;
-    isPinStoreInitialized(&pinStoreInitialized);
-    if (pinStoreInitialized == PIN_DRIVER_FALSE) {
-        const int pinStoreStatus = initPinStore();
-        if (pinStoreStatus != PIN_DRIVER_ERROR_NO) {
-            status = PIN_CONTROLLER_ERROR_STORE;
-        }
-    }
-
-    state = PIN_CONTROLLER_TRUE;
-
-    Unlock :
-    {
-        const int unlockStatus = pthread_mutex_unlock(&mutex);
-        if (unlockStatus != 0) {
-            status = PIN_CONTROLLER_ERROR_UNLOCK;
-        }
-
-    };
-
-    Return :
-    {
-        return status;
-    };
+    return PIN_CONTROLLER_ERROR_NO;
 
 }
 
-int pinControllerDestroy() {
+PIN_CONTROLLER_ERROR pinControllerDestroy() {
 
-    volatile int status = PIN_CONTROLLER_ERROR_NO;
-
-    const int lockStatus = pthread_mutex_lock(&mutex);
-    if (lockStatus != 0) {
-        status = PIN_CONTROLLER_ERROR_LOCK;
-        goto Return;
+    if (!isPinDriverInitialized()) {
+        return PIN_CONTROLLER_ERROR_NO;
     }
 
-    if (state == PIN_CONTROLLER_FALSE) {
-        status = PIN_CONTROLLER_ERROR_STATE;
-        goto Unlock;
+    const PIN_DRIVER_ERROR error = destroyPinDriver();
+    if (error != PIN_DRIVER_ERROR_NO) {
+        return PIN_CONTROLLER_ERROR_DESTROY;
     }
 
-    int pinDriverInitialized;
-    isPinDriverInitialized(&pinDriverInitialized);
-    if (pinDriverInitialized == PIN_DRIVER_TRUE) {
-        int closablePinLength;
-        const int *closablePinReferences = getClosablePinReferences(&closablePinLength);
-        if (closablePinReferences != NULL) {
-            for (int i = 0; i < closablePinLength; ++i) {
-                pin_t *pin = getPin(closablePinReferences[i]);
-                int closeStatus;
-                switch (pin->type) {
-                    case PIN_TYPE_OUTPUT: {
-                        closeStatus = destroyOutputPin(pin);
-                        break;
-                    }
-                    case PIN_TYPE_INPUT: {
-                        closeStatus = destroyInputPin(pin);
-                        break;
-                    }
-                    default: {
-                        closeStatus = destroyListenerPin(pin);
-                        break;
-                    }
-                }
-                if (closeStatus != PIN_DRIVER_ERROR_NO) {
-                    status = PIN_CONTROLLER_ERROR_PIN_CLOSE;
-                    break;
-                }
-            }
-        }
-        const int pinDriverStatus = destroyPinDriver();
-        if (pinDriverStatus != PIN_DRIVER_ERROR_NO) {
-            status = PIN_CONTROLLER_ERROR_DRIVER;
-        }
-    }
-
-    int pinStoreInitialized;
-    isPinStoreInitialized(&pinStoreInitialized);
-    if (pinStoreInitialized == PIN_DRIVER_TRUE) {
-        destroyPinStore();
-    }
-
-    state = PIN_CONTROLLER_FALSE;
-
-    Unlock :
-    {
-        const int unlockStatus = pthread_mutex_unlock(&mutex);
-        if (unlockStatus != 0) {
-            status = PIN_CONTROLLER_ERROR_UNLOCK;
-        }
-
-    };
-
-    Return :
-    {
-        return status;
-    };
+    return PIN_CONTROLLER_ERROR_NO;
 
 }
 
-int outputPinOpen(const uint8_t pinNumber, int *const reference) {
+PIN_CONTROLLER_ERROR outputPinOpen(const uint8_t pinNumber, uint32_t *const ioReference) {
 
-    volatile int status = PIN_CONTROLLER_ERROR_NO;
-
-    const int lockStatus = pthread_mutex_lock(&mutex);
-    if (lockStatus != 0) {
-        status = PIN_CONTROLLER_ERROR_LOCK;
+    const PIN_VALIDATOR_ERROR validatorError = validateOutputPin(pinNumber);
+    if (validatorError != PIN_VALIDATOR_ERROR_NO) {
+        return PIN_CONTROLLER_ERROR_PIN_NUMBER;
     }
 
-    if (state == PIN_CONTROLLER_FALSE) {
-        status = PIN_CONTROLLER_ERROR_STATE;
+    setPinFunction(pinNumber, PIN_CONFIG_FUNCTION_OUTPUT);
+    const uint8_t pinFunction = readPinFunction(pinNumber);
+    if (pinFunction != PIN_CONFIG_FUNCTION_OUTPUT) {
+        return PIN_CONTROLLER_ERROR_PIN_FUNCTION;
     }
 
-    const int unlockStatus = pthread_mutex_unlock(&mutex);
-    if (unlockStatus != 0) {
-        status = PIN_CONTROLLER_ERROR_UNLOCK;
-    }
+    *ioReference = getPinBitField(pinNumber);
 
-    if (status != PIN_CONTROLLER_ERROR_NO) {
-        goto Return;
-    }
-
-    const int configSessionLockStatus = lockPinConfigSession();
-    if (configSessionLockStatus != PIN_SESSION_ERROR_NO) {
-        status = PIN_CONTROLLER_ERROR_CONFIG_LOCK;
-        goto Return;
-    }
-
-    int pinAdded;
-    isPinAdded(pinNumber, &pinAdded);
-    if (pinAdded == PIN_STORE_TRUE) {
-        status = PIN_CONTROLLER_ERROR_PIN_OPENED;
-        goto Unlock;
-    }
-
-    pin_t outputPin = {
-            .type = PIN_TYPE_OUTPUT,
-            .cNumber = pinNumber,
-            .cFunction = PIN_CONFIG_FUNCTION_OUTPUT,
-    };
-
-    const int validationStatus = validateOutputPin(&outputPin);
-    if (validationStatus != PIN_VALIDATOR_ERROR_NO) {
-        status = PIN_CONTROLLER_ERROR_PIN_VALIDATION;
-        goto Unlock;
-    }
-
-    const int initStatus = initOutputPin(&outputPin);
-    if (initStatus != PIN_DRIVER_ERROR_NO) {
-        status = PIN_CONTROLLER_ERROR_PIN_INIT;
-        goto Unlock;
-    }
-
-    const int sessionInitStatus = initPinIOSession(&outputPin);
-    if (sessionInitStatus != PIN_SESSION_ERROR_NO) {
-        status = PIN_CONTROLLER_ERROR_PIN_SESSION_INIT;
-        goto Unlock;
-    }
-
-    const int addStatus = addPin(outputPin, reference);
-    if (addStatus != PIN_STORE_ERROR_NO) {
-        status = PIN_CONTROLLER_ERROR_PIN_ADD;
-        goto Unlock;
-    }
-
-    Unlock :
-    {
-        const int configSessionUnlockStatus = unlockPinConfigSession();
-        if (configSessionUnlockStatus != PIN_SESSION_ERROR_NO) {
-            status = PIN_CONTROLLER_ERROR_CONFIG_UNLOCK;
-        }
-
-    };
-
-    Return :
-    {
-        return status;
-    };
+    return PIN_CONTROLLER_ERROR_NO;
 
 }
 
-int outputPinClose(const int reference) {
+PIN_CONTROLLER_ERROR outputPinClose(const uint8_t pinNumber) {
 
-    volatile int status = PIN_CONTROLLER_ERROR_NO;
-
-    const int lockStatus = pthread_mutex_lock(&mutex);
-    if (lockStatus != 0) {
-        status = PIN_CONTROLLER_ERROR_LOCK;
+    setPinFunction(pinNumber, PIN_CONFIG_FUNCTION_INPUT);
+    const uint8_t pinFunction = readPinFunction(pinNumber);
+    if (pinFunction != PIN_CONFIG_FUNCTION_INPUT) {
+        return PIN_CONTROLLER_ERROR_PIN_FUNCTION;
     }
 
-    if (state == PIN_CONTROLLER_FALSE) {
-        status = PIN_CONTROLLER_ERROR_STATE;
-    }
-
-    const int unlockStatus = pthread_mutex_unlock(&mutex);
-    if (unlockStatus != 0) {
-        status = PIN_CONTROLLER_ERROR_UNLOCK;
-    }
-
-    if (status != PIN_CONTROLLER_ERROR_NO) {
-        goto Return;
-    }
-
-    const int configSessionLockStatus = lockPinConfigSession();
-    if (configSessionLockStatus != PIN_SESSION_ERROR_NO) {
-        status = PIN_CONTROLLER_ERROR_CONFIG_LOCK;
-        goto Return;
-    }
-
-    pin_t *outputPin = getPin(reference);
-
-    int pinAdded;
-    isPinAdded(outputPin->cNumber, &pinAdded);
-    if (pinAdded == PIN_STORE_FALSE) {
-        status = PIN_CONTROLLER_ERROR_PIN_CLOSED;
-        goto Unlock;
-    }
-
-    const int destroyStatus = destroyOutputPin(outputPin);
-    if (destroyStatus != PIN_DRIVER_ERROR_NO) {
-        status = PIN_CONTROLLER_ERROR_PIN_DESTROY;
-        goto Unlock;
-    }
-
-    const int sessionDestroyStatus = destroyPinIOSession(outputPin);
-    if (sessionDestroyStatus != PIN_SESSION_ERROR_NO) {
-        status = PIN_CONTROLLER_ERROR_PIN_SESSION_DESTROY;
-        goto Unlock;
-    }
-
-    removePin(reference);
-
-    Unlock :
-    {
-        const int configSessionUnlockStatus = unlockPinConfigSession();
-        if (configSessionUnlockStatus != PIN_SESSION_ERROR_NO) {
-            status = PIN_CONTROLLER_ERROR_CONFIG_UNLOCK;
-        }
-
-    };
-
-    Return :
-    {
-        return status;
-    };
+    return PIN_CONTROLLER_ERROR_NO;
 
 }
 
-int outputPinWrite(const int reference) {
+int readPinLevel(const uint32_t ioReference) {
 
-    volatile int status = PIN_CONTROLLER_ERROR_NO;
-
-    const int lockStatus = pthread_mutex_lock(&mutex);
-    if (lockStatus != 0) {
-        status = PIN_CONTROLLER_ERROR_LOCK;
-    }
-
-    if (state == PIN_CONTROLLER_FALSE) {
-        status = PIN_CONTROLLER_ERROR_STATE;
-    }
-
-    const int unlockStatus = pthread_mutex_unlock(&mutex);
-    if (unlockStatus != 0) {
-        status = PIN_CONTROLLER_ERROR_UNLOCK;
-    }
-
-    if (status != PIN_CONTROLLER_ERROR_NO) {
-        goto Return;
-    }
-
-    pin_t *outputPin = getPin(reference);
-
-    const int ioSessionLockStatus = lockPinIOSession(outputPin);
-    if (ioSessionLockStatus != PIN_SESSION_ERROR_NO) {
-        status = PIN_CONTROLLER_ERROR_IO_LOCK;
-        goto Return;
-    }
-
-    const int setStatus = setPin(outputPin);
-    if (setStatus != PIN_DRIVER_ERROR_NO) {
-        status = PIN_CONTROLLER_ERROR_STATE;
-        goto Unlock;
-    }
-
-    Unlock :
-    {
-        const int ioSessionUnlockStatus = unlockPinIOSession(outputPin);
-        if (ioSessionUnlockStatus != PIN_SESSION_ERROR_NO) {
-            status = PIN_CONTROLLER_ERROR_IO_UNLOCK;
-        }
-
-    };
-
-    Return :
-    {
-        return status;
-    };
-
-}
-
-int outputPinClear(const int reference) {
-
-    volatile int status = PIN_CONTROLLER_ERROR_NO;
-
-    const int lockStatus = pthread_mutex_lock(&mutex);
-    if (lockStatus != 0) {
-        status = PIN_CONTROLLER_ERROR_LOCK;
-    }
-
-    if (state == PIN_CONTROLLER_FALSE) {
-        status = PIN_CONTROLLER_ERROR_STATE;
-    }
-
-    const int unlockStatus = pthread_mutex_unlock(&mutex);
-    if (unlockStatus != 0) {
-        status = PIN_CONTROLLER_ERROR_UNLOCK;
-    }
-
-    if (status != PIN_CONTROLLER_ERROR_NO) {
-        goto Return;
-    }
-
-    pin_t *outputPin = getPin(reference);
-
-    const int ioSessionLockStatus = lockPinIOSession(outputPin);
-    if (ioSessionLockStatus != PIN_SESSION_ERROR_NO) {
-        status = PIN_CONTROLLER_ERROR_IO_LOCK;
-        goto Return;
-    }
-
-    const int clearStatus = clearPin(outputPin);
-    if (clearStatus != PIN_DRIVER_ERROR_NO) {
-        status = PIN_CONTROLLER_ERROR_STATE;
-        goto Unlock;
-    }
-
-    Unlock :
-    {
-        const int ioSessionUnlockStatus = unlockPinIOSession(outputPin);
-        if (ioSessionUnlockStatus != PIN_SESSION_ERROR_NO) {
-            status = PIN_CONTROLLER_ERROR_IO_UNLOCK;
-        }
-
-    };
-
-    Return :
-    {
-        return status;
-    };
-
-}
-
-int outputPinRead(const int reference, int *const pinLevel) {
-
-    volatile int status = PIN_CONTROLLER_ERROR_NO;
-
-    const int lockStatus = pthread_mutex_lock(&mutex);
-    if (lockStatus != 0) {
-        status = PIN_CONTROLLER_ERROR_LOCK;
-    }
-
-    if (state == PIN_CONTROLLER_FALSE) {
-        status = PIN_CONTROLLER_ERROR_STATE;
-    }
-
-    const int unlockStatus = pthread_mutex_unlock(&mutex);
-    if (unlockStatus != 0) {
-        status = PIN_CONTROLLER_ERROR_UNLOCK;
-    }
-
-    if (status != PIN_CONTROLLER_ERROR_NO) {
-        goto Return;
-    }
-
-    pin_t *outputPin = getPin(reference);
-
-    const int ioSessionLockStatus = lockPinIOSession(outputPin);
-    if (ioSessionLockStatus != PIN_SESSION_ERROR_NO) {
-        status = PIN_CONTROLLER_ERROR_IO_LOCK;
-        goto Return;
-    }
-
-    const int readStatus = readPin(outputPin);
-    if (readStatus != PIN_DRIVER_ERROR_NO) {
-        status = PIN_CONTROLLER_ERROR_STATE;
-        goto Unlock;
-    }
-
-    if(outputPin->ioLevel == PIN_DRIVER_IO_LEVEL_HIGH){
-        *pinLevel = PIN_CONTROLLER_PIN_LEVEL_HIGH;
+    uint32_t pinLevel = readPin(ioReference);
+    if (pinLevel > 0) {
+        return PIN_CONTROLLER_PIN_LEVEL_HIGH;
     } else {
-        *pinLevel = PIN_CONTROLLER_PIN_LEVEL_LOW;
+        return PIN_CONTROLLER_PIN_LEVEL_LOW;
     }
 
-    Unlock :
-    {
-        const int ioSessionUnlockStatus = unlockPinIOSession(outputPin);
-        if (ioSessionUnlockStatus != PIN_SESSION_ERROR_NO) {
-            status = PIN_CONTROLLER_ERROR_IO_UNLOCK;
-        }
+}
 
-    };
+void outputPinWrite(const uint32_t ioReference) {
 
-    Return :
-    {
-        return status;
-    };
+    setPin(ioReference);
+
+}
+
+void outputPinClear(const uint32_t ioReference) {
+
+    clearPin(ioReference);
+
+}
+
+int outputPinRead(const uint32_t ioReference) {
+
+    return readPinLevel(ioReference);
 
 }

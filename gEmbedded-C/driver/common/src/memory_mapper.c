@@ -4,63 +4,64 @@
 
 #include "memory_mapper.h"
 
-int mapBaseRegister(const char *const fileName, const size_t length, const off_t offset, void **const pointer) {
+MAPPER_ERROR
+mapBaseRegister(const char* const pFileName, const size_t length, const off_t offset, void** const pBase) {
 
-    if (fileName == NULL) {
-        return MAPPER_EXCEPTION_MAPPING_ERROR;
+    if (pFileName == NULL) {
+        return MAPPER_ERROR_MAP;
     }
 
     if (length < 1) {
-        return MAPPER_EXCEPTION_MAPPING_ERROR;
+        return MAPPER_ERROR_MAP;
     }
 
-    if (pointer == NULL) {
-        return MAPPER_EXCEPTION_MAPPING_ERROR;
+    if (pBase == NULL) {
+        return MAPPER_ERROR_MAP;
     }
 
-    const int memoryFileDescriptor = open(fileName, FILE_FLAG);
+    const int memoryFileDescriptor = open(pFileName, FILE_FLAG);
 
     if (memoryFileDescriptor < 0) {
-        return MAPPER_EXCEPTION_MAPPING_ERROR;
+        return MAPPER_ERROR_MAP;
     }
 
-    void *const ptr = mmap(NULL, length, PROT_FLAG, MAP_FLAG, memoryFileDescriptor, offset);
-    if (ptr == MAP_FAILED) {
+    void* const base = mmap(NULL, length, PROT_FLAG, MAP_FLAG, memoryFileDescriptor, offset);
+    if (base == MAP_FAILED) {
         close(memoryFileDescriptor);
-        *pointer = NULL;
-        return MAPPER_EXCEPTION_MAPPING_ERROR;
+        *pBase = NULL;
+        return MAPPER_ERROR_MAP;
     } else {
-        *pointer = ptr;
+        *pBase = base;
     }
 
     close(memoryFileDescriptor);
 
-    return MAPPER_EXCEPTION_NO_ERROR;
+    return MAPPER_ERROR_NO;
 
 }
 
-int unmapBaseRegister(void **const pointer, size_t const length) {
+MAPPER_ERROR unmapBaseRegister(void** const pBase, const size_t length) {
 
-    if (pointer == NULL) {
-        return MAPPER_EXCEPTION_UNMAPPING_ERROR;
+    if (pBase == NULL) {
+        return MAPPER_ERROR_UNMAP;
     }
 
-    if (*pointer == NULL) {
-        return MAPPER_EXCEPTION_UNMAPPING_ERROR;
+    if (*pBase == NULL) {
+        return MAPPER_ERROR_UNMAP;
     }
 
     if (length < 1) {
-        return MAPPER_EXCEPTION_UNMAPPING_ERROR;
+        return MAPPER_ERROR_UNMAP;
     }
 
-    const int memoryUnmapResult = munmap(*pointer, length);
+    const int memoryUnmapResult = munmap(*pBase, length);
 
     if (memoryUnmapResult < 0) {
-        return MAPPER_EXCEPTION_UNMAPPING_ERROR;
+        return MAPPER_ERROR_UNMAP;
     } else {
-        *pointer = NULL;
+        *pBase = NULL;
     }
 
-    return MAPPER_EXCEPTION_NO_ERROR;
+    return MAPPER_ERROR_NO;
 
 }
