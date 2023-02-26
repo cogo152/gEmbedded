@@ -8,6 +8,7 @@
 #include "common.h"
 
 #define PIN_NUMBER_SELF                           (16)
+#define PIN_NUMBER_OUTPUT_LED                     (22)
 #define PIN_NUMBER_OUTPUT_PULLDOWN                (17)
 #define PIN_NUMBER_OUTPUT_PULLUP                  (23)
 #define PIN_NUMBER_OUTPUT_LISTENER                (5)
