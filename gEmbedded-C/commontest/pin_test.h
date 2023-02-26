@@ -16,11 +16,12 @@
 #define PIN_NUMBER_INVALID                        (45)
 #define PIN_NUMBER_VALID                          (PIN_NUMBER_SELF)
 #define PIN_PULLUPDOWN_INVALID                    (0b11U)
+#define PIN_PULLUPDOWN_VALID                      (0b00U)
 #define PIN_EVENT_INVALID                         (0b00U)
 #define PIN_EVENT_TIMEOUT_INVALID                 (0)
 #define PIN_EVENT_TIMEOUT_VALID                   (1)
 
 
-#define PIN_SLEEP_IN_MILSEC                       (200)
+#define PIN_SLEEP_IN_MILSEC                       (100)
 
 #endif //GEMBEDDED_C_PIN_TEST_H

@@ -7,6 +7,10 @@
 
 #include "pin_controller.h"
 
+extern "C" {
+#include "peripheral.h"
+}
+
 TEST(PinControllerTest, testInitDestroyPinController) {
 
     PIN_CONTROLLER_ERROR error;
@@ -19,12 +23,12 @@ TEST(PinControllerTest, testInitDestroyPinController) {
 
 }
 
-TEST(PinControllerTest, testOutputPin) {
+TEST(PinControllerTest, testOutputPinError) {
 
     PIN_CONTROLLER_ERROR error;
+
     uint8_t pinNumber = PIN_NUMBER_INVALID;
     uint32_t ioReference = 0;
-    int pinLevel;
 
     pinControllerInit();
 
@@ -32,20 +36,235 @@ TEST(PinControllerTest, testOutputPin) {
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_PIN_NUMBER);
     ASSERT_EQ(ioReference, 0);
 
-    pinNumber = PIN_NUMBER_SELF;
+    pinNumber = PIN_NUMBER_VALID;
     error = outputPinOpen(pinNumber, &ioReference);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
     ASSERT_GT(ioReference, 0);
 
+    error = outputPinClose(pinNumber);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+
+    pinControllerDestroy();
+
+}
+
+TEST(PinControllerTest, testOutputPinWriteRead) {
+
+    PIN_CONTROLLER_ERROR error;
+
+    uint8_t pinNumber = PIN_NUMBER_SELF;
+    uint32_t ioReference;
+    int pinLevel;
+
+    pinControllerInit();
+
+    error = outputPinOpen(pinNumber, &ioReference);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+
     outputPinWrite(ioReference);
     pinLevel = outputPinRead(ioReference);
     ASSERT_EQ(pinLevel, PIN_CONTROLLER_PIN_LEVEL_HIGH);
+
+    error = outputPinClose(pinNumber);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+
+    pinControllerDestroy();
+
+}
+
+TEST(PinControllerTest, testOutputPinClearRead) {
+
+    PIN_CONTROLLER_ERROR error;
+
+    uint8_t pinNumber = PIN_NUMBER_SELF;
+    uint32_t ioReference;
+    int pinLevel;
+
+    pinControllerInit();
+
+    error = outputPinOpen(pinNumber, &ioReference);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
 
     outputPinClear(ioReference);
     pinLevel = outputPinRead(ioReference);
     ASSERT_EQ(pinLevel, PIN_CONTROLLER_PIN_LEVEL_LOW);
 
     error = outputPinClose(pinNumber);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+
+    pinControllerDestroy();
+
+}
+
+TEST(PinControllerTest, testInputPinError) {
+
+    PIN_CONTROLLER_ERROR error;
+
+    uint8_t pinNumber = PIN_NUMBER_INVALID;
+    uint8_t pinPullUpDown = PIN_PULLUPDOWN_INVALID;
+    uint32_t ioReference = 0;
+
+    pinControllerInit();
+
+    error = inputPinOpen(pinNumber, pinPullUpDown, &ioReference);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_PIN_NUMBER);
+    ASSERT_EQ(ioReference, 0);
+
+    pinNumber = PIN_NUMBER_VALID;
+    error = inputPinOpen(pinNumber, pinPullUpDown, &ioReference);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_PIN_PULLUPDOWN);
+    ASSERT_EQ(ioReference, 0);
+
+    pinPullUpDown = PIN_PULLUPDOWN_VALID;
+    error = inputPinOpen(pinNumber, pinPullUpDown, &ioReference);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+    ASSERT_GT(ioReference, 0);
+
+    error = inputPinClose(pinNumber);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+
+    pinControllerDestroy();
+
+}
+
+TEST(PinControllerTest, testInputPinNoResistor) {
+
+    PIN_CONTROLLER_ERROR error;
+
+    const uint8_t outputPin_PULLDOWN = PIN_NUMBER_OUTPUT_PULLDOWN;
+    uint32_t outputPin_PULLDOWN_ioReference;
+    const uint8_t inputPin_PULLDOWN = PIN_NUMBER_INPUT_PULLDOWN;
+    const uint8_t inputPin_PULLDOWN_pinPullUpDown = PIN_CONFIG_PUD_NO_RESISTOR;
+    uint32_t inputPin_PULLDOWN_ioReference;
+
+    const uint8_t outputPin_PULLUP = PIN_NUMBER_OUTPUT_PULLUP;
+    uint32_t outputPin_PULLUP_ioReference;
+    const uint8_t inputPin_PULLUP = PIN_NUMBER_INPUT_PULLUP;
+    const uint8_t inputPin_PULLUP_pinPullUpDown = PIN_CONFIG_PUD_NO_RESISTOR;
+    uint32_t inputPin_PULLUP_ioReference;
+
+    int pinLevel;
+
+    pinControllerInit();
+
+    // Test pull-down
+
+    error = outputPinOpen(outputPin_PULLDOWN, &outputPin_PULLDOWN_ioReference);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+    error = inputPinOpen(inputPin_PULLDOWN, inputPin_PULLDOWN_pinPullUpDown, &inputPin_PULLDOWN_ioReference);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+
+    outputPinWrite(outputPin_PULLDOWN_ioReference);
+    std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
+    pinLevel = inputPinRead(inputPin_PULLDOWN_ioReference);
+    ASSERT_EQ(pinLevel, PIN_CONTROLLER_PIN_LEVEL_HIGH);
+
+    outputPinClear(outputPin_PULLDOWN_ioReference);
+    std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
+    pinLevel = inputPinRead(inputPin_PULLDOWN_ioReference);
+    ASSERT_EQ(pinLevel, PIN_CONTROLLER_PIN_LEVEL_LOW);
+
+    error = outputPinClose(outputPin_PULLDOWN);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+    error = inputPinClose(inputPin_PULLDOWN);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+
+    // Test pull-up
+
+    error = outputPinOpen(outputPin_PULLUP, &outputPin_PULLUP_ioReference);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+    error = inputPinOpen(inputPin_PULLUP, inputPin_PULLUP_pinPullUpDown, &inputPin_PULLUP_ioReference);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+
+    outputPinWrite(outputPin_PULLUP_ioReference);
+    std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
+    pinLevel = inputPinRead(inputPin_PULLUP_ioReference);
+    ASSERT_EQ(pinLevel, PIN_CONTROLLER_PIN_LEVEL_LOW);
+
+    outputPinClear(outputPin_PULLUP_ioReference);
+    std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
+    pinLevel = inputPinRead(inputPin_PULLUP_ioReference);
+    ASSERT_EQ(pinLevel, PIN_CONTROLLER_PIN_LEVEL_HIGH);
+
+    error = outputPinClose(outputPin_PULLUP);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+    error = inputPinClose(inputPin_PULLUP);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+
+    pinControllerDestroy();
+
+}
+
+TEST(PinControllerTest, testInputPinPullDown) {
+
+    PIN_CONTROLLER_ERROR error;
+
+    const uint8_t outputPin_PULLDOWN = PIN_NUMBER_OUTPUT_PULLDOWN;
+    uint32_t outputPin_PULLDOWN_ioReference;
+    const uint8_t inputPin_PULLDOWN = PIN_NUMBER_INPUT_PULLDOWN;
+    const uint8_t inputPin_PULLDOWN_pinPullUpDown = PIN_CONFIG_PUD_PULL_DOWN;
+    uint32_t inputPin_PULLDOWN_ioReference;
+
+    int pinLevel;
+
+    pinControllerInit();
+
+    error = outputPinOpen(outputPin_PULLDOWN, &outputPin_PULLDOWN_ioReference);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+    error = inputPinOpen(inputPin_PULLDOWN, inputPin_PULLDOWN_pinPullUpDown, &inputPin_PULLDOWN_ioReference);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+
+    outputPinWrite(outputPin_PULLDOWN_ioReference);
+    std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
+    pinLevel = inputPinRead(inputPin_PULLDOWN_ioReference);
+    ASSERT_EQ(pinLevel, PIN_CONTROLLER_PIN_LEVEL_HIGH);
+
+    outputPinClear(outputPin_PULLDOWN_ioReference);
+    std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
+    pinLevel = inputPinRead(inputPin_PULLDOWN_ioReference);
+    ASSERT_EQ(pinLevel, PIN_CONTROLLER_PIN_LEVEL_LOW);
+
+    error = outputPinClose(outputPin_PULLDOWN);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+    error = inputPinClose(inputPin_PULLDOWN);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+
+    pinControllerDestroy();
+
+}
+
+TEST(PinControllerTest, testInputPinPullUp) {
+
+    PIN_CONTROLLER_ERROR error;
+
+    const uint8_t outputPin_PULLUP = PIN_NUMBER_OUTPUT_PULLUP;
+    uint32_t outputPin_PULLUP_ioReference;
+    const uint8_t inputPin_PULLUP = PIN_NUMBER_INPUT_PULLUP;
+    const uint8_t inputPin_PULLUP_pinPullUpDown = PIN_CONFIG_PUD_PULL_UP;
+    uint32_t inputPin_PULLUP_ioReference;
+
+    int pinLevel;
+
+    pinControllerInit();
+
+    error = outputPinOpen(outputPin_PULLUP, &outputPin_PULLUP_ioReference);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+    error = inputPinOpen(inputPin_PULLUP, inputPin_PULLUP_pinPullUpDown, &inputPin_PULLUP_ioReference);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+
+    outputPinWrite(outputPin_PULLUP_ioReference);
+    std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
+    pinLevel = inputPinRead(inputPin_PULLUP_ioReference);
+    ASSERT_EQ(pinLevel, PIN_CONTROLLER_PIN_LEVEL_LOW);
+
+    outputPinClear(outputPin_PULLUP_ioReference);
+    std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
+    pinLevel = inputPinRead(inputPin_PULLUP_ioReference);
+    ASSERT_EQ(pinLevel, PIN_CONTROLLER_PIN_LEVEL_HIGH);
+
+    error = outputPinClose(outputPin_PULLUP);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
+    error = inputPinClose(inputPin_PULLUP);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
 
     pinControllerDestroy();
