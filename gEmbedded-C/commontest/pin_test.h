@@ -5,6 +5,8 @@
 #ifndef GEMBEDDED_C_PIN_TEST_H
 #define GEMBEDDED_C_PIN_TEST_H
 
+#include "common.h"
+
 #define PIN_NUMBER_SELF                           (16)
 #define PIN_NUMBER_OUTPUT_PULLDOWN                (17)
 #define PIN_NUMBER_OUTPUT_PULLUP                  (23)
@@ -18,10 +20,10 @@
 #define PIN_PULLUPDOWN_INVALID                    (0b11U)
 #define PIN_PULLUPDOWN_VALID                      (0b00U)
 #define PIN_EVENT_INVALID                         (0b00U)
+#define PIN_EVENT_VALID                           (0b01U)
 #define PIN_EVENT_TIMEOUT_INVALID                 (0)
 #define PIN_EVENT_TIMEOUT_VALID                   (1)
 
-
-#define PIN_SLEEP_IN_MILSEC                       (100)
+#define PIN_SLEEP_IN_MILSEC                       (200)
 
 #endif //GEMBEDDED_C_PIN_TEST_H

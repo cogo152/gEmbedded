@@ -35,7 +35,7 @@ PIN_VALIDATOR_ERROR validateInputPin(const uint8_t pinNumber, const uint8_t pinP
 }
 
 PIN_VALIDATOR_ERROR
-validateListenerPin(const uint8_t pinNumber, const uint8_t pinEvent, const int pinEventTimeOutInMilSec) {
+validateListenerPin(const uint8_t pinNumber, const uint8_t pinEvent, const int timeoutInMilSec) {
 
     const int result = isElementInArray(gpioPins, MAX_GPIO_PIN_SIZE, pinNumber);
     if (result != 0) {
@@ -51,7 +51,7 @@ validateListenerPin(const uint8_t pinNumber, const uint8_t pinEvent, const int p
             return PIN_VALIDATOR_ERROR_PIN_EVENT;
     }
 
-    if (pinEventTimeOutInMilSec <= 0) {
+    if (timeoutInMilSec <= 0) {
         return PIN_VALIDATOR_ERROR_PIN_EVENT_TIMEOUT;
     }
 

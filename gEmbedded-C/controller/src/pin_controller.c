@@ -11,7 +11,7 @@ PIN_CONTROLLER_ERROR pinControllerInit() {
 
     const PIN_DRIVER_ERROR error = initPinDriver();
     if (error != PIN_DRIVER_ERROR_NO) {
-        return PIN_CONTROLLER_ERROR_INIT;
+        return PIN_CONTROLLER_ERROR_INIT_MAP;
     }
 
     return PIN_CONTROLLER_ERROR_NO;
@@ -22,7 +22,7 @@ PIN_CONTROLLER_ERROR pinControllerDestroy() {
 
     const PIN_DRIVER_ERROR error = destroyPinDriver();
     if (error != PIN_DRIVER_ERROR_NO) {
-        return PIN_CONTROLLER_ERROR_DESTROY;
+        return PIN_CONTROLLER_ERROR_DESTROY_UNMAP;
     }
 
     return PIN_CONTROLLER_ERROR_NO;
@@ -139,5 +139,86 @@ PIN_CONTROLLER_ERROR inputPinClose(const uint8_t pinNumber) {
 int inputPinRead(const uint32_t ioReference) {
 
     return readPinLevel(ioReference);
+
+}
+
+PIN_CONTROLLER_ERROR
+listenerPinOpen(const uint8_t pinNumber, const uint8_t pinEvent, const int timeoutInMilSec,
+                int *const ioReference) {
+
+    const PIN_VALIDATOR_ERROR validatorError = validateListenerPin(pinNumber, pinEvent, timeoutInMilSec);
+    if (validatorError != PIN_VALIDATOR_ERROR_NO) {
+        if (validatorError == PIN_VALIDATOR_ERROR_PIN_NUMBER) {
+            return PIN_CONTROLLER_ERROR_PIN_NUMBER;
+        } else if (validatorError == PIN_VALIDATOR_ERROR_PIN_EVENT) {
+            return PIN_CONTROLLER_ERROR_PIN_EVENT;
+        } else {
+            return PIN_CONTROLLER_ERROR_PIN_EVENT_TIMEOUT;
+        }
+    }
+
+    const PIN_DRIVER_ERROR driverError = setPinEvent(pinNumber, pinEvent, ioReference);
+    if (driverError != PIN_DRIVER_ERROR_NO) {
+        if (driverError == PIN_DRIVER_ERROR_FILE) {
+            return PIN_CONTROLLER_ERROR_FILE;
+        } else {
+            return PIN_CONTROLLER_ERROR_IOCTL;
+        }
+    }
+
+    const uint8_t pinFunction = readPinFunction(pinNumber);
+    if (pinFunction != PIN_CONFIG_FUNCTION_INPUT) {
+        return PIN_CONTROLLER_ERROR_PIN_FUNCTION;
+    }
+
+    const uint8_t _pinEvent = readPinEvent(pinNumber);
+    if (_pinEvent != pinEvent) {
+        return PIN_CONTROLLER_ERROR_PIN_EVENT;
+    }
+
+    pin_event_t pinEventData;
+
+    listenerPinRead(*ioReference, 1, &pinEventData);
+
+    return PIN_CONTROLLER_ERROR_NO;
+
+}
+
+PIN_CONTROLLER_ERROR listenerPinClose(const int ioReference, const uint8_t pinNumber) {
+
+    closePinEvent(ioReference);
+
+    return closePin(pinNumber);
+
+}
+
+PIN_CONTROLLER_ERROR listenerPinRead(const int ioReference, const int timeoutInMilSec, pin_event_t *const pinEvent) {
+
+    struct gpioevent_data data;
+
+    const PIN_DRIVER_ERROR error = pollPin(ioReference, timeoutInMilSec, &data);
+    if (error != PIN_DRIVER_ERROR_NO) {
+        switch (error) {
+            case PIN_DRIVER_ERROR_IO_POLL_TIMEOUT: {
+                return PIN_CONTROLLER_ERROR_PIN_EVENT_TIMEOUT;
+            }
+            case PIN_DRIVER_ERROR_FILE: {
+                return PIN_CONTROLLER_ERROR_FILE;
+            }
+            default: {
+                return PIN_CONTROLLER_ERROR_POLL;
+            }
+        }
+    }
+
+    if (data.id == GPIOEVENT_EVENT_RISING_EDGE) {
+        pinEvent->event = PIN_CONTROLLER_PIN_EVENT_RISING;
+    } else {
+        pinEvent->event = PIN_CONTROLLER_PIN_EVENT_FALLING;
+    }
+
+    pinEvent->timeStamp = data.timestamp;
+
+    return PIN_CONTROLLER_ERROR_NO;
 
 }
