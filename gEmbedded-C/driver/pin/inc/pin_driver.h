@@ -9,7 +9,7 @@
 
 #include "common.h"
 
-typedef enum{
+typedef enum {
     PIN_DRIVER_ERROR_NO = 0,
     PIN_DRIVER_ERROR_MAP = -1,
     PIN_DRIVER_ERROR_UNMAP = -2,
@@ -31,7 +31,7 @@ void setPinPullUpDown(uint8_t pinNumber, uint8_t pullUpDown);
 
 uint8_t readPinPullUpDown(uint8_t pinNumber);
 
-PIN_DRIVER_ERROR setPinEvent(uint8_t pinNumber, uint8_t pinEvent, int* fileDescriptor);
+PIN_DRIVER_ERROR setPinEvent(uint8_t pinNumber, uint8_t pinEvent, int *fileDescriptor);
 
 uint8_t readPinEvent(uint8_t pinNumber);
 
@@ -45,6 +45,6 @@ void clearPin(uint32_t pinBitField);
 
 uint32_t readPin(uint32_t pinBitField);
 
-PIN_DRIVER_ERROR pollPin(int fileDescriptor, int timeoutInMilSec, struct gpioevent_data* eventData);
+PIN_DRIVER_ERROR pollPin(int fileDescriptor, int timeoutInMilSec, struct gpioevent_data *eventData);
 
 #endif //GEMBEDDED_C_PIN_DRIVER_H

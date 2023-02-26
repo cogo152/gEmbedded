@@ -80,7 +80,8 @@ PIN_DRIVER_ERROR destroyPinDriver(void) {
 void setPinFunction(const uint8_t pinNumber, const uint8_t pinFunction) {
 
     const uint32_t registerSelector = pinNumber / PIN_CONFIG_FUNCTION_MOD_DIV;
-    const uint32_t clearValue = ~(PIN_CONFIG_FUNCTION_MASK << ((pinNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL));
+    const uint32_t clearValue = ~(PIN_CONFIG_FUNCTION_MASK
+            << ((pinNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL));
     const uint32_t setValue = pinFunction << ((pinNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL);
 
     registers.GPFSEL[registerSelector] &= clearValue;
@@ -92,7 +93,8 @@ uint8_t readPinFunction(const uint8_t pinNumber) {
 
     const uint32_t registerSelector = pinNumber / PIN_CONFIG_FUNCTION_MOD_DIV;
     const uint32_t registerLine = registers.GPFSEL[registerSelector];
-    const uint32_t maskValue = PIN_CONFIG_FUNCTION_MASK << ((pinNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL);
+    const uint32_t maskValue =
+            PIN_CONFIG_FUNCTION_MASK << ((pinNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL);
 
     uint32_t pinFunction = registerLine & maskValue;
     pinFunction >>= ((pinNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL);
