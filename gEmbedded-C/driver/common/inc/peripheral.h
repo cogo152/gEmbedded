@@ -36,8 +36,8 @@
 
 #define PIN_CONFIG_GPIO_CHIP                    ("/dev/gpiochip0")
 #define PIN_CONFIG_EVENT_RISING                 (1)
-#define PIN_CONFIG_EVENT_FALLING                (0)
-#define PIN_CONFIG_EVENT_BOTH                   (2)
+#define PIN_CONFIG_EVENT_FALLING                (2)
+#define PIN_CONFIG_EVENT_BOTH                   (3)
 #define PIN_CONFIG_EVENT_MOD_DIV                (32U)
 #define PIN_CONFIG_EVENT_MASK                   (0b1U)
 #define PIN_CONFIG_EVENT_SET                    (0b1U)

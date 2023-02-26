@@ -19,12 +19,7 @@ typedef enum{
     PIN_DRIVER_ERROR_IO_POLL_TIMEOUT = -6
 } PIN_DRIVER_ERROR;
 
-#define PIN_DRIVER_TRUE                     (1)
-#define PIN_DRIVER_FALSE                    (0)
-
 PIN_DRIVER_ERROR initPinDriver(void);
-
-int isPinDriverInitialized(void);
 
 PIN_DRIVER_ERROR destroyPinDriver(void);
 

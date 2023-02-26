@@ -16,7 +16,7 @@
 #define PIN_NUMBER_INVALID                        (45)
 #define PIN_NUMBER_VALID                          (PIN_NUMBER_SELF)
 #define PIN_PULLUPDOWN_INVALID                    (0b11U)
-#define PIN_EVENT_INVALID                         (0b11U)
+#define PIN_EVENT_INVALID                         (0b00U)
 #define PIN_EVENT_TIMEOUT_INVALID                 (0)
 #define PIN_EVENT_TIMEOUT_VALID                   (1)
 

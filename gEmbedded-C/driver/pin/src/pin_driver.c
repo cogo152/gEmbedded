@@ -9,7 +9,6 @@
 #include "peripheral.h"
 #include "memory_mapper.h"
 
-static volatile int initialized = PIN_DRIVER_FALSE;
 static void *gpioBase = NULL;
 
 static gpio_registers_t registers = {
@@ -48,19 +47,7 @@ PIN_DRIVER_ERROR initPinDriver(void) {
     registers.GPAFEN = (uintptr_t *) (offset + GPIO_GPAFEN_OFFSET);
     registers.GPPUD = (uintptr_t *) (offset + GPIO_GPPUD_OFFSET);
 
-    initialized = PIN_DRIVER_TRUE;
-
     return PIN_DRIVER_ERROR_NO;
-
-}
-
-int isPinDriverInitialized(void) {
-
-    if (initialized) {
-        return PIN_DRIVER_TRUE;
-    } else {
-        return PIN_DRIVER_FALSE;
-    }
 
 }
 
@@ -86,17 +73,14 @@ PIN_DRIVER_ERROR destroyPinDriver(void) {
 
     gpioBase = NULL;
 
-    initialized = PIN_DRIVER_FALSE;
-
     return PIN_DRIVER_ERROR_NO;
 
 }
 
 void setPinFunction(const uint8_t pinNumber, const uint8_t pinFunction) {
 
-    const uint8_t registerSelector = pinNumber / PIN_CONFIG_FUNCTION_MOD_DIV;
-    const uint32_t clearValue = ~(PIN_CONFIG_FUNCTION_MASK
-            << ((pinNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL));
+    const uint32_t registerSelector = pinNumber / PIN_CONFIG_FUNCTION_MOD_DIV;
+    const uint32_t clearValue = ~(PIN_CONFIG_FUNCTION_MASK << ((pinNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL));
     const uint32_t setValue = pinFunction << ((pinNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL);
 
     registers.GPFSEL[registerSelector] &= clearValue;
@@ -106,10 +90,9 @@ void setPinFunction(const uint8_t pinNumber, const uint8_t pinFunction) {
 
 uint8_t readPinFunction(const uint8_t pinNumber) {
 
-    const uint8_t registerSelector = pinNumber / PIN_CONFIG_FUNCTION_MOD_DIV;
+    const uint32_t registerSelector = pinNumber / PIN_CONFIG_FUNCTION_MOD_DIV;
     const uint32_t registerLine = registers.GPFSEL[registerSelector];
-    const uint32_t maskValue =
-            PIN_CONFIG_FUNCTION_MASK << ((pinNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL);
+    const uint32_t maskValue = PIN_CONFIG_FUNCTION_MASK << ((pinNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL);
 
     uint32_t pinFunction = registerLine & maskValue;
     pinFunction >>= ((pinNumber % PIN_CONFIG_FUNCTION_MOD_DIV) * PIN_CONFIG_FUNCTION_MUL);
@@ -120,7 +103,7 @@ uint8_t readPinFunction(const uint8_t pinNumber) {
 
 void setPinPullUpDown(const uint8_t pinNumber, const uint8_t pullUpDown) {
 
-    const uint8_t registerSelector = pinNumber / PIN_CONFIG_PUD_MOD_DIV;
+    const uint32_t registerSelector = pinNumber / PIN_CONFIG_PUD_MOD_DIV;
     const uint32_t clearValue = ~(PIN_CONFIG_PUD_MASK << ((pinNumber % PIN_CONFIG_PUD_MOD_DIV) * PIN_CONFIG_PUD_MUL));
     const uint32_t setValue = (pullUpDown << ((pinNumber % PIN_CONFIG_PUD_MOD_DIV) * PIN_CONFIG_PUD_MUL));
 
@@ -131,7 +114,7 @@ void setPinPullUpDown(const uint8_t pinNumber, const uint8_t pullUpDown) {
 
 uint8_t readPinPullUpDown(const uint8_t pinNumber) {
 
-    const uint8_t registerSelector = pinNumber / PIN_CONFIG_PUD_MOD_DIV;
+    const uint32_t registerSelector = pinNumber / PIN_CONFIG_PUD_MOD_DIV;
     const uint32_t registerLine = registers.GPPUD[registerSelector];
     const uint32_t maskValue = (PIN_CONFIG_PUD_MASK << ((pinNumber % PIN_CONFIG_PUD_MOD_DIV) * PIN_CONFIG_PUD_MUL));
 
@@ -181,7 +164,7 @@ PIN_DRIVER_ERROR setPinEvent(const uint8_t pinNumber, const uint8_t pinEvent, in
 
 uint8_t readPinEvent(const uint8_t pinNumber) {
 
-    const uint8_t registerSelector = pinNumber / PIN_CONFIG_EVENT_MOD_DIV;
+    const uint32_t registerSelector = pinNumber / PIN_CONFIG_EVENT_MOD_DIV;
     const uint32_t registerLineREN = registers.GPREN[registerSelector];
     const uint32_t registerLineFEN = registers.GPFEN[registerSelector];
     const uint32_t mask = (PIN_CONFIG_EVENT_MASK << ((pinNumber % PIN_CONFIG_EVENT_MOD_DIV) * PIN_CONFIG_EVENT_MUL));

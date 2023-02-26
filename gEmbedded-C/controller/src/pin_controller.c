@@ -9,10 +9,6 @@
 
 PIN_CONTROLLER_ERROR pinControllerInit() {
 
-    if (isPinDriverInitialized()) {
-        return PIN_CONTROLLER_ERROR_NO;
-    }
-
     const PIN_DRIVER_ERROR error = initPinDriver();
     if (error != PIN_DRIVER_ERROR_NO) {
         return PIN_CONTROLLER_ERROR_INIT;
@@ -23,10 +19,6 @@ PIN_CONTROLLER_ERROR pinControllerInit() {
 }
 
 PIN_CONTROLLER_ERROR pinControllerDestroy() {
-
-    if (!isPinDriverInitialized()) {
-        return PIN_CONTROLLER_ERROR_NO;
-    }
 
     const PIN_DRIVER_ERROR error = destroyPinDriver();
     if (error != PIN_DRIVER_ERROR_NO) {

@@ -15,15 +15,13 @@ extern "C" {
 
 TEST(PinDriverTest, testInitDestroyPinDriver) {
 
-    volatile PIN_DRIVER_ERROR status;
+    volatile PIN_DRIVER_ERROR error;
 
-    status = initPinDriver();
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(isPinDriverInitialized(), PIN_DRIVER_TRUE);
+    error = initPinDriver();
+    ASSERT_EQ(error, PIN_DRIVER_ERROR_NO);
 
-    status = destroyPinDriver();
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
-    ASSERT_EQ(isPinDriverInitialized(), PIN_DRIVER_FALSE);
+    error = destroyPinDriver();
+    ASSERT_EQ(error, PIN_DRIVER_ERROR_NO);
 
 }
 
@@ -108,6 +106,8 @@ TEST(PinDriverTest, testPinPullUpdown) {
 
 TEST(PinDriverTest, testPinEvent) {
 
+    PIN_DRIVER_ERROR error;
+
     const uint8_t pinNumber = PIN_NUMBER_SELF;
     uint8_t pinEventToSet, pinEventToRead;
     int fd = -1;
@@ -115,7 +115,8 @@ TEST(PinDriverTest, testPinEvent) {
     initPinDriver();
 
     pinEventToSet = PIN_CONFIG_EVENT_RISING;
-    setPinEvent(pinNumber, pinEventToSet, &fd);
+    error = setPinEvent(pinNumber, pinEventToSet, &fd);
+    ASSERT_EQ(error, PIN_DRIVER_ERROR_NO);
     ASSERT_GT(fd, 0);
     pinEventToRead = readPinEvent(pinNumber);
     ASSERT_EQ(pinEventToRead, pinEventToSet);
@@ -123,7 +124,8 @@ TEST(PinDriverTest, testPinEvent) {
     fd = -1;
 
     pinEventToSet = PIN_CONFIG_EVENT_FALLING;
-    setPinEvent(pinNumber, pinEventToSet, &fd);
+    error = setPinEvent(pinNumber, pinEventToSet, &fd);
+    ASSERT_EQ(error, PIN_DRIVER_ERROR_NO);
     ASSERT_GT(fd, 0);
     pinEventToRead = readPinEvent(pinNumber);
     ASSERT_EQ(pinEventToRead, pinEventToSet);
@@ -131,12 +133,12 @@ TEST(PinDriverTest, testPinEvent) {
     fd = -1;
 
     pinEventToSet = PIN_CONFIG_EVENT_BOTH;
-    setPinEvent(pinNumber, pinEventToSet, &fd);
+    error = setPinEvent(pinNumber, pinEventToSet, &fd);
+    ASSERT_EQ(error, PIN_DRIVER_ERROR_NO);
     ASSERT_GT(fd, 0);
     pinEventToRead = readPinEvent(pinNumber);
     ASSERT_EQ(pinEventToRead, pinEventToSet);
     closePinEvent(fd);
-    fd = -1;
 
     destroyPinDriver();
 
@@ -188,6 +190,8 @@ static void invokeFalling(const uint32_t pinBitField) {
 
 TEST(PinDriverTest, testPollPin) {
 
+    PIN_DRIVER_ERROR error;
+
     const uint8_t outputPin = PIN_NUMBER_OUTPUT_LISTENER;
     const uint8_t outputPinFunction = PIN_CONFIG_FUNCTION_OUTPUT;
     uint32_t outputPinBitField;
@@ -201,8 +205,6 @@ TEST(PinDriverTest, testPollPin) {
             .id = 0
     };
 
-    PIN_DRIVER_ERROR status;
-
     initPinDriver();
 
     setPinFunction(outputPin, outputPinFunction);
@@ -211,27 +213,28 @@ TEST(PinDriverTest, testPollPin) {
 
     setPinEvent(listenerPin, listenerPinConfigEvent, &listenerPinFd);
 
-    status = pollPin(listenerPinFd, listenerPinTimeout, &listenerPinEventData);
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_IO_POLL_TIMEOUT);
+    error = pollPin(listenerPinFd, listenerPinTimeout, &listenerPinEventData);
+    ASSERT_EQ(error, PIN_DRIVER_ERROR_IO_POLL_TIMEOUT);
     ASSERT_EQ(listenerPinEventData.timestamp, 0);
     ASSERT_EQ(listenerPinEventData.id, 0);
 
     std::thread risingSuccessOnBoth(invokeRising, outputPinBitField);
-    status = pollPin(listenerPinFd, listenerPinTimeout, &listenerPinEventData);
+    error = pollPin(listenerPinFd, listenerPinTimeout, &listenerPinEventData);
     risingSuccessOnBoth.join();
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
+    ASSERT_EQ(error, PIN_DRIVER_ERROR_NO);
     ASSERT_GT(listenerPinEventData.timestamp, 0);
     ASSERT_EQ(listenerPinEventData.id, GPIOEVENT_EVENT_RISING_EDGE);
     listenerPinEventData.timestamp = 0;
     listenerPinEventData.id = 0;
 
     std::thread fallingSuccessOnBoth(invokeFalling, outputPinBitField);
-    status = pollPin(listenerPinFd, listenerPinTimeout, &listenerPinEventData);
+    error = pollPin(listenerPinFd, listenerPinTimeout, &listenerPinEventData);
     fallingSuccessOnBoth.join();
-    ASSERT_EQ(status, PIN_DRIVER_ERROR_NO);
+    ASSERT_EQ(error, PIN_DRIVER_ERROR_NO);
     ASSERT_GT(listenerPinEventData.timestamp, 0);
     ASSERT_EQ(listenerPinEventData.id, GPIOEVENT_EVENT_FALLING_EDGE);
 
+    setPinFunction(outputPin, PIN_CONFIG_FUNCTION_INPUT);
     closePinEvent(listenerPinFd);
 
     destroyPinDriver();
