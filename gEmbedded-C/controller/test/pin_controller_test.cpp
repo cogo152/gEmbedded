@@ -411,19 +411,8 @@ TEST(PinControllerTest, testListenerPinRisingEdge) {
     error = outputPinOpen(outputPin, &outputPin_ioReference);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
 
-    outputPinWrite(outputPin_ioReference); // High on startup
-
     error = listenerPinOpen(listenerPin, pinPullUpDown, pinEvent, timeoutInMilSec, &listenerPin_ioReference);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
-
-    // timeout on falling
-
-    std::thread timeoutOnFalling(invokeFalling, outputPin_ioReference);
-    error = listenerPinRead(listenerPin_ioReference, timeoutInMilSec, &pinEventResult);
-    timeoutOnFalling.join();
-    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_PIN_EVENT_TIMEOUT);
-    ASSERT_EQ(pinEventResult.event, 0);
-    ASSERT_EQ(pinEventResult.timeStamp, 0);
 
     // success on rising
 
@@ -433,6 +422,17 @@ TEST(PinControllerTest, testListenerPinRisingEdge) {
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
     ASSERT_EQ(pinEventResult.event, PIN_CONTROLLER_IO_PIN_EVENT_RISING);
     ASSERT_GT(pinEventResult.timeStamp, 0);
+    pinEventResult.event = 0;
+    pinEventResult.timeStamp = 0;
+
+    // timeout on falling
+
+    std::thread timeoutOnFalling(invokeFalling, outputPin_ioReference);
+    error = listenerPinRead(listenerPin_ioReference, timeoutInMilSec, &pinEventResult);
+    timeoutOnFalling.join();
+    EXPECT_EQ(error, PIN_CONTROLLER_ERROR_PIN_EVENT_TIMEOUT); // FAILED expected = timeout, actual = rising
+    ASSERT_EQ(pinEventResult.event, 0);
+    ASSERT_EQ(pinEventResult.timeStamp, 0);
 
     error = outputPinClose(outputPin);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
@@ -465,8 +465,6 @@ TEST(PinControllerTest, testListenerPinFallingEdge) {
     error = outputPinOpen(outputPin, &outputPin_ioReference);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
 
-    outputPinClear(outputPin_ioReference); // Low on startup
-
     error = listenerPinOpen(listenerPin, pinPullUpDown, pinEvent, timeoutInMilSec, &listenerPin_ioReference);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
 
@@ -475,9 +473,9 @@ TEST(PinControllerTest, testListenerPinFallingEdge) {
     std::thread timeoutOnRising(invokeRising, outputPin_ioReference);
     error = listenerPinRead(listenerPin_ioReference, timeoutInMilSec, &pinEventResult);
     timeoutOnRising.join();
-    EXPECT_EQ(error, PIN_CONTROLLER_ERROR_PIN_EVENT_TIMEOUT);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_PIN_EVENT_TIMEOUT);
     ASSERT_EQ(pinEventResult.event, 0);
-    EXPECT_EQ(pinEventResult.timeStamp, 0);
+    ASSERT_EQ(pinEventResult.timeStamp, 0);
 
     // success on falling
 
