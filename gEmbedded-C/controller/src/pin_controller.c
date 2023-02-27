@@ -37,9 +37,9 @@ PIN_CONTROLLER_ERROR closePin(const uint8_t pinNumber) {
         return PIN_CONTROLLER_ERROR_PIN_FUNCTION;
     }
 
-    setPinPullUpDown(pinNumber, PIN_CONFIG_PUD_NO_RESISTOR);
+    setPinPullUpDown(pinNumber, PIN_CONTROLLER_CONFIG_PULLUPDOWN_NO_RESISTOR);
     const uint8_t pinPullUpDown = readPinPullUpDown(pinNumber);
-    if (pinPullUpDown != PIN_CONFIG_PUD_NO_RESISTOR) {
+    if (pinPullUpDown != PIN_CONTROLLER_CONFIG_PULLUPDOWN_NO_RESISTOR) {
         return PIN_CONTROLLER_ERROR_PIN_PULLUPDOWN;
     }
 
@@ -51,9 +51,9 @@ int readPinLevel(const uint32_t ioReference) {
 
     uint32_t pinLevel = readPin(ioReference);
     if (pinLevel > 0) {
-        return PIN_CONTROLLER_PIN_LEVEL_HIGH;
+        return PIN_CONTROLLER_IO_PIN_LEVEL_HIGH;
     } else {
-        return PIN_CONTROLLER_PIN_LEVEL_LOW;
+        return PIN_CONTROLLER_IO_PIN_LEVEL_LOW;
     }
 
 }
@@ -219,9 +219,9 @@ PIN_CONTROLLER_ERROR listenerPinRead(const int ioReference, const int timeoutInM
     }
 
     if (data.id == GPIOEVENT_EVENT_RISING_EDGE) {
-        pinEventData->event = PIN_CONTROLLER_PIN_EVENT_RISING;
+        pinEventData->event = PIN_CONTROLLER_IO_PIN_EVENT_RISING;
     } else {
-        pinEventData->event = PIN_CONTROLLER_PIN_EVENT_FALLING;
+        pinEventData->event = PIN_CONTROLLER_IO_PIN_EVENT_FALLING;
     }
 
     pinEventData->timeStamp = data.timestamp;

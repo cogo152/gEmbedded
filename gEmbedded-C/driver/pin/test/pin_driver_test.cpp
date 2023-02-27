@@ -85,17 +85,17 @@ TEST(PinDriverTest, testPinPullUpdown) {
 
     setPinFunction(pinNumber, PIN_CONFIG_FUNCTION_INPUT);
 
-    pinPullUpDownToSet = PIN_CONFIG_PUD_PULL_UP;
+    pinPullUpDownToSet = PIN_CONFIG_PULLUPDOWN_PULL_UP;
     setPinPullUpDown(pinNumber, pinPullUpDownToSet);
     pinPullUpDownToRead = readPinPullUpDown(pinNumber);
     ASSERT_EQ(pinPullUpDownToRead, pinPullUpDownToSet);
 
-    pinPullUpDownToSet = PIN_CONFIG_PUD_PULL_DOWN;
+    pinPullUpDownToSet = PIN_CONFIG_PULLUPDOWN_PULL_DOWN;
     setPinPullUpDown(pinNumber, pinPullUpDownToSet);
     pinPullUpDownToRead = readPinPullUpDown(pinNumber);
     ASSERT_EQ(pinPullUpDownToRead, pinPullUpDownToSet);
 
-    pinPullUpDownToSet = PIN_CONFIG_PUD_NO_RESISTOR;
+    pinPullUpDownToSet = PIN_CONFIG_PULLUPDOWN_NO_RESISTOR;
     setPinPullUpDown(pinNumber, pinPullUpDownToSet);
     pinPullUpDownToRead = readPinPullUpDown(pinNumber);
     ASSERT_EQ(pinPullUpDownToRead, pinPullUpDownToSet);
@@ -114,7 +114,7 @@ TEST(PinDriverTest, testPinEvent) {
 
     initPinDriver();
 
-    pinPullUpDownToSet = PIN_CONFIG_PUD_PULL_UP;
+    pinPullUpDownToSet = PIN_CONFIG_PULLUPDOWN_PULL_UP;
     pinEventToSet = PIN_CONFIG_EVENT_RISING;
     error = setPinEvent(pinNumber, pinPullUpDownToSet, pinEventToSet, &fd);
     ASSERT_EQ(error, PIN_DRIVER_ERROR_NO);
@@ -127,7 +127,7 @@ TEST(PinDriverTest, testPinEvent) {
     closePinEvent(fd);
     fd = -1;
 
-    pinPullUpDownToSet = PIN_CONFIG_PUD_PULL_DOWN;
+    pinPullUpDownToSet = PIN_CONFIG_PULLUPDOWN_PULL_DOWN;
     pinEventToSet = PIN_CONFIG_EVENT_FALLING;
     error = setPinEvent(pinNumber, pinPullUpDownToSet, pinEventToSet, &fd);
     ASSERT_EQ(error, PIN_DRIVER_ERROR_NO);
@@ -140,7 +140,7 @@ TEST(PinDriverTest, testPinEvent) {
     closePinEvent(fd);
     fd = -1;
 
-    pinPullUpDownToSet = PIN_CONFIG_PUD_NO_RESISTOR;
+    pinPullUpDownToSet = PIN_CONFIG_PULLUPDOWN_NO_RESISTOR;
     pinEventToSet = PIN_CONFIG_EVENT_BOTH;
     error = setPinEvent(pinNumber, pinPullUpDownToSet, pinEventToSet, &fd);
     ASSERT_EQ(error, PIN_DRIVER_ERROR_NO);
@@ -209,7 +209,7 @@ TEST(PinDriverTest, testPollPin) {
     uint32_t outputPinBitField;
 
     const uint8_t listenerPin = PIN_NUMBER_LISTENER;
-    const uint8_t listenerPinPullUpDown = PIN_CONFIG_PUD_PULL_DOWN;
+    const uint8_t listenerPinPullUpDown = PIN_CONFIG_PULLUPDOWN_PULL_DOWN;
     const uint8_t listenerPinEvent = PIN_CONFIG_EVENT_BOTH;
     int listenerPinFd;
     const int listenerPinTimeout = PIN_SLEEP_IN_MILSEC;

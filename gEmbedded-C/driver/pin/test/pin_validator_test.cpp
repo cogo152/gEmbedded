@@ -41,17 +41,17 @@ TEST(PinValidatorTest, testInputPin) {
     error = validateInputPin(pinNumber, pinPullUpDown);
     ASSERT_EQ(error, PIN_VALIDATOR_ERROR_PIN_PULLUPDOWN);
 
-    pinPullUpDown = PIN_CONFIG_PUD_NO_RESISTOR;
+    pinPullUpDown = PIN_CONFIG_PULLUPDOWN_NO_RESISTOR;
 
     error = validateInputPin(pinNumber, pinPullUpDown);
     ASSERT_EQ(error, PIN_VALIDATOR_ERROR_NO);
 
-    pinPullUpDown = PIN_CONFIG_PUD_PULL_UP;
+    pinPullUpDown = PIN_CONFIG_PULLUPDOWN_PULL_UP;
 
     error = validateInputPin(pinNumber, pinPullUpDown);
     ASSERT_EQ(error, PIN_VALIDATOR_ERROR_NO);
 
-    pinPullUpDown = PIN_CONFIG_PUD_PULL_DOWN;
+    pinPullUpDown = PIN_CONFIG_PULLUPDOWN_PULL_DOWN;
 
     error = validateInputPin(pinNumber, pinPullUpDown);
     ASSERT_EQ(error, PIN_VALIDATOR_ERROR_NO);
@@ -75,17 +75,17 @@ TEST(PinValidatorTest, testListenerPin) {
     error = validateListenerPin(pinNumber, pinPullUpDown, pinEvent, pinEventTimeOutInMilSec);
     ASSERT_EQ(error, PIN_VALIDATOR_ERROR_PIN_PULLUPDOWN);
 
-    pinPullUpDown = PIN_CONFIG_PUD_NO_RESISTOR;
+    pinPullUpDown = PIN_CONFIG_PULLUPDOWN_NO_RESISTOR;
 
     error = validateListenerPin(pinNumber, pinPullUpDown, pinEvent, pinEventTimeOutInMilSec);
     ASSERT_EQ(error, PIN_VALIDATOR_ERROR_PIN_EVENT);
 
-    pinPullUpDown = PIN_CONFIG_PUD_PULL_UP;
+    pinPullUpDown = PIN_CONFIG_PULLUPDOWN_PULL_UP;
 
     error = validateListenerPin(pinNumber, pinPullUpDown, pinEvent, pinEventTimeOutInMilSec);
     ASSERT_EQ(error, PIN_VALIDATOR_ERROR_PIN_EVENT);
 
-    pinPullUpDown = PIN_CONFIG_PUD_PULL_DOWN;
+    pinPullUpDown = PIN_CONFIG_PULLUPDOWN_PULL_DOWN;
 
     error = validateListenerPin(pinNumber, pinPullUpDown, pinEvent, pinEventTimeOutInMilSec);
     ASSERT_EQ(error, PIN_VALIDATOR_ERROR_PIN_EVENT);

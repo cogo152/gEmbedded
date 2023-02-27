@@ -63,7 +63,7 @@ TEST(PinControllerTest, testOutputPinWriteRead) {
 
     outputPinWrite(ioReference);
     pinLevel = outputPinRead(ioReference);
-    ASSERT_EQ(pinLevel, PIN_CONTROLLER_PIN_LEVEL_HIGH);
+    ASSERT_EQ(pinLevel, PIN_CONTROLLER_IO_PIN_LEVEL_HIGH);
 
     error = outputPinClose(pinNumber);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
@@ -87,7 +87,7 @@ TEST(PinControllerTest, testOutputPinClearRead) {
 
     outputPinClear(ioReference);
     pinLevel = outputPinRead(ioReference);
-    ASSERT_EQ(pinLevel, PIN_CONTROLLER_PIN_LEVEL_LOW);
+    ASSERT_EQ(pinLevel, PIN_CONTROLLER_IO_PIN_LEVEL_LOW);
 
     error = outputPinClose(pinNumber);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
@@ -134,13 +134,13 @@ TEST(PinControllerTest, testInputPinNoResistor) {
     const uint8_t outputPin_PULLDOWN = PIN_NUMBER_OUTPUT_PULLDOWN;
     uint32_t outputPin_PULLDOWN_ioReference;
     const uint8_t inputPin_PULLDOWN = PIN_NUMBER_INPUT_PULLDOWN;
-    const uint8_t inputPin_PULLDOWN_pinPullUpDown = PIN_CONFIG_PUD_NO_RESISTOR;
+    const uint8_t inputPin_PULLDOWN_pinPullUpDown = PIN_CONTROLLER_CONFIG_PULLUPDOWN_NO_RESISTOR;
     uint32_t inputPin_PULLDOWN_ioReference;
 
     const uint8_t outputPin_PULLUP = PIN_NUMBER_OUTPUT_PULLUP;
     uint32_t outputPin_PULLUP_ioReference;
     const uint8_t inputPin_PULLUP = PIN_NUMBER_INPUT_PULLUP;
-    const uint8_t inputPin_PULLUP_pinPullUpDown = PIN_CONFIG_PUD_NO_RESISTOR;
+    const uint8_t inputPin_PULLUP_pinPullUpDown = PIN_CONTROLLER_CONFIG_PULLUPDOWN_NO_RESISTOR;
     uint32_t inputPin_PULLUP_ioReference;
 
     int pinLevel;
@@ -157,12 +157,12 @@ TEST(PinControllerTest, testInputPinNoResistor) {
     outputPinWrite(outputPin_PULLDOWN_ioReference);
     std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
     pinLevel = inputPinRead(inputPin_PULLDOWN_ioReference);
-    ASSERT_EQ(pinLevel, PIN_CONTROLLER_PIN_LEVEL_HIGH);
+    ASSERT_EQ(pinLevel, PIN_CONTROLLER_IO_PIN_LEVEL_HIGH);
 
     outputPinClear(outputPin_PULLDOWN_ioReference);
     std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
     pinLevel = inputPinRead(inputPin_PULLDOWN_ioReference);
-    ASSERT_EQ(pinLevel, PIN_CONTROLLER_PIN_LEVEL_LOW);
+    ASSERT_EQ(pinLevel, PIN_CONTROLLER_IO_PIN_LEVEL_LOW);
 
     error = outputPinClose(outputPin_PULLDOWN);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
@@ -179,12 +179,12 @@ TEST(PinControllerTest, testInputPinNoResistor) {
     outputPinWrite(outputPin_PULLUP_ioReference);
     std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
     pinLevel = inputPinRead(inputPin_PULLUP_ioReference);
-    ASSERT_EQ(pinLevel, PIN_CONTROLLER_PIN_LEVEL_LOW);
+    ASSERT_EQ(pinLevel, PIN_CONTROLLER_IO_PIN_LEVEL_LOW);
 
     outputPinClear(outputPin_PULLUP_ioReference);
     std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
     pinLevel = inputPinRead(inputPin_PULLUP_ioReference);
-    ASSERT_EQ(pinLevel, PIN_CONTROLLER_PIN_LEVEL_HIGH);
+    ASSERT_EQ(pinLevel, PIN_CONTROLLER_IO_PIN_LEVEL_HIGH);
 
     error = outputPinClose(outputPin_PULLUP);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
@@ -202,7 +202,7 @@ TEST(PinControllerTest, testInputPinPullDown) {
     const uint8_t outputPin_PULLDOWN = PIN_NUMBER_OUTPUT_PULLDOWN;
     uint32_t outputPin_PULLDOWN_ioReference;
     const uint8_t inputPin_PULLDOWN = PIN_NUMBER_INPUT_PULLDOWN;
-    const uint8_t inputPin_PULLDOWN_pinPullUpDown = PIN_CONFIG_PUD_PULL_DOWN;
+    const uint8_t inputPin_PULLDOWN_pinPullUpDown = PIN_CONTROLLER_CONFIG_PULLUPDOWN_PULL_DOWN;
     uint32_t inputPin_PULLDOWN_ioReference;
 
     int pinLevel;
@@ -217,12 +217,12 @@ TEST(PinControllerTest, testInputPinPullDown) {
     outputPinWrite(outputPin_PULLDOWN_ioReference);
     std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
     pinLevel = inputPinRead(inputPin_PULLDOWN_ioReference);
-    ASSERT_EQ(pinLevel, PIN_CONTROLLER_PIN_LEVEL_HIGH);
+    ASSERT_EQ(pinLevel, PIN_CONTROLLER_IO_PIN_LEVEL_HIGH);
 
     outputPinClear(outputPin_PULLDOWN_ioReference);
     std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
     pinLevel = inputPinRead(inputPin_PULLDOWN_ioReference);
-    ASSERT_EQ(pinLevel, PIN_CONTROLLER_PIN_LEVEL_LOW);
+    ASSERT_EQ(pinLevel, PIN_CONTROLLER_IO_PIN_LEVEL_LOW);
 
     error = outputPinClose(outputPin_PULLDOWN);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
@@ -240,7 +240,7 @@ TEST(PinControllerTest, testInputPinPullUp) {
     const uint8_t outputPin_PULLUP = PIN_NUMBER_OUTPUT_PULLUP;
     uint32_t outputPin_PULLUP_ioReference;
     const uint8_t inputPin_PULLUP = PIN_NUMBER_INPUT_PULLUP;
-    const uint8_t inputPin_PULLUP_pinPullUpDown = PIN_CONFIG_PUD_PULL_UP;
+    const uint8_t inputPin_PULLUP_pinPullUpDown = PIN_CONTROLLER_CONFIG_PULLUPDOWN_PULL_UP;
     uint32_t inputPin_PULLUP_ioReference;
 
     int pinLevel;
@@ -255,12 +255,12 @@ TEST(PinControllerTest, testInputPinPullUp) {
     outputPinWrite(outputPin_PULLUP_ioReference);
     std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
     pinLevel = inputPinRead(inputPin_PULLUP_ioReference);
-    ASSERT_EQ(pinLevel, PIN_CONTROLLER_PIN_LEVEL_LOW);
+    ASSERT_EQ(pinLevel, PIN_CONTROLLER_IO_PIN_LEVEL_LOW);
 
     outputPinClear(outputPin_PULLUP_ioReference);
     std::this_thread::sleep_for(std::chrono::milliseconds(PIN_SLEEP_IN_MILSEC));
     pinLevel = inputPinRead(inputPin_PULLUP_ioReference);
-    ASSERT_EQ(pinLevel, PIN_CONTROLLER_PIN_LEVEL_HIGH);
+    ASSERT_EQ(pinLevel, PIN_CONTROLLER_IO_PIN_LEVEL_HIGH);
 
     error = outputPinClose(outputPin_PULLUP);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
@@ -336,7 +336,7 @@ TEST(PinControllerTest, testListenerPinBothEdge) {
     uint32_t outputPin_ioReference;
 
     const uint8_t listenerPin = PIN_NUMBER_LISTENER;
-    const uint8_t pinPullUpDown = PIN_CONFIG_PUD_PULL_DOWN;
+    const uint8_t pinPullUpDown = PIN_CONTROLLER_CONFIG_PULLUPDOWN_PULL_DOWN;
     const uint8_t pinEvent = PIN_CONFIG_EVENT_BOTH;
     const int timeoutInMilSec = PIN_SLEEP_IN_MILSEC;
     int listenerPin_ioReference;
@@ -365,7 +365,7 @@ TEST(PinControllerTest, testListenerPinBothEdge) {
     error = listenerPinRead(listenerPin_ioReference, timeoutInMilSec, &pinEventResult);
     risingSuccessOnBoth.join();
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
-    ASSERT_EQ(pinEventResult.event, PIN_CONTROLLER_PIN_EVENT_RISING);
+    ASSERT_EQ(pinEventResult.event, PIN_CONTROLLER_IO_PIN_EVENT_RISING);
     ASSERT_GT(pinEventResult.timeStamp, 0);
 
     pinEventResult.event = 0;
@@ -377,7 +377,7 @@ TEST(PinControllerTest, testListenerPinBothEdge) {
     error = listenerPinRead(listenerPin_ioReference, timeoutInMilSec, &pinEventResult);
     fallingSuccessOnBoth.join();
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
-    ASSERT_EQ(pinEventResult.event, PIN_CONTROLLER_PIN_EVENT_FALLING);
+    ASSERT_EQ(pinEventResult.event, PIN_CONTROLLER_IO_PIN_EVENT_FALLING);
     ASSERT_GT(pinEventResult.timeStamp, 0);
 
     error = outputPinClose(outputPin);
@@ -397,7 +397,7 @@ TEST(PinControllerTest, testListenerPinRisingEdge) {
     uint32_t outputPin_ioReference;
 
     const uint8_t listenerPin = PIN_NUMBER_LISTENER;
-    const uint8_t pinPullUpDown = PIN_CONFIG_PUD_PULL_DOWN;
+    const uint8_t pinPullUpDown = PIN_CONTROLLER_CONFIG_PULLUPDOWN_PULL_DOWN;
     const uint8_t pinEvent = PIN_CONFIG_EVENT_RISING;
     const int timeoutInMilSec = PIN_SLEEP_IN_MILSEC;
     int listenerPin_ioReference;
@@ -431,7 +431,7 @@ TEST(PinControllerTest, testListenerPinRisingEdge) {
     error = listenerPinRead(listenerPin_ioReference, timeoutInMilSec, &pinEventResult);
     successOnRising.join();
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
-    ASSERT_EQ(pinEventResult.event, PIN_CONTROLLER_PIN_EVENT_RISING);
+    ASSERT_EQ(pinEventResult.event, PIN_CONTROLLER_IO_PIN_EVENT_RISING);
     ASSERT_GT(pinEventResult.timeStamp, 0);
 
     error = outputPinClose(outputPin);
@@ -451,7 +451,7 @@ TEST(PinControllerTest, testListenerPinFallingEdge) {
     uint32_t outputPin_ioReference;
 
     const uint8_t listenerPin = PIN_NUMBER_LISTENER;
-    const uint8_t pinPullUpDown = PIN_CONFIG_PUD_PULL_DOWN;
+    const uint8_t pinPullUpDown = PIN_CONTROLLER_CONFIG_PULLUPDOWN_PULL_DOWN;
     const uint8_t pinEvent = PIN_CONFIG_EVENT_FALLING;
     const int timeoutInMilSec = PIN_SLEEP_IN_MILSEC;
     int listenerPin_ioReference;
@@ -485,7 +485,7 @@ TEST(PinControllerTest, testListenerPinFallingEdge) {
     error = listenerPinRead(listenerPin_ioReference, timeoutInMilSec, &pinEventResult);
     successOnFalling.join();
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
-    ASSERT_EQ(pinEventResult.event, PIN_CONTROLLER_PIN_EVENT_FALLING);
+    ASSERT_EQ(pinEventResult.event, PIN_CONTROLLER_IO_PIN_EVENT_FALLING);
     ASSERT_GT(pinEventResult.timeStamp, 0);
 
     error = outputPinClose(outputPin);

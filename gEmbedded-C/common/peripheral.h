@@ -27,12 +27,12 @@
 #define PIN_CONFIG_FUNCTION_MASK                (0b111U)
 #define PIN_CONFIG_FUNCTION_MUL                 (3U)
 
-#define PIN_CONFIG_PUD_NO_RESISTOR              (0b00U)
-#define PIN_CONFIG_PUD_PULL_UP                  (0b01U)
-#define PIN_CONFIG_PUD_PULL_DOWN                (0b10U)
-#define PIN_CONFIG_PUD_MOD_DIV                  (16U)
-#define PIN_CONFIG_PUD_MASK                     (0b11U)
-#define PIN_CONFIG_PUD_MUL                      (2U)
+#define PIN_CONFIG_PULLUPDOWN_NO_RESISTOR              (0b00U)
+#define PIN_CONFIG_PULLUPDOWN_PULL_UP                  (0b01U)
+#define PIN_CONFIG_PULLUPDOWN_PULL_DOWN                (0b10U)
+#define PIN_CONFIG_PULLUPDOWN_MOD_DIV                  (16U)
+#define PIN_CONFIG_PULLUPDOWN_MASK                     (0b11U)
+#define PIN_CONFIG_PULLUPDOWN_MUL                      (2U)
 
 #define PIN_CONFIG_GPIO_CHIP                    ("/dev/gpiochip0")
 #define PIN_CONFIG_EVENT_RISING                 (1)
