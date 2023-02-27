@@ -1,1 +1,2 @@
 1. Always refresh project after adding new source files -> because aux_source_directory() does not understand adding or removing files.
+2. Listenerpin open -> must one time poll. Inspect!

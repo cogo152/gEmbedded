@@ -176,8 +176,8 @@ listenerPinOpen(const uint8_t pinNumber, const uint8_t pinEvent, const int timeo
         return PIN_CONTROLLER_ERROR_PIN_EVENT;
     }
 
+    // /home/sondahi/Projects/gEmbedded/gEmbedded-C/controller/test/pin_controller_test.cpp:458: Failure
     pin_event_t pinEventData;
-
     listenerPinRead(*ioReference, 1, &pinEventData);
 
     return PIN_CONTROLLER_ERROR_NO;
