@@ -36,3 +36,11 @@ SET(CMAKE_STRINGS       ${GCC_DIR}/arm-${TARGET_ABI}-strings    CACHE FILEPATH "
 
 #SET(CMAKE_SYSTEM_VERSION 1)
 #SET(CMAKE_TRY_COMPILE_TARGET_TYPE   STATIC_LIBRARY)
+
+# compiler options
+set(COMPILER_FLAGS "-Wall -mcpu=cortex-a72 -mtune=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8")
+set(VERBOSE "-v -Wl,--verbose")
+set(CMAKE_C_FLAGS           "${COMPILER_FLAGS}" CACHE STRING    "c flags"           FORCE)
+set(CMAKE_CXX_FLAGS         "${COMPILER_FLAGS}" CACHE STRING    "cpp flags"         FORCE)
+set(CMAKE_C_FLAGS_RELEASE   "-O3 -DNDEBUG"      CACHE STRING    "c flags release"   FORCE)
+set(CMAKE_CXX_FLAGS_RELEASE "-O0 -ggdb -DDEBUG" CACHE STRING    "cpp flags release" FORCE)

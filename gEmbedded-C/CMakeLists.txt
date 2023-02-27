@@ -1,16 +1,8 @@
 cmake_minimum_required(VERSION 3.22.1)
 
-set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/toolchain.cmake")
+set(CMAKE_TOOLCHAIN_FILE "${CMAKE_SOURCE_DIR}/../tools/toolchain-arm32hf.cmake")
 
 project(gEmbedded-C)
-
-# compiler options
-set(COMPILER_FLAGS "-Wall -mcpu=cortex-a72 -mtune=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8")
-set(VERBOSE "-v -Wl,--verbose")
-set(CMAKE_C_FLAGS           "${COMPILER_FLAGS}" CACHE STRING    "c flags"           FORCE)
-set(CMAKE_CXX_FLAGS         "${COMPILER_FLAGS}" CACHE STRING    "cpp flags"         FORCE)
-set(CMAKE_C_FLAGS_RELEASE   "-O3 -DNDEBUG"      CACHE STRING    "c flags release"   FORCE)
-set(CMAKE_CXX_FLAGS_RELEASE "-O0 -ggdb -DDEBUG" CACHE STRING    "cpp flags release" FORCE)
 
 # project languages
 enable_language(C)
