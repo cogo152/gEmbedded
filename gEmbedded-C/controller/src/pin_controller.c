@@ -37,9 +37,9 @@ PIN_CONTROLLER_ERROR closePin(const uint8_t pinNumber) {
         return PIN_CONTROLLER_ERROR_PIN_FUNCTION;
     }
 
-    setPinPullUpDown(pinNumber, PIN_CONFIG_PUD_PULL_UP);
+    setPinPullUpDown(pinNumber, PIN_CONFIG_PUD_PULL_DOWN);
     const uint8_t pinPullUpDown = readPinPullUpDown(pinNumber);
-    if (pinPullUpDown != PIN_CONFIG_PUD_PULL_UP) {
+    if (pinPullUpDown != PIN_CONFIG_PUD_PULL_DOWN) {
         return PIN_CONTROLLER_ERROR_PIN_PULLUPDOWN;
     }
 
