@@ -109,35 +109,47 @@ TEST(PinDriverTest, testPinEvent) {
     PIN_DRIVER_ERROR error;
 
     const uint8_t pinNumber = PIN_NUMBER_SELF;
-    uint8_t pinEventToSet, pinEventToRead;
+    uint8_t pinPullUpDownToSet, pinEventToSet, pinPullUpDownToRead, pinEventToRead;
     int fd = -1;
 
     initPinDriver();
 
+    pinPullUpDownToSet = PIN_CONFIG_PUD_PULL_UP;
     pinEventToSet = PIN_CONFIG_EVENT_RISING;
-    error = setPinEvent(pinNumber, pinEventToSet, &fd);
+    error = setPinEvent(pinNumber, pinPullUpDownToSet, pinEventToSet, &fd);
     ASSERT_EQ(error, PIN_DRIVER_ERROR_NO);
-    ASSERT_GT(fd, 0);
+    ASSERT_EQ(readPinFunction(pinNumber), PIN_CONFIG_FUNCTION_INPUT);
+    pinPullUpDownToRead = readPinPullUpDown(pinNumber);
+    ASSERT_EQ(pinPullUpDownToRead, pinPullUpDownToSet);
     pinEventToRead = readPinEvent(pinNumber);
     ASSERT_EQ(pinEventToRead, pinEventToSet);
+    ASSERT_GT(fd, 0);
     closePinEvent(fd);
     fd = -1;
 
+    pinPullUpDownToSet = PIN_CONFIG_PUD_PULL_DOWN;
     pinEventToSet = PIN_CONFIG_EVENT_FALLING;
-    error = setPinEvent(pinNumber, pinEventToSet, &fd);
+    error = setPinEvent(pinNumber, pinPullUpDownToSet, pinEventToSet, &fd);
     ASSERT_EQ(error, PIN_DRIVER_ERROR_NO);
-    ASSERT_GT(fd, 0);
+    ASSERT_EQ(readPinFunction(pinNumber), PIN_CONFIG_FUNCTION_INPUT);
+    pinPullUpDownToRead = readPinPullUpDown(pinNumber);
+    ASSERT_EQ(pinPullUpDownToRead, pinPullUpDownToSet);
     pinEventToRead = readPinEvent(pinNumber);
     ASSERT_EQ(pinEventToRead, pinEventToSet);
+    ASSERT_GT(fd, 0);
     closePinEvent(fd);
     fd = -1;
 
+    pinPullUpDownToSet = PIN_CONFIG_PUD_NO_RESISTOR;
     pinEventToSet = PIN_CONFIG_EVENT_BOTH;
-    error = setPinEvent(pinNumber, pinEventToSet, &fd);
+    error = setPinEvent(pinNumber, pinPullUpDownToSet, pinEventToSet, &fd);
     ASSERT_EQ(error, PIN_DRIVER_ERROR_NO);
-    ASSERT_GT(fd, 0);
+    ASSERT_EQ(readPinFunction(pinNumber), PIN_CONFIG_FUNCTION_INPUT);
+    pinPullUpDownToRead = readPinPullUpDown(pinNumber);
+    ASSERT_EQ(pinPullUpDownToRead, pinPullUpDownToSet);
     pinEventToRead = readPinEvent(pinNumber);
     ASSERT_EQ(pinEventToRead, pinEventToSet);
+    ASSERT_GT(fd, 0);
     closePinEvent(fd);
 
     destroyPinDriver();
@@ -197,7 +209,8 @@ TEST(PinDriverTest, testPollPin) {
     uint32_t outputPinBitField;
 
     const uint8_t listenerPin = PIN_NUMBER_LISTENER;
-    const uint8_t listenerPinConfigEvent = PIN_CONFIG_EVENT_BOTH;
+    const uint8_t listenerPinPullUpDown = PIN_CONFIG_PUD_PULL_DOWN;
+    const uint8_t listenerPinEvent = PIN_CONFIG_EVENT_BOTH;
     int listenerPinFd;
     const int listenerPinTimeout = PIN_SLEEP_IN_MILSEC;
     struct gpioevent_data listenerPinEventData = {
@@ -211,7 +224,7 @@ TEST(PinDriverTest, testPollPin) {
     outputPinBitField = getPinBitField(outputPin);
     clearPin(outputPinBitField);
 
-    setPinEvent(listenerPin, listenerPinConfigEvent, &listenerPinFd);
+    setPinEvent(listenerPin, listenerPinPullUpDown, listenerPinEvent, &listenerPinFd);
 
     error = pollPin(listenerPinFd, listenerPinTimeout, &listenerPinEventData);
     ASSERT_EQ(error, PIN_DRIVER_ERROR_IO_POLL_TIMEOUT);

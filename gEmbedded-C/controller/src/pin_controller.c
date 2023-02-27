@@ -143,13 +143,15 @@ int inputPinRead(const uint32_t ioReference) {
 }
 
 PIN_CONTROLLER_ERROR
-listenerPinOpen(const uint8_t pinNumber, const uint8_t pinEvent, const int timeoutInMilSec,
+listenerPinOpen(const uint8_t pinNumber, const uint8_t pinPullUpDown, const uint8_t pinEvent, const int timeoutInMilSec,
                 int *const ioReference) {
 
-    const PIN_VALIDATOR_ERROR validatorError = validateListenerPin(pinNumber, pinEvent, timeoutInMilSec);
+    const PIN_VALIDATOR_ERROR validatorError = validateListenerPin(pinNumber, pinPullUpDown, pinEvent, timeoutInMilSec);
     if (validatorError != PIN_VALIDATOR_ERROR_NO) {
         if (validatorError == PIN_VALIDATOR_ERROR_PIN_NUMBER) {
             return PIN_CONTROLLER_ERROR_PIN_NUMBER;
+        } else if (validatorError == PIN_VALIDATOR_ERROR_PIN_PULLUPDOWN) {
+            return PIN_CONTROLLER_ERROR_PIN_PULLUPDOWN;
         } else if (validatorError == PIN_VALIDATOR_ERROR_PIN_EVENT) {
             return PIN_CONTROLLER_ERROR_PIN_EVENT;
         } else {
@@ -157,7 +159,7 @@ listenerPinOpen(const uint8_t pinNumber, const uint8_t pinEvent, const int timeo
         }
     }
 
-    const PIN_DRIVER_ERROR driverError = setPinEvent(pinNumber, pinEvent, ioReference);
+    const PIN_DRIVER_ERROR driverError = setPinEvent(pinNumber, pinPullUpDown, pinEvent, ioReference);
     if (driverError != PIN_DRIVER_ERROR_NO) {
         if (driverError == PIN_DRIVER_ERROR_FILE) {
             return PIN_CONTROLLER_ERROR_FILE;
@@ -171,13 +173,18 @@ listenerPinOpen(const uint8_t pinNumber, const uint8_t pinEvent, const int timeo
         return PIN_CONTROLLER_ERROR_PIN_FUNCTION;
     }
 
+    const uint8_t _pinPullUpDown = readPinPullUpDown(pinNumber);
+    if (_pinPullUpDown != pinPullUpDown) {
+        return PIN_CONTROLLER_ERROR_PIN_PULLUPDOWN;
+    }
+
     const uint8_t _pinEvent = readPinEvent(pinNumber);
     if (_pinEvent != pinEvent) {
         return PIN_CONTROLLER_ERROR_PIN_EVENT;
     }
 
     // /home/sondahi/Projects/gEmbedded/gEmbedded-C/controller/test/pin_controller_test.cpp:458: Failure
-    pin_event_t pinEventData;
+    pin_event_data pinEventData;
     listenerPinRead(*ioReference, 1, &pinEventData);
 
     return PIN_CONTROLLER_ERROR_NO;
@@ -192,7 +199,7 @@ PIN_CONTROLLER_ERROR listenerPinClose(const int ioReference, const uint8_t pinNu
 
 }
 
-PIN_CONTROLLER_ERROR listenerPinRead(const int ioReference, const int timeoutInMilSec, pin_event_t *const pinEvent) {
+PIN_CONTROLLER_ERROR listenerPinRead(const int ioReference, const int timeoutInMilSec, pin_event_data *pinEventData) {
 
     struct gpioevent_data data;
 
@@ -212,12 +219,12 @@ PIN_CONTROLLER_ERROR listenerPinRead(const int ioReference, const int timeoutInM
     }
 
     if (data.id == GPIOEVENT_EVENT_RISING_EDGE) {
-        pinEvent->event = PIN_CONTROLLER_PIN_EVENT_RISING;
+        pinEventData->event = PIN_CONTROLLER_PIN_EVENT_RISING;
     } else {
-        pinEvent->event = PIN_CONTROLLER_PIN_EVENT_FALLING;
+        pinEventData->event = PIN_CONTROLLER_PIN_EVENT_FALLING;
     }
 
-    pinEvent->timeStamp = data.timestamp;
+    pinEventData->timeStamp = data.timestamp;
 
     return PIN_CONTROLLER_ERROR_NO;
 

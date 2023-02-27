@@ -103,11 +103,11 @@ uint8_t readPinFunction(const uint8_t pinNumber) {
 
 }
 
-void setPinPullUpDown(const uint8_t pinNumber, const uint8_t pullUpDown) {
+void setPinPullUpDown(const uint8_t pinNumber, const uint8_t pinPullUpDown) {
 
     const uint32_t registerSelector = pinNumber / PIN_CONFIG_PUD_MOD_DIV;
     const uint32_t clearValue = ~(PIN_CONFIG_PUD_MASK << ((pinNumber % PIN_CONFIG_PUD_MOD_DIV) * PIN_CONFIG_PUD_MUL));
-    const uint32_t setValue = (pullUpDown << ((pinNumber % PIN_CONFIG_PUD_MOD_DIV) * PIN_CONFIG_PUD_MUL));
+    const uint32_t setValue = (pinPullUpDown << ((pinNumber % PIN_CONFIG_PUD_MOD_DIV) * PIN_CONFIG_PUD_MUL));
 
     registers.GPPUD[registerSelector] &= clearValue;
     registers.GPPUD[registerSelector] |= setValue;
@@ -120,14 +120,14 @@ uint8_t readPinPullUpDown(const uint8_t pinNumber) {
     const uint32_t registerLine = registers.GPPUD[registerSelector];
     const uint32_t maskValue = (PIN_CONFIG_PUD_MASK << ((pinNumber % PIN_CONFIG_PUD_MOD_DIV) * PIN_CONFIG_PUD_MUL));
 
-    uint32_t pullUpDown = registerLine & maskValue;
-    pullUpDown >>= ((pinNumber % PIN_CONFIG_PUD_MOD_DIV) * PIN_CONFIG_PUD_MUL);
+    uint32_t pinPullUpDown = registerLine & maskValue;
+    pinPullUpDown >>= ((pinNumber % PIN_CONFIG_PUD_MOD_DIV) * PIN_CONFIG_PUD_MUL);
 
-    return pullUpDown;
+    return pinPullUpDown;
 
 }
 
-PIN_DRIVER_ERROR setPinEvent(const uint8_t pinNumber, const uint8_t pinEvent, int *const fileDescriptor) {
+PIN_DRIVER_ERROR setPinEvent(const uint8_t pinNumber, const uint8_t pinPullUpDown, const uint8_t pinEvent, int *const fileDescriptor) {
 
     const int fd = open(PIN_CONFIG_GPIO_CHIP, O_RDONLY);
     if (fd < 0) {
@@ -136,7 +136,23 @@ PIN_DRIVER_ERROR setPinEvent(const uint8_t pinNumber, const uint8_t pinEvent, in
 
     struct gpioevent_request rq;
     rq.lineoffset = pinNumber;
+
     rq.handleflags = GPIOHANDLE_REQUEST_INPUT;
+    switch (pinPullUpDown) {
+        case PIN_CONFIG_PUD_PULL_DOWN:{
+            rq.handleflags |= GPIOHANDLE_REQUEST_BIAS_PULL_DOWN;
+            break;
+        }
+        case PIN_CONFIG_PUD_PULL_UP: {
+            rq.handleflags |= GPIOHANDLE_REQUEST_BIAS_PULL_UP;
+            break;
+        }
+        default: {
+            rq.handleflags |= GPIOHANDLE_REQUEST_BIAS_DISABLE;
+            break;
+        }
+    }
+
     switch (pinEvent) {
         case PIN_CONFIG_EVENT_RISING: {
             rq.eventflags = GPIOEVENT_REQUEST_RISING_EDGE;

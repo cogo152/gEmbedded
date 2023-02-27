@@ -276,28 +276,38 @@ TEST(PinControllerTest, testListenerPinError) {
     PIN_CONTROLLER_ERROR error;
 
     uint8_t pinNumber = PIN_NUMBER_INVALID;
+    uint8_t pinPullUpDown = PIN_PULLUPDOWN_INVALID;
     uint8_t pinEvent = PIN_EVENT_INVALID;
     int timeoutInMilSec = PIN_EVENT_TIMEOUT_INVALID;
     int ioReference = 0;
 
     pinControllerInit();
 
-    error = listenerPinOpen(pinNumber, pinEvent, timeoutInMilSec, &ioReference);
+    error = listenerPinOpen(pinNumber, pinPullUpDown, pinEvent, timeoutInMilSec, &ioReference);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_PIN_NUMBER);
     ASSERT_EQ(ioReference, 0);
 
     pinNumber = PIN_NUMBER_VALID;
-    error = listenerPinOpen(pinNumber, pinEvent, timeoutInMilSec, &ioReference);
+
+    error = listenerPinOpen(pinNumber, pinPullUpDown, pinEvent, timeoutInMilSec, &ioReference);
+    ASSERT_EQ(error, PIN_CONTROLLER_ERROR_PIN_PULLUPDOWN);
+    ASSERT_EQ(ioReference, 0);
+
+    pinPullUpDown = PIN_PULLUPDOWN_VALID;
+
+    error = listenerPinOpen(pinNumber, pinPullUpDown, pinEvent, timeoutInMilSec, &ioReference);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_PIN_EVENT);
     ASSERT_EQ(ioReference, 0);
 
     pinEvent = PIN_EVENT_VALID;
-    error = listenerPinOpen(pinNumber, pinEvent, timeoutInMilSec, &ioReference);
+
+    error = listenerPinOpen(pinNumber, pinPullUpDown, pinEvent, timeoutInMilSec, &ioReference);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_PIN_EVENT_TIMEOUT);
     ASSERT_EQ(ioReference, 0);
 
     timeoutInMilSec = PIN_EVENT_TIMEOUT_VALID;
-    error = listenerPinOpen(pinNumber, pinEvent, timeoutInMilSec, &ioReference);
+
+    error = listenerPinOpen(pinNumber, pinPullUpDown, pinEvent, timeoutInMilSec, &ioReference);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
     ASSERT_GT(ioReference, 0);
 
@@ -326,6 +336,7 @@ TEST(PinControllerTest, testListenerPinBothEdge) {
     uint32_t outputPin_ioReference;
 
     const uint8_t listenerPin = PIN_NUMBER_LISTENER;
+    const uint8_t pinPullUpDown = PIN_CONFIG_PUD_PULL_DOWN;
     const uint8_t pinEvent = PIN_CONFIG_EVENT_BOTH;
     const int timeoutInMilSec = PIN_SLEEP_IN_MILSEC;
     int listenerPin_ioReference;
@@ -338,7 +349,7 @@ TEST(PinControllerTest, testListenerPinBothEdge) {
 
     error = outputPinOpen(outputPin, &outputPin_ioReference);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
-    error = listenerPinOpen(listenerPin, pinEvent, timeoutInMilSec, &listenerPin_ioReference);
+    error = listenerPinOpen(listenerPin, pinPullUpDown, pinEvent, timeoutInMilSec, &listenerPin_ioReference);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
 
     // timeout
@@ -386,6 +397,7 @@ TEST(PinControllerTest, testListenerPinRisingEdge) {
     uint32_t outputPin_ioReference;
 
     const uint8_t listenerPin = PIN_NUMBER_LISTENER;
+    const uint8_t pinPullUpDown = PIN_CONFIG_PUD_PULL_DOWN;
     const uint8_t pinEvent = PIN_CONFIG_EVENT_RISING;
     const int timeoutInMilSec = PIN_SLEEP_IN_MILSEC;
     int listenerPin_ioReference;
@@ -401,7 +413,7 @@ TEST(PinControllerTest, testListenerPinRisingEdge) {
 
     outputPinWrite(outputPin_ioReference); // High on startup
 
-    error = listenerPinOpen(listenerPin, pinEvent, timeoutInMilSec, &listenerPin_ioReference);
+    error = listenerPinOpen(listenerPin, pinPullUpDown, pinEvent, timeoutInMilSec, &listenerPin_ioReference);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
 
     // timeout on falling
@@ -439,6 +451,7 @@ TEST(PinControllerTest, testListenerPinFallingEdge) {
     uint32_t outputPin_ioReference;
 
     const uint8_t listenerPin = PIN_NUMBER_LISTENER;
+    const uint8_t pinPullUpDown = PIN_CONFIG_PUD_PULL_DOWN;
     const uint8_t pinEvent = PIN_CONFIG_EVENT_FALLING;
     const int timeoutInMilSec = PIN_SLEEP_IN_MILSEC;
     int listenerPin_ioReference;
@@ -454,7 +467,7 @@ TEST(PinControllerTest, testListenerPinFallingEdge) {
 
     outputPinClear(outputPin_ioReference); // Low on startup
 
-    error = listenerPinOpen(listenerPin, pinEvent, timeoutInMilSec, &listenerPin_ioReference);
+    error = listenerPinOpen(listenerPin, pinPullUpDown, pinEvent, timeoutInMilSec, &listenerPin_ioReference);
     ASSERT_EQ(error, PIN_CONTROLLER_ERROR_NO);
 
     // timeout on rising

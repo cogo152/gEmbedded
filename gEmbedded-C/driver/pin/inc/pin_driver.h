@@ -27,11 +27,11 @@ void setPinFunction(uint8_t pinNumber, uint8_t pinFunction);
 
 uint8_t readPinFunction(uint8_t pinNumber);
 
-void setPinPullUpDown(uint8_t pinNumber, uint8_t pullUpDown);
+void setPinPullUpDown(uint8_t pinNumber, uint8_t pinPullUpDown);
 
 uint8_t readPinPullUpDown(uint8_t pinNumber);
 
-PIN_DRIVER_ERROR setPinEvent(uint8_t pinNumber, uint8_t pinEvent, int *fileDescriptor);
+PIN_DRIVER_ERROR setPinEvent(uint8_t pinNumber, uint8_t pinPullUpDown, uint8_t pinEvent, int *fileDescriptor);
 
 uint8_t readPinEvent(uint8_t pinNumber);
 

@@ -25,10 +25,10 @@ typedef enum {
     PIN_CONTROLLER_ERROR_POLL = 110
 } PIN_CONTROLLER_ERROR;
 
-typedef struct {
+typedef struct pin_event_t{
     int event;
     uint64_t timeStamp;
-} pin_event_t;
+} pin_event_data;
 
 PIN_CONTROLLER_ERROR pinControllerInit();
 
@@ -51,11 +51,11 @@ PIN_CONTROLLER_ERROR inputPinClose(uint8_t pinNumber);
 int inputPinRead(uint32_t ioReference);
 
 PIN_CONTROLLER_ERROR
-listenerPinOpen(uint8_t pinNumber, uint8_t pinEvent, int timeoutInMilSec, int *ioReference);
+listenerPinOpen(uint8_t pinNumber, uint8_t pinPullUpDown, uint8_t pinEvent, int timeoutInMilSec, int *ioReference);
 
 PIN_CONTROLLER_ERROR listenerPinClose(int ioReference, uint8_t pinNumber);
 
-PIN_CONTROLLER_ERROR listenerPinRead(int ioReference, int timeoutInMilSec, pin_event_t *pinEvent);
+PIN_CONTROLLER_ERROR listenerPinRead(int ioReference, int timeoutInMilSec, pin_event_data *pinEventData);
 
 #define PIN_CONTROLLER_PIN_LEVEL_HIGH               (1)
 #define PIN_CONTROLLER_PIN_LEVEL_LOW                (0)
