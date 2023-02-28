@@ -6,7 +6,6 @@
 
 extern "C" {
 #include "peripheral.h"
-#include "memory_mapper.h"
 }
 
 TEST(PeripheralTest, testIsElementInArray) {

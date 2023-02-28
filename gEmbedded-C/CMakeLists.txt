@@ -61,7 +61,8 @@ add_custom_command(
 
 # order is important for test
 add_subdirectory(development)
+
 add_subdirectory(common)
-add_subdirectory(validator)
-add_subdirectory(driver)
-add_subdirectory(controller)
+#add_subdirectory(validator)
+#add_subdirectory(driver)
+#add_subdirectory(controller)
